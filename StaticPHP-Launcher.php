@@ -49,6 +49,39 @@ $friendly_urls = true;
 $metadata_delimiter = "---";
 
 
+/*
+	Minify HTML
+
+	Removes whitespace between HTML tags, comments, and extra spaces.
+
+	Set to true to enable, or false to disable. Default is false.
+*/
+
+$minify_html = false;
+
+
+/*
+	Minify CSS
+
+	Removes comments, extra spaces, and newline characters.
+
+	Set to true to enable, or false to disable. Default is false.
+*/
+
+$minify_css = false;
+
+
+/*
+	Minify JavaScript
+
+	Removes comments, unnecessary whitespace, and newlines.
+
+	Set to true to enable, or false to disable. Default is false.
+*/
+
+$minify_js = false;
+
+
 //	END OF CONFIGURABLE OPTIONS
 
 
@@ -89,7 +122,7 @@ if( is_file( $path_to_local_file ) && file_get_contents( $path_to_local_file ) =
 	if( class_exists( $project_name ) )
 	{
 		echo "Running " . $project_name . "...\n\n";
-		$project = new $project_name( $path_to_source_files, $path_to_public_files, $paths_to_ignore, $friendly_urls, $metadata_delimiter );
+		$project = new $project_name( $path_to_source_files, $path_to_public_files, $paths_to_ignore, $friendly_urls, $metadata_delimiter, $minify_html, $minify_css, $minify_js );
 	}
 	
 	echo "\n\nRemoving local " . $project_name . " file...\n";

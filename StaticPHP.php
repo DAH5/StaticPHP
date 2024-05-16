@@ -7,14 +7,20 @@ class StaticPHP
 	private $items_to_ignore;
 	private $friendly_urls;
 	private $metaDataDelimiter;
+	private $minify_html;
+	private $minify_css;
+	private $minify_js;
 
-	public function __construct( String $path_to_input_directory, String $path_to_output_directory, array $items_to_ignore = [], bool $friendly_urls = false, String $metaDataDelimiter = "---" )
+	public function __construct( String $path_to_input_directory, String $path_to_output_directory, array $items_to_ignore = [], bool $friendly_urls = false, String $metaDataDelimiter = "---", bool $minify_html = false, bool $minify_css = false, bool $minify_js = false )
 	{
 		$this->source_dir_path = $path_to_input_directory;
 		$this->output_dir_path = $path_to_output_directory;
 		$this->items_to_ignore = $items_to_ignore;
 		$this->friendly_urls = $friendly_urls;
 		$this->metaDataDelimiter = $metaDataDelimiter;
+		$this->minify_html = $minify_html;
+		$this->minify_css = $minify_css;
+		$this->minify_js = $minify_js;
 
 		$this->source_dir_path = str_replace( [ "\\", "/" ], DIRECTORY_SEPARATOR, $this->source_dir_path );
 		$this->output_dir_path = str_replace( [ "\\", "/" ], DIRECTORY_SEPARATOR, $this->output_dir_path );
@@ -123,6 +129,32 @@ class StaticPHP
 			
 			if( is_file( $path_to_input_directory_item ) )
 			{
+				if( $this->minify_css === true && substr( $path_to_input_directory_item, -4 ) == ".css" )
+				{
+					echo "Minifying CSS File: " . $path_to_input_directory_item . "\n";
+
+					$css = file_get_contents( $path_to_input_directory_item );
+
+					$css = $this->minifyCSS( $css );
+
+					$this->outputFile( $path_to_output_directory_item, $css );
+
+					continue;
+				}
+
+				if( $this->minify_css === true && substr( $path_to_input_directory_item, -3 ) == ".js" )
+				{
+					echo "Minifying JS File: " . $path_to_input_directory_item . "\n";
+
+					$js = file_get_contents( $path_to_input_directory_item );
+
+					$js = $this->minifyJS( $js );
+
+					$this->outputFile( $path_to_output_directory_item, $js );
+
+					continue;
+				}
+
 				echo "Copying File: " . $path_to_input_directory_item . " to " . $path_to_output_directory_item . "\n";
 				copy( $path_to_input_directory_item, $path_to_output_directory_item );
 			}
@@ -350,6 +382,9 @@ class StaticPHP
 		else
 			$this->processOutputPath( $path_to_output_file, $metadata, $friendly_urls );
 		
+		if( $this->minify_html === true )
+			$input_file_contents = $this->minifyHTML( $input_file_contents );
+		
 		$this->outputFile( $path_to_output_file, $input_file_contents );
 	}
 
@@ -385,6 +420,9 @@ class StaticPHP
 			$this->processOutputPath( $path_to_output_file, $metadata, $friendly_urls, $custom_output_path );
 		else
 			$this->processOutputPath( $path_to_output_file, $metadata, $friendly_urls );
+		
+		if( $this->minify_html === true )
+			$input_file_contents = $this->minifyHTML( $input_file_contents );
 		
 		$this->outputFile( $path_to_output_file, $input_file_contents );
 	}
@@ -608,6 +646,60 @@ class StaticPHP
 		
 		return $params;
 	}
+
+	private function minifyHTML( String $html )
+	{
+		echo "Minifying HTML...\n";
+
+		// Remove comments
+		$html = preg_replace( '/<!--(?!<!)[^\[>][\s\S]*?-->/s', '', $html );
+		
+		// Remove whitespace between tags
+		$html = preg_replace( '/>\s+</', '><', $html );
+		
+		// Remove unnecessary spaces
+		$html = preg_replace( '/\s+/', ' ', $html );
+		
+		return $html;
+	}
+
+	private function minifyCSS( String $css )
+	{
+		echo "Minifying CSS...\n";
+
+		// Remove comments
+		$css = preg_replace( '!/\*.*?\*/!s', '', $css );
+
+		// Remove spaces, newlines, and tabs
+		$css = preg_replace( '/\s*([{}|:;,])\s*/', '$1', $css );
+
+		// Remove trailing semicolons in CSS blocks
+		$css = preg_replace( '/;}/', '}', $css );
+
+		// Remove extra whitespace
+		$css = preg_replace( '/\s+/', ' ', $css );
+
+		return $css;
+	}
+
+	private function minifyJS( String $js )
+	{
+		echo "Minifying JS...\n";
+
+		// Remove single-line comments
+		$js = preg_replace( '/\/\/[^\n]*\n/', '', $js );
+
+		// Remove multi-line comments
+		$js = preg_replace( '/\/\*.*?\*\//s', '', $js );
+
+		// Remove unnecessary whitespace
+		$js = preg_replace( '/\s*([{}|:;,])\s*/', '$1', $js );
+
+		// Remove newlines
+		$js = preg_replace( '/\s+/', ' ', $js );
+
+		return $js;
+	}
 }
 
 if( isset( $argv[ 0 ] ) && basename( $argv[ 0 ] ) == basename( __FILE__ ) )
@@ -617,6 +709,9 @@ if( isset( $argv[ 0 ] ) && basename( $argv[ 0 ] ) == basename( __FILE__ ) )
 	$items_to_ignore = [];
 	$friendly_urls = false;
 	$metaDataDelimiter = "---";
+	$minify_html = false;
+	$minify_css = false;
+	$minify_js = false;
 	
 	unset( $argv[ 0 ] );
 	$argv = array_values( $argv );
@@ -634,8 +729,14 @@ if( isset( $argv[ 0 ] ) && basename( $argv[ 0 ] ) == basename( __FILE__ ) )
 			$friendly_urls = $argv[ 3 ] == "true" ? true : false;
 		if( isset( $argv[ 4 ] ) )
 			$metaDataDelimiter = $argv[ 4 ];
+		if( isset( $argv[ 5 ] ) )
+			$minify_html = $argv[ 5 ] == "true" ? true : false;
+		if( isset( $argv[ 6 ] ) )
+			$minify_css = $argv[ 6 ] == "true" ? true : false;
+		if( isset( $argv[ 7 ] ) )
+			$minify_js = $argv[ 7 ] == "true" ? true : false;
 	}
 	
-	new StaticPHP( $path_to_input_directory, $path_to_output_directory, $items_to_ignore, $friendly_urls, $metaDataDelimiter );
+	new StaticPHP( $path_to_input_directory, $path_to_output_directory, $items_to_ignore, $friendly_urls, $metaDataDelimiter, $minify_html, $minify_css, $minify_js );
 }
 
