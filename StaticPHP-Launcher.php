@@ -91,7 +91,7 @@ $minify_js = false;
 
 
 $project_name = "StaticPHP";
-$project_author_username = "DavidHunterScot";
+$project_author_username = "StaticPHP";
 $project_branch = "master";
 
 $path_to_latest_code = "https://raw.githubusercontent.com/" . $project_author_username . "/" . $project_name . "/" . $project_branch . "/" . $project_name . ".php";
