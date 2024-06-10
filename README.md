@@ -1,37 +1,28 @@
 # StaticPHP: Fast and Simple Static Site Generator
 
-*Build static websites effortlessly with PHP.*
-
+*Effortlessly build static websites with PHP.*
 
 ## Key Features
 
-### Blazing Fast
+### 🚀 Blazing Fast
+StaticPHP generates static websites in seconds, ensuring minimal wait times.
 
-StaticPHP generates static websites within seconds.
+### 🛠️ Easy to Use
+With a simple setup and straightforward usage, StaticPHP is accessible to everyone, from beginners to advanced users.
 
-### Easy To Use
+### 💪 Flexible and Powerful
+Offering extensive customization options, StaticPHP adapts to your specific needs.
 
-Simple to setup, and easy to run, makes it accessible to everyone.
-
-### Flexible and Powerful
-
-Extensive customisation options to fit your needs.
-
-### SEO Friendly URLs
-
-Optimize for Search Engines and have URLs like website.tld/page.
-
+### 🌐 SEO Friendly URLs
+Optimize your site for search engines with clean and descriptive URLs, like `website.tld/page`.
 
 ## How It Works
 
-### Install StaticPHP
+### 1. Install StaticPHP
+Follow the instructions in our [Getting Started](docs/Getting-Started.md) guide to install StaticPHP quickly and easily.
 
-Find out how to do this in the [Getting Started](docs/Getting-Started.md) guide.
+### 2. Create Your Site
+Develop your site using PHP and/or HTML files. Design your layout and content to fit your vision.
 
-### Create Your Site
-
-Using PHP and/or HTML files.
-
-### Build and Deploy
-
-Run StaticPHP to render the static files for your site, and deploy to your server.
+### 3. Build and Deploy
+Run StaticPHP to generate your static files. Once built, deploy your site to your preferred server with ease.
