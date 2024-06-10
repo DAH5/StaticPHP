@@ -12,19 +12,19 @@
 
 //	Set this to the path where you have put your source files.
 
-$path_to_source_files = __DIR__ . DIRECTORY_SEPARATOR . "SOURCE-FILES";
+$path_to_source_files = __DIR__ . DIRECTORY_SEPARATOR . "src";
 
 
 //	Set this to the path where you wish your generated output files.
 
-$path_to_public_files = __DIR__ . DIRECTORY_SEPARATOR . "OUTPUT-FILES";
+$path_to_public_files = __DIR__ . DIRECTORY_SEPARATOR . "public";
 
 
 //	Modify this array to include elements that will form parts of paths you wish to ignore.
 //	Any path that matches any of the elements of this array will not be processed at all.
 //	Such as PHP includes will still be converted as part of where they are included, but ignored as individual files.
 
-$paths_to_ignore = array();
+$paths_to_ignore = array( "_includes" );
 
 
 /*
