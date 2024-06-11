@@ -8,11 +8,15 @@ The StaticPHP Launcher makes it easy to save your build configuration and stay u
 
 [StaticPHP-Launcher.php on GitHub](http://raw.githubusercontent.com/StaticPHP/StaticPHP/master/StaticPHP-Launcher.php)
 
+[StaticPHP-Launcher.php on GitLab](http://gitlab.com/StaticPHP/StaticPHP/-/raw/master/StaticPHP-Launcher.php)
+
 ## Download StaticPHP
 
 Alternatively, you can download the actual StaticPHP class file for use with the commandline or your own launcher script.
 
 [StaticPHP.php on GitHub](http://raw.githubusercontent.com/StaticPHP/StaticPHP/master/StaticPHP.php)
+
+[StaticPHP.php on GitLab](http://gitlab.com/StaticPHP/StaticPHP/-/raw/master/StaticPHP.php)
 
 ___
 
