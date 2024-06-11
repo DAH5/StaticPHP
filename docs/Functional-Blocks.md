@@ -1,16 +1,15 @@
 # Functional Blocks
 
-These are blocks of code that actually do things! Think of it like using PHP, but without PHP.
-Syntax
+Functional Blocks in StaticPHP allow you to create dynamic content without writing PHP. They are similar to using PHP functions but with a simplified syntax.
 
-The opening tag uses the same delimiter used for MetaData, followed by the block name, then within round brackets a set of key equals value parameters separated by a comma (parameters can be in any order), and lastly the MetaData delimiter again.
+## Syntax
 
-Close off the block with the end tag, which is the word "end" and the block name surounded by the MetaData delimiter.
+A Functional Block starts with an opening tag using the same delimiter as MetaData, followed by the block name, and then a set of key-value parameters within parentheses. The block is closed with an end tag, which is the word "end" followed by the block name, surrounded by the MetaData delimiter.
 
-Between the opening and close tags, this is where you put the content that will appear whenever the functional block succeeds.
+Here's an example:
 
-```
---- func( key = "value", another-key = "another-value" ) ---
+```plaintext
+--- func(key = "value", another-key = "another-value") ---
 
 Put anything here.
 
@@ -19,37 +18,36 @@ Put anything here.
 
 ## The Loop Functional Block
 
-This block allows you to loop through a list of items and display information related to each item however you want.
-Directory Contents
+The `loop` block allows you to iterate through a list of items and display information for each item as you define.
 
-Use the dir parameter to loop through each file in a directory. You can enter an absolute path here or a relative path by negating the leading slash. For relative paths, these will be relative to StaticPHP and not the file the code is in.
+### Directory Contents
 
-Then MetaData can be used to set values within each file for you to access within the loop block using MetaData PlaceHolders.
+Use the `dir` parameter to loop through each file in a directory. You can specify an absolute path or a relative path (without a leading slash). Relative paths are relative to the location of the StaticPHP file, not the file containing the loop block.
 
-Note that MetaData placeholders used within the loop use the "loop" prefix instead of "metadata".
-Example
+You can access MetaData within each file using placeholders prefixed with "loop" instead of "metadata."
 
-```
---- loop( dir = "src/items" ) ---
+Example:
+
+```plaintext
+--- loop(dir = "src/items") ---
 
 Item Name: --- loop.item-name ---
 
 --- endloop ---
 ```
 
-Please refer to the page on MetaData to learn more about setting MetaData in files and how to use placeholders.
+For more information on setting MetaData in files and using placeholders, refer to the [MetaData](MetaData.md) page.
 
-A special MetaData placeholder is available when using the dir parameter and that is uri. This will display the path to the current dir item suitable for use in links.
-
-`--- loop.uri ---`
+A special placeholder `--- loop.uri ---` is available when using the `dir` parameter, displaying the path to the current directory item for use in links.
 
 ### Sorting Order
 
-By default, items will be sorted however the filesystem sorts them, which is usually ascending order. You can specify the sort order by setting the sort parameter to either ascending or descending.
-Example of Sort using Dir
+By default, items are sorted as the filesystem sorts them, typically in ascending order. You can change this by setting the `sort` parameter to either `ascending` or `descending`.
 
-```
---- loop( dir = "src/items", sort = "descending" ) ---
+Example of sorting with `dir`:
+
+```plaintext
+--- loop(dir = "src/items", sort = "descending") ---
 
 Item Name: --- loop.item-name ---
 
@@ -58,13 +56,12 @@ Item Name: --- loop.item-name ---
 
 ### Outputting JSON
 
-This feature is useful if you want to make the results of the loop available as a JSON file.
+You can make the loop results available as a JSON file by setting the `json` parameter to the desired file path. Similar to `dir`, this path can be relative to StaticPHP or absolute.
 
-Set the json parameter to a path to where you want the JSON file to be located. Similar to the dir parameter, this path can be relative to StaticPHP or be absolute.
-Example of JSON using Dir
+Example of JSON output:
 
-```
---- loop( dir = "src/items", json = "src/api/items.json" ) ---
+```plaintext
+--- loop(dir = "src/items", json = "src/api/items.json") ---
 
 Item Name: --- loop.item-name ---
 
@@ -73,19 +70,19 @@ Item Name: --- loop.item-name ---
 
 ### Ignoring Items
 
-The ignore list defined in your build configuration will automatically be applied, but you may wish to have the loop ignore additional items, that is where the ignores parameter comes into play.
+You can specify additional items for the loop to ignore using the `ignores` parameter. This parameter takes a semicolon-separated list of items to ignore, optionally with spaces for readability.
 
-Simply define additional items to ignore separated by a semicolon (;). Optionally add spacing to improve readability.
-Example of Ignores
+Example of ignoring items:
 
-```
---- loop( dir = "src/items", ignores = "ignore-this; ignore-that" ) ---
+```plaintext
+--- loop(dir = "src/items", ignores = "ignore-this; ignore-that") ---
 
 Item Name: --- loop.item-name ---
 
 --- endloop ---
 ```
 
-## More Coming in the Future
+## More Features Coming Soon
 
-For now, this is how things stand, but it is not a complete feature, so please stay tuned to this page and the other doc pages for more on how this feature expands moving forward.
+This is just the beginning for Functional Blocks in StaticPHP. Stay tuned for updates and additional features in the documentation.
+
