@@ -142,7 +142,7 @@ class StaticPHP
 					continue;
 				}
 
-				if( $this->minify_css === true && substr( $path_to_input_directory_item, -3 ) == ".js" )
+				if( $this->minify_js === true && substr( $path_to_input_directory_item, -3 ) == ".js" )
 				{
 					echo "Minifying JS File: " . $path_to_input_directory_item . "\n";
 
