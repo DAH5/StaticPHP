@@ -372,7 +372,7 @@ class StaticPHP
 		
 		$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $input_file_contents, $metadata, $input_file_contents );
 
-		$input_file_contents = $this->processFunctionalBlocks( $input_file_contents );
+		$input_file_contents = $this->processFunctionalBlocks( $input_file_contents, $metadata );
 
 		if( ! isset( $friendly_urls ) )
 			$friendly_urls = $this->friendly_urls;
@@ -411,7 +411,7 @@ class StaticPHP
 
 		$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $input_file_contents, $metadata, $input_file_contents );
 
-		$input_file_contents = $this->processFunctionalBlocks( $input_file_contents );
+		$input_file_contents = $this->processFunctionalBlocks( $input_file_contents, $metadata );
 
 		if( ! isset( $friendly_urls ) )
 			$friendly_urls = $this->friendly_urls;
@@ -427,7 +427,7 @@ class StaticPHP
 		$this->outputFile( $path_to_output_file, $input_file_contents );
 	}
 
-	private function processFunctionalBlocks( String $content )
+	private function processFunctionalBlocks( String $content, array $metadata )
 	{
 		echo "Processing Functional Blocks...\n";
 
@@ -436,7 +436,7 @@ class StaticPHP
 		$pattern = '/' . preg_quote( $delimiter ) . ' (\w+)\(([^)]*)\) ' . preg_quote( $delimiter ) . '\s*(.*?)\s*' . preg_quote( $delimiter ) . ' end\1 ' . preg_quote( $delimiter ) . '/s';
 
 		$output = preg_replace_callback(
-			$pattern, function( $matches ) use ( $delimiter )
+			$pattern, function( $matches ) use ( $delimiter, $metadata )
 			{
 				$funcName = $matches[ 1 ];
 				$paramStr = $matches[ 2 ];
@@ -446,6 +446,15 @@ class StaticPHP
 				{
 					case 'loop':
 						$blockOutput = $this->processLoopFunctionalBlock( $this->parseFunctionalBlockParameters( $paramStr ), $blockContent );
+
+						if( $blockOutput !== null && $blockOutput !== "" )
+						{
+							return $blockOutput; // Replaced Content
+						}
+
+						break;
+					case 'if':
+						$blockOutput = $this->processIfFunctionalBlock( $paramStr, $blockContent, $metadata );
 
 						if( $blockOutput !== null && $blockOutput !== "" )
 						{
@@ -515,6 +524,44 @@ class StaticPHP
 		echo "...Loop Functional Block Processed.\n";
 
 		return $output_str;
+	}
+
+	private function processIfFunctionalBlock( String $paramStr, String $content, array $metadata )
+	{
+		echo "Processing If Functional Block...\n";
+
+		$condition_state = true;
+
+		$params = preg_split( "/(\s*)(&&)(\s*)/", $paramStr );
+
+		foreach( $params as $param )
+		{
+			$param = trim( $param );
+			$param = preg_split( "/(\s*)(==)(\s*)/", $param );
+			$param_key = $param[ 0 ];
+			$param_value = $param[ 1 ];
+
+			if( ! array_key_exists( $param_key, $metadata ) )
+			{
+				$condition_state = false;
+			}
+
+			if( substr( trim( $param_value ), 0, 1 ) != "\"" && substr( trim( $param_value ), -1, 1 ) != "\"" )
+			{
+				$condition_state = false;
+			}
+
+			if( array_key_exists( $param_key, $metadata ) && $metadata[ $param_key ] != substr( $param_value, 1, -1 ) )
+			{
+				$condition_state = false;
+			}
+		}
+
+		echo "...If Functional Block Processed.\n";
+
+		if( $condition_state )
+			return $content;
+		return " ";
 	}
 
 	private function processLoopDir( String $dirPath, array $params, String $loopContent, array $output = array() )
