@@ -82,7 +82,37 @@ Item Name: --- loop.item-name ---
 --- endloop ---
 ```
 
+## The If Functional Block
+
+The `if` functional block allows you to perform conditional checks on MetaData.
+
+### Example of Use
+
+Assume you have the following MetaData at the top of your home page file, indicating that this page is the home page.
+
+```plaintext
+---
+current-page: home
+---
+```
+
+You can perform a check that the current page is the home page using the following `if` functional block.
+
+```html
+--- if( current-page == "home" ) ---
+    <p>This is the home page.</p>
+--- endif ---
+```
+
+When the condition is true, it will output the content inside.
+
+```html
+<p>This is the home page.</p>
+```
+
+It is currently only limited to this basic functionality. The functionality may get extended in the future.
+
 ## More Features Coming Soon
 
-This is just the beginning for Functional Blocks in StaticPHP. Stay tuned for updates and additional features in the documentation.
+Stay tuned for updates and additional features in the documentation.
 
