@@ -126,6 +126,14 @@ class StaticPHP
 				$this->processHTML( $path_to_input_directory_item, $path_to_output_directory_item );
 				continue;
 			}
+
+			if( is_file( $path_to_input_directory_item ) && substr( $directory_item, -3 ) == ".md" )
+			{
+				$path_to_output_directory_item = substr( $path_to_output_directory_item, 0, -3 ) . ".html";
+
+				$this->processMarkdown( $path_to_input_directory_item, $path_to_output_directory_item );
+				continue;
+			}
 			
 			if( is_file( $path_to_input_directory_item ) )
 			{
@@ -424,6 +432,124 @@ class StaticPHP
 		if( $this->minify_html === true )
 			$input_file_contents = $this->minifyHTML( $input_file_contents );
 		
+		$this->outputFile( $path_to_output_file, $input_file_contents );
+	}
+
+	private function processMarkdown( $path_to_input_file, $path_to_output_file )
+	{
+		if( ! is_file( $path_to_input_file ) )
+			return;
+
+		echo "Processing Markdown File: " . $path_to_input_file . "\n";
+
+		$input_file_contents = file_get_contents( $path_to_input_file );
+		$input_file_lines = explode( "\n", $input_file_contents );
+
+		$isCodeblock = false;
+		$codeblockName = "";
+
+		for( $ifl = 0; $ifl < count( $input_file_lines ); $ifl++ )
+		{
+			$input_file_lines[ $ifl ] = trim( $input_file_lines[ $ifl ] );
+
+			if( preg_match( "/(#{6}\s)(.*)/", $input_file_lines[ $ifl ] ) )
+			{
+				$input_file_lines[ $ifl ] = preg_replace( "/(#{6}\s)(.*)/", "<h6>$2</h6>", $input_file_lines[ $ifl ] );
+				continue;
+			}
+			
+			if( preg_match( "/(#{5}\s)(.*)/", $input_file_lines[ $ifl ] ) )
+			{
+				$input_file_lines[ $ifl ] = preg_replace( "/(#{5}\s)(.*)/", "<h5>$2</h5>", $input_file_lines[ $ifl ] );
+				continue;
+			}
+
+			if( preg_match( "/(#{4}\s)(.*)/", $input_file_lines[ $ifl ] ) )
+			{
+				$input_file_lines[ $ifl ] = preg_replace( "/(#{4}\s)(.*)/", "<h4>$2</h4>", $input_file_lines[ $ifl ] );
+				continue;
+			}
+
+			if( preg_match( "/(#{3}\s)(.*)/", $input_file_lines[ $ifl ] ) )
+			{
+				$input_file_lines[ $ifl ] = preg_replace( "/(#{3}\s)(.*)/", "<h3>$2</h3>", $input_file_lines[ $ifl ] );
+				continue;
+			}
+
+			if( preg_match( "/(#{2}\s)(.*)/", $input_file_lines[ $ifl ] ) )
+			{
+				$input_file_lines[ $ifl ] = preg_replace( "/(#{2}\s)(.*)/", "<h2>$2</h2>", $input_file_lines[ $ifl ] );
+				continue;
+			}
+
+			if( preg_match( "/(#{1}\s)(.*)/", $input_file_lines[ $ifl ] ) )
+			{
+				$input_file_lines[ $ifl ] = preg_replace( "/(#{1}\s)(.*)/", "<h1>$2</h1>", $input_file_lines[ $ifl ] );
+				continue;
+			}
+
+			if( preg_match( "/\`\`\`(.*)/", $input_file_lines[ $ifl ], $matches ) )
+			{
+				if( ! $isCodeblock )
+				{
+					$codeblockName = $matches[ 1 ];
+					$isCodeblock = true;
+					$input_file_lines[ $ifl ] = preg_replace( "/\`\`\`(.*)/", "<code class=\"codeblock-" . $codeblockName . "\"><pre>", $input_file_lines[ $ifl ] );
+					continue;
+				}
+			}
+
+			if( preg_match( "/\`\`\`/", $input_file_lines[ $ifl ], $matches ) )
+			{
+				if( $isCodeblock )
+				{
+					$input_file_lines[ $ifl ] = preg_replace( "/\`\`\`/", "</pre></code>", $input_file_lines[ $ifl ] );
+
+					if( $this->minify_html )
+						$input_file_lines[ $ifl -1 ] = substr( $input_file_lines[ $ifl -1 ], 0, -4 );
+				}
+
+				$isCodeblock = false;
+
+				continue;
+			}
+
+			if( $isCodeblock )
+			{
+				$input_file_lines[ $ifl ] = htmlentities( $input_file_lines[ $ifl ] );
+
+				if( $this->minify_html )
+					$input_file_lines .= "<br>";
+
+				continue;
+			}
+
+			$input_file_lines[ $ifl ] = preg_replace( "/\*\*([^\*]+)\*\*/", "<strong>$1</strong>", $input_file_lines[ $ifl ] );
+			$input_file_lines[ $ifl ] = preg_replace( "/\_\_([^\_]+)\_\_/", "<strong>$1</strong>", $input_file_lines[ $ifl ] );
+			$input_file_lines[ $ifl ] = preg_replace( "/\*([^\*]+)\*/", "<em>$1</em>", $input_file_lines[ $ifl ] );
+			$input_file_lines[ $ifl ] = preg_replace( "/\_([^\_]+)\_/", "<em>$1</em>", $input_file_lines[ $ifl ] );
+			$input_file_lines[ $ifl ] = preg_replace( "/\~\~([^\~]+)\~\~/", "<del>$1</del>", $input_file_lines[ $ifl ] );
+			$input_file_lines[ $ifl ] = preg_replace( "/\`([^\`]+)\`/", "<code>$1</code>", $input_file_lines[ $ifl ] );
+
+			$input_file_lines[ $ifl ] = preg_replace( "/\!\[([^\]]+)\]\(([^\"\)]+) \"([^\"]+)\"\)/", "<img src=\"$2\" alt=\"$1\" title=\"$3\">", $input_file_lines[ $ifl ] );
+			$input_file_lines[ $ifl ] = preg_replace( "/\!\[([^\]]+)\]\(([^\"\)]+)\)/", "<img src=\"$2\" alt=\"$1\">", $input_file_lines[ $ifl ] );
+
+			$input_file_lines[ $ifl ] = preg_replace( "/\[([^\]]+)\]\(([^\"\)]+) \"([^\"]+)\"\)/", "<a href=\"$2\" title=\"$3\">$1</a>", $input_file_lines[ $ifl ] );
+			$input_file_lines[ $ifl ] = preg_replace( "/\[([^\]]+)\]\(([^\"\)]+)\)/", "<a href=\"$2\">$1</a>", $input_file_lines[ $ifl ] );
+
+			if( $input_file_lines[ $ifl ] == "" )
+				continue;
+
+			if( $ifl != 0 && $input_file_lines[ $ifl -1 ] != "" )
+				$input_file_lines[ $ifl -1 ] = substr( $input_file_lines[ $ifl -1 ], 0, -4 ) . "<br>";
+			elseif( $ifl == 0 || ( $ifl != 0 && $input_file_lines[ $ifl -1 ] == "" ) )
+				$input_file_lines[ $ifl ] = "<p>" . $input_file_lines[ $ifl ];
+
+			$input_file_lines[ $ifl ] .= "</p>";
+		}
+
+		$input_file_contents = join( "\n", $input_file_lines );
+
 		$this->outputFile( $path_to_output_file, $input_file_contents );
 	}
 
