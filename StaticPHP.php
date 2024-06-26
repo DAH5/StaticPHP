@@ -559,7 +559,7 @@ class StaticPHP
 
 		$delimiter = $this->metaDataDelimiter;
 
-		$pattern = '/' . preg_quote( $delimiter ) . ' (\w+)\(([^)]*)\) ' . preg_quote( $delimiter ) . '\s*(.*?)\s*' . preg_quote( $delimiter ) . ' end\1 ' . preg_quote( $delimiter ) . '/s';
+		$pattern = '/' . preg_quote($delimiter) . ' (\w+)\(([^)]*)\) ' . preg_quote($delimiter) . '(.*?)' . preg_quote($delimiter) . ' end\1 ' . preg_quote($delimiter) . '/s';
 
 		$output = preg_replace_callback(
 			$pattern, function( $matches ) use ( $delimiter, $metadata )
@@ -582,7 +582,7 @@ class StaticPHP
 					case 'if':
 						$blockOutput = $this->processIfFunctionalBlock( $paramStr, $blockContent, $metadata );
 
-						if( $blockOutput !== null && $blockOutput !== "" )
+						if( $blockOutput !== null )
 						{
 							return $blockOutput; // Replaced Content
 						}
@@ -687,7 +687,7 @@ class StaticPHP
 
 		if( $condition_state )
 			return $content;
-		return " ";
+		return "";
 	}
 
 	private function processLoopDir( String $dirPath, array $params, String $loopContent, array $output = array() )
