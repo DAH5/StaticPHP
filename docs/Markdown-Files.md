@@ -79,5 +79,12 @@ And you can write multiline codeblocks using three backticks on the start and en
 
 ## MetaData Support
 
-There is currently no MetaData support, but this is planned.
+StaticPHP has MetaData support for Markdown files. Refer to the [MetaData](MetaData.md) documentation for more.
+
+
+## Functional Blocks Support
+
+There is currently no functional blocks support for Markdown files. This is planned and will likely be added in the future.
+
+Functional blocks can still be used with other files. Refer to the [Functional Blocks](Functional-Blocks.md) documentation for more.
 

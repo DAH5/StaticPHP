@@ -443,6 +443,11 @@ class StaticPHP
 		echo "Processing Markdown File: " . $path_to_input_file . "\n";
 
 		$input_file_contents = file_get_contents( $path_to_input_file );
+
+		$metadata = array();
+
+		$this->processMetaData( $this->metaDataDelimiter, $input_file_contents, $metadata, $input_file_contents );
+
 		$input_file_lines = explode( "\n", $input_file_contents );
 
 		$isCodeblock = false;
@@ -550,6 +555,24 @@ class StaticPHP
 
 		$input_file_contents = join( "\n", $input_file_lines );
 
+		$layout_contents = "";
+		$this->processLayoutMetaData( $metadata, $this->metaDataDelimiter, $layout_contents );
+
+		if( isset( $metadata['layout'] ) && $metadata['layout'] && substr( $metadata['layout'], -4 ) == ".php" )
+			$this->processTemporaryFile( $metadata['layout'], $layout_contents, $metadata );
+
+		$this->processContentPlaceHolder( $metadata, $input_file_contents, $layout_contents );
+
+		$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $input_file_contents, $metadata, $input_file_contents );
+
+		if( ! isset( $friendly_urls ) )
+			$friendly_urls = $this->friendly_urls;
+
+		$this->processOutputPath( $path_to_output_file, $metadata, $friendly_urls );
+		
+		if( $this->minify_html === true )
+			$input_file_contents = $this->minifyHTML( $input_file_contents );
+		
 		$this->outputFile( $path_to_output_file, $input_file_contents );
 	}
 
