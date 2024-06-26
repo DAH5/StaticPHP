@@ -524,7 +524,7 @@ class StaticPHP
 				$input_file_lines[ $ifl ] = htmlentities( $input_file_lines[ $ifl ] );
 
 				if( $this->minify_html )
-					$input_file_lines .= "<br>";
+					$input_file_lines[ $ifl ] .= "<br>";
 
 				continue;
 			}
