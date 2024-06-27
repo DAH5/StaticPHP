@@ -105,7 +105,9 @@ $project_name = "StaticPHP";
 $project_author_username = "DAH5";
 $project_branch = "master";
 
-$path_to_latest_code = "https://raw.githubusercontent.com/" . $project_author_username . "/" . $project_name . "/" . $project_branch . "/" . $project_name . ".php";
+$path_to_latest_code_on_github = "https://raw.githubusercontent.com/" . $project_author_username . "/" . $project_name . "/" . $project_branch . "/" . $project_name . ".php";
+$path_to_latest_code_on_gitlab = "https://gitlab.com/" . $project_author_username . "/" . $project_name . "/-/raw/master/" . $project_name . ".php";
+
 $path_to_local_file = __DIR__ . DIRECTORY_SEPARATOR . $project_name . ".php";
 
 echo "Welcome to the " . $project_name . " Launcher!\n\n";
@@ -127,8 +129,31 @@ if( isset( $configurable_options[ 'metadata_delimiter' ] ) && is_string( $config
 
 if( ( isset( $configurable_options[ 'auto_update' ] ) && is_bool( $configurable_options[ 'auto_update' ] ) && $configurable_options[ 'auto_update' ] === true ) || ! is_file( $path_to_local_file ) )
 {
-	echo "\nFetching latest " . $project_name . " from " . $path_to_latest_code . "\n";
-	$latest_code = file_get_contents( $path_to_latest_code );
+	echo "\nAttempting to fetch latest " . $project_name . " code from GitHub: " . $path_to_latest_code_on_github . "\n";
+
+	$latest_code = "";
+
+	$github_headers = @get_headers( $path_to_latest_code_on_github );
+	
+	if( $github_headers && strpos( $github_headers[ 0 ], '200' ) )
+		$latest_code = file_get_contents( $path_to_latest_code_on_github );
+	else
+	{
+		echo "\nAttempting to fetch latest " . $project_name . " code from GitLab: " . $path_to_latest_code_on_gitlab . "\n";
+		$gitlab_headers = @get_headers( $path_to_latest_code_on_gitlab );
+
+		if( $gitlab_headers && strpos( $gitlab_headers[ 0 ], '200' ) )
+			$latest_code = file_get_contents( $path_to_latest_code_on_gitlab );
+	}
+
+	if( $latest_code == "" )
+	{
+		echo "\nUnable to access latest code on GitHub or GitLab. Please check your network connection.\n\n";
+
+		echo "\nThank you for using the " . $project_name . " Launcher!\n\n";
+
+		exit;
+	}
 
 	echo "Saving to local path " . $path_to_local_file . "\n";
 	file_put_contents( $path_to_local_file, $latest_code );
