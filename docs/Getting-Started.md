@@ -31,17 +31,17 @@ This method is less recommended due to the potential difficulty in remembering c
 Open a terminal in your project directory/folder, and type the following command, adjusting the parameters to suit your project:
 
 ```bash
-php StaticPHP.php PATH_TO_INPUT_FILES_DIR PATH_TO_OUTPUT_FILES_DIR PATH_PART_TO_IGNORE FRIENDLY_URLS_BOOL METADATA_DELIMITER MINIFY_HTML_BOOL MINIFY_CSS_BOOL MINIFY_JS_BOOL
+php StaticPHP.php source_dir_path output_dir_path items_to_ignore friendly_urls metadata_delimiter minify_html minify_css minify_js
 ```
 
-- `PATH_TO_INPUT_FILES_DIR`: The path relative to StaticPHP that contains your source input files.
-- `PATH_TO_OUTPUT_FILES_DIR`: The path relative to StaticPHP that contains your generated output files.
-- `PATH_PART_TO_IGNORE`: Any string of text in file paths that StaticPHP should ignore as individual files. Useful for PHP includes that you don't want to output.
-- `FRIENDLY_URLS_BOOL`: A boolean (true/false) indicating whether StaticPHP should create friendly URLs (e.g., `domain.tld/page`) or keep the paths the same as the source (e.g., `domain.tld/page.html`).
-- `METADATA_DELIMITER`: A delimiter indicating where Metadata starts and ends. See the [Metadata](MetaData.md) page for more details.
-- `MINIFY_HTML_BOOL`: A boolean indicating whether StaticPHP should minify HTML files. This affects only the output files; source files remain unminified.
-- `MINIFY_CSS_BOOL`: A boolean indicating whether StaticPHP should minify CSS files. This affects only the output files; source files remain unminified.
-- `MINIFY_JS_BOOL`: A boolean indicating whether StaticPHP should minify JavaScript files. This affects only the output files; source files remain unminified.
+- `source_dir_path`: The path relative to StaticPHP that contains your source input files.
+- `output_dir_path`: The path relative to StaticPHP that contains your generated output files.
+- `items_to_ignore`: Any string of text in file paths that StaticPHP should ignore as individual files. Useful for PHP includes that you don't want to output.
+- `friendly_urls`: A boolean (true/false) indicating whether StaticPHP should create friendly URLs (e.g., `domain.tld/page`) or keep the paths the same as the source (e.g., `domain.tld/page.html`).
+- `metadata_delimiter`: A delimiter indicating where Metadata starts and ends. See the [Metadata](MetaData.md) page for more details.
+- `minify_html`: A boolean indicating whether StaticPHP should minify HTML files. This affects only the output files; source files remain unminified.
+- `minify_css`: A boolean indicating whether StaticPHP should minify CSS files. This affects only the output files; source files remain unminified.
+- `minify_js`: A boolean indicating whether StaticPHP should minify JavaScript files. This affects only the output files; source files remain unminified.
 
 ### Using a Custom Launcher Script
 
@@ -50,27 +50,27 @@ You can create a custom launcher script for more flexibility. Here is an example
 ```php
 <?php
 
-$path_to_input_files_dir = __DIR__ . DIRECTORY_SEPARATOR . 'src';
-$path_to_output_files_dir = __DIR__ . DIRECTORY_SEPARATOR . 'public';
-$path_parts_to_ignore = array( '_includes' );
-$friendly_urls_bool = true;
+$source_dir_path = __DIR__ . DIRECTORY_SEPARATOR . 'src';
+$output_dir_path = __DIR__ . DIRECTORY_SEPARATOR . 'public';
+$items_to_ignore = array( '_includes' );
+$friendly_urls = true;
 $metadata_delimiter = '---';
-$minify_html_bool = true;
-$minify_css_bool = true;
-$minify_js_bool = true;
+$minify_html = true;
+$minify_css = true;
+$minify_js = true;
 
 include __DIR__ . DIRECTORY_SEPARATOR . 'StaticPHP.php';
 
 new StaticPHP
 (
-    $path_to_input_files_dir,
-    $path_to_output_files_dir,
-    $path_parts_to_ignore,
-    $friendly_urls_bool,
+    $source_dir_path,
+    $output_dir_path,
+    $items_to_ignore,
+    $friendly_urls,
     $metadata_delimiter,
-    $minify_html_bool,
-    $minify_css_bool,
-    $minify_js_bool
+    $minify_html,
+    $minify_css,
+    $minify_js
 );
 ```
 

@@ -2,25 +2,81 @@
 
 class StaticPHP
 {
-	private $source_dir_path;
-	private $output_dir_path;
-	private $items_to_ignore;
-	private $friendly_urls;
-	private $metaDataDelimiter;
-	private $minify_html;
-	private $minify_css;
-	private $minify_js;
+	private $source_dir_path = "src";
+	private $output_dir_path = "public";
+	private $items_to_ignore = array( "_includes" );
+	private $friendly_urls = false;
+	private $metaDataDelimiter = "---";
+	private $minify_html = false;
+	private $minify_css = false;
+	private $minify_js = false;
 
-	public function __construct( String $path_to_input_directory, String $path_to_output_directory, array $items_to_ignore = [], bool $friendly_urls = false, String $metaDataDelimiter = "---", bool $minify_html = false, bool $minify_css = false, bool $minify_js = false )
+	public function __construct()
 	{
-		$this->source_dir_path = $path_to_input_directory;
-		$this->output_dir_path = $path_to_output_directory;
-		$this->items_to_ignore = $items_to_ignore;
-		$this->friendly_urls = $friendly_urls;
-		$this->metaDataDelimiter = $metaDataDelimiter;
-		$this->minify_html = $minify_html;
-		$this->minify_css = $minify_css;
-		$this->minify_js = $minify_js;
+		$args = func_get_args();
+
+		// Array Method
+		if( count( $args ) >= 1 && is_array( $args[ 0 ] ) )
+		{
+			$configurable_options = $args[ 0 ];
+
+			if( isset( $configurable_options[ 'source_dir_path' ] ) && is_string( $configurable_options[ 'source_dir_path' ] ) && trim( $configurable_options[ 'source_dir_path' ] ) != "" )
+				$this->source_dir_path = trim( $configurable_options[ 'source_dir_path' ] );
+			if( isset( $configurable_options[ 'output_dir_path' ] ) && is_string( $configurable_options[ 'output_dir_path' ] ) && trim( $configurable_options[ 'output_dir_path' ] ) != "" )
+				$this->output_dir_path = trim( $configurable_options[ 'output_dir_path' ] );
+			if( isset( $configurable_options[ 'items_to_ignore' ] ) && is_array( $configurable_options[ 'items_to_ignore' ] ) && count( $configurable_options[ 'items_to_ignore' ] ) > 0 )
+				$this->items_to_ignore = $configurable_options[ 'items_to_ignore' ];
+			if( isset( $configurable_options[ 'items_to_ignore' ] ) && is_string( $configurable_options[ 'items_to_ignore' ] ) && trim( $configurable_options[ 'items_to_ignore' ] ) != "" )
+				$this->items_to_ignore = array( trim( $configurable_options[ 'items_to_ignore' ] ) );
+			if( isset( $configurable_options[ 'friendly_urls' ] ) && is_bool( $configurable_options[ 'friendly_urls' ] ) )
+				$this->friendly_urls = $configurable_options[ 'friendly_urls' ];
+			if( isset( $configurable_options[ 'friendly_urls' ] ) && is_string( $configurable_options[ 'friendly_urls' ] ) && trim( $configurable_options[ 'friendly_urls' ] ) == "true" )
+				$this->friendly_urls = true;
+			if( isset( $configurable_options[ 'metadata_delimiter' ] ) && is_string( $configurable_options[ 'metadata_delimiter' ] ) && trim( $configurable_options[ 'metadata_delimiter' ] ) != "" )
+				$this->metaDataDelimiter = $configurable_options[ 'metadata_delimiter' ];
+			if( isset( $configurable_options[ 'minify_html' ] ) && is_bool( $configurable_options[ 'minify_html' ] ) )
+				$this->minify_html = $configurable_options[ 'minify_html' ];
+			if( isset( $configurable_options[ 'minify_html' ] ) && is_string( $configurable_options[ 'minify_html' ] ) && trim( $configurable_options[ 'minify_html' ] ) == "true" )
+				$this->minify_html = true;
+			if( isset( $configurable_options[ 'minify_css' ] ) && is_bool( $configurable_options[ 'minify_css' ] ) )
+				$this->minify_css = $configurable_options[ 'minify_css' ];
+			if( isset( $configurable_options[ 'minify_css' ] ) && is_string( $configurable_options[ 'minify_css' ] ) && trim( $configurable_options[ 'minify_css' ] ) == "true" )
+				$this->minify_css = true;
+			if( isset( $configurable_options[ 'minify_js' ] ) && is_bool( $configurable_options[ 'minify_js' ] ) )
+				$this->minify_js = $configurable_options[ 'minify_js' ];
+			if( isset( $configurable_options[ 'minify_js' ] ) && is_string( $configurable_options[ 'minify_js' ] ) && trim( $configurable_options[ 'minify_js' ] ) == "true" )
+				$this->minify_js = true;
+		}
+		// End Array Method
+
+		// Arguments Method
+		if( count( $args ) >= 1 && is_string( $args[ 0 ] ) && trim( $args[ 0 ] ) != "" )
+			$this->source_dir_path = trim( $args[ 0 ] );
+		if( count( $args ) >= 2 && is_string( $args[ 1 ] ) && trim( $args[ 1 ] ) != "" )
+			$this->output_dir_path = trim( $args[ 1 ] );
+		if( count( $args ) >= 3 && is_array( $args[ 2 ] ) && count( $args[ 2 ] ) > 0 )
+			$this->items_to_ignore = trim( $args[ 2 ] );
+		if( count( $args ) >= 3 && is_string( $args[ 2 ] ) && trim( $args[ 2 ] ) != "" )
+			$this->items_to_ignore = array( trim( $args[ 2 ] ) );
+		if( count( $args ) >= 4 && is_bool( $args[ 3 ] ) )
+			$this->friendly_urls = $args[ 3 ];
+		if( count( $args ) >= 4 && is_string( $args[ 3 ] ) && trim( $args[ 3 ] ) == "true" )
+			$this->friendly_urls = true;
+		if( count( $args ) >= 5 && is_string( $args[ 4 ] ) && trim( $args[ 4 ] ) != "" )
+			$this->metaDataDelimiter = trim( $args[ 4 ] );
+		if( count( $args ) >= 6 && is_bool( $args[ 5 ] ) )
+			$this->minify_html = $args[ 5 ];
+		if( count( $args ) >= 6 && is_string( $args[ 5 ] ) && trim( $args[ 5 ] ) == "true" )
+			$this->minify_html = true;
+		if( count( $args ) >= 7 && is_bool( $args[ 6 ] ) )
+			$this->minify_css = $args[ 6 ];
+		if( count( $args ) >= 7 && is_string( $args[ 6 ] ) && trim( $args[ 6 ] ) == "true" )
+			$this->minify_css = true;
+		if( count( $args ) >= 8 && is_bool( $args[ 7 ] ) )
+			$this->minify_js = $args[ 7 ];
+		if( count( $args ) >= 8 && is_string( $args[ 7 ] ) && trim( $args[ 7 ] ) == "true" )
+			$this->minify_js = true;
+		// End Arguments Method
 
 		$this->source_dir_path = str_replace( [ "\\", "/" ], DIRECTORY_SEPARATOR, $this->source_dir_path );
 		$this->output_dir_path = str_replace( [ "\\", "/" ], DIRECTORY_SEPARATOR, $this->output_dir_path );
