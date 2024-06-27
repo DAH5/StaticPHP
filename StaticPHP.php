@@ -956,14 +956,7 @@ class StaticPHP
 
 if( isset( $argv[ 0 ] ) && basename( $argv[ 0 ] ) == basename( __FILE__ ) )
 {
-	$path_to_input_directory = "." . DIRECTORY_SEPARATOR . "input";
-	$path_to_output_directory = "." . DIRECTORY_SEPARATOR . "output";
-	$items_to_ignore = [];
-	$friendly_urls = false;
-	$metaDataDelimiter = "---";
-	$minify_html = false;
-	$minify_css = false;
-	$minify_js = false;
+	$configurable_options = array();
 	
 	unset( $argv[ 0 ] );
 	$argv = array_values( $argv );
@@ -972,23 +965,23 @@ if( isset( $argv[ 0 ] ) && basename( $argv[ 0 ] ) == basename( __FILE__ ) )
 	if( $argc >= 0 )
 	{
 		if( isset( $argv[ 0 ] ) )
-			$path_to_input_directory = $argv[ 0 ];
+			$configurable_options[ 'source_dir_path' ] = $argv[ 0 ];
 		if( isset( $argv[ 1 ] ) )
-			$path_to_output_directory = $argv[ 1 ];
-		if( isset( $argv[ 2 ] ) && strlen( $argv[ 2 ] ) > 0 )
-			$items_to_ignore = [ $argv[ 2 ] ];
+			$configurable_options[ 'output_dir_path' ] = $argv[ 1 ];
+		if( isset( $argv[ 2 ] ) )
+			$configurable_options[ 'items_to_ignore' ] = $argv[ 2 ];
 		if( isset( $argv[ 3 ] ) )
-			$friendly_urls = $argv[ 3 ] == "true" ? true : false;
+			$configurable_options[ 'friendly_urls '] = $argv[ 3 ];
 		if( isset( $argv[ 4 ] ) )
-			$metaDataDelimiter = $argv[ 4 ];
+			$configurable_options[ 'metadata_delimiter' ] = $argv[ 4 ];
 		if( isset( $argv[ 5 ] ) )
-			$minify_html = $argv[ 5 ] == "true" ? true : false;
+			$configurable_options[ 'minify_html' ] = $argv[ 5 ];
 		if( isset( $argv[ 6 ] ) )
-			$minify_css = $argv[ 6 ] == "true" ? true : false;
+			$configurable_options[ 'minify_css' ] = $argv[ 6 ];
 		if( isset( $argv[ 7 ] ) )
-			$minify_js = $argv[ 7 ] == "true" ? true : false;
+			$configurable_options[ 'minify_js' ] = $argv[ 7 ];
 	}
 	
-	new StaticPHP( $path_to_input_directory, $path_to_output_directory, $items_to_ignore, $friendly_urls, $metaDataDelimiter, $minify_html, $minify_css, $minify_js );
+	new StaticPHP( $configurable_options );
 }
 
