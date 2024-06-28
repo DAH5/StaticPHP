@@ -44,6 +44,8 @@ The code minification feature removes unnecessary spacing from your generated fi
 
 You can choose which types of files to minify (`HTML`, `CSS`, `JS`) in your build configuration, by setting `minify_html`, `minify_css`, and `minify_js` to true or false.
 
+**JavaScript Minification** is currently **Disabled** due to a bug in the minification process. It will be re-enabled once the bug has been fixed.
+
 ---
 
 For more information on customising StaticPHP, be sure to check out the [Getting Started](Getting-Started.md) guide. For options available to be overridden on a per-file basis, refer to the [MetaData](MetaData.md) guide.

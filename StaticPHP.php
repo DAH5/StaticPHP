@@ -934,24 +934,10 @@ class StaticPHP
 		return $css;
 	}
 
-	private function minifyJS( String $js )
+	private function minifyJS(String $js)
 	{
-		echo "Minifying JS...\n";
-
-		// Remove single-line comments
-		$js = preg_replace( '/\/\/[^\n]*\n/', '', $js );
-
-		// Remove multi-line comments
-		$js = preg_replace( '/\/\*.*?\*\//s', '', $js );
-
-		// Remove unnecessary whitespace
-		$js = preg_replace( '/\s*([{}|:;,])\s*/', '$1', $js );
-
-		// Remove newlines
-		$js = preg_replace( '/\s+/', ' ', $js );
-
-		return $js;
-	}
+		echo "JavaScript Minification is disabled until a bug in the minification process can be fixed.\n";
+	}	
 }
 
 if( isset( $argv[ 0 ] ) && basename( $argv[ 0 ] ) == basename( __FILE__ ) )

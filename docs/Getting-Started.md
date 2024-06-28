@@ -16,6 +16,8 @@ Refer to the [MetaData](MetaData.md) feature to explore additional capabilities 
 
 Run StaticPHP to generate the static version of your website in the output folder/directory.
 
+**JavaScript Minification** is currently **Disabled** due to a bug in the minification process. It will be re-enabled once the bug has been fixed.
+
 If using the launcher, simply run the following command:
 
 ```bash
