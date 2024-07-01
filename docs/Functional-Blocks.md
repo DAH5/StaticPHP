@@ -110,7 +110,31 @@ When the condition is true, it will output the content inside.
 <p>This is the home page.</p>
 ```
 
-It is currently only limited to this basic functionality. The functionality may get extended in the future.
+### Checking the Key Only
+
+The IF functional block can be used to only check if the key exists. Assume you want to output the page title, and have the following MetaData...
+
+```plaintext
+---
+page-title: Welcome
+---
+```
+
+You want to check if there is a title before displaying it, so you have the following if functional block...
+
+```html
+--- if( page-title ) ---
+<h1>--- metadata.page-title ---</h1>
+--- endif ---
+```
+
+When the condition is true, it will output the content inside.
+
+```html
+<h1>Welcome</h1>
+```
+
+The if functional block is currently limited to this basic functionality. The functionality may get extended in the future.
 
 ## More Features Coming Soon
 

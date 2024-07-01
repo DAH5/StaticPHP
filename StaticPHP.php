@@ -742,23 +742,34 @@ class StaticPHP
 		foreach( $params as $param )
 		{
 			$param = trim( $param );
-			$param = preg_split( "/(\s*)(==)(\s*)/", $param );
-			$param_key = $param[ 0 ];
-			$param_value = $param[ 1 ];
 
-			if( ! array_key_exists( $param_key, $metadata ) )
+			if( strpos( $param, '==' ) )
 			{
-				$condition_state = false;
+				$param = preg_split( "/(\s*)(==)(\s*)/", $param );
+				$param_key = $param[ 0 ];
+				$param_value = $param[ 1 ];
+
+				if( ! array_key_exists( $param_key, $metadata ) )
+				{
+					$condition_state = false;
+				}
+
+				if( substr( trim( $param_value ), 0, 1 ) != "\"" && substr( trim( $param_value ), -1, 1 ) != "\"" )
+				{
+					$condition_state = false;
+				}
+
+				if( array_key_exists( $param_key, $metadata ) && $metadata[ $param_key ] != substr( $param_value, 1, -1 ) )
+				{
+					$condition_state = false;
+				}
 			}
-
-			if( substr( trim( $param_value ), 0, 1 ) != "\"" && substr( trim( $param_value ), -1, 1 ) != "\"" )
+			else
 			{
-				$condition_state = false;
-			}
-
-			if( array_key_exists( $param_key, $metadata ) && $metadata[ $param_key ] != substr( $param_value, 1, -1 ) )
-			{
-				$condition_state = false;
+				if( ! array_key_exists( trim( $param ), $metadata ) )
+				{
+					$condition_state = false;
+				}
 			}
 		}
 
