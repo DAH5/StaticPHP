@@ -4,15 +4,34 @@
 
 ## Step One: Download and Install
 
-Download the latest version to your project folder/directory. It is recommended to download the launcher, as this will keep you up-to-date with the latest StaticPHP features and provide easy customization options.
+Create a new folder/directory for your project (e.g. `mysite`). Download the latest version of StaticPHP to your project folder/directory. It is recommended to download the launcher instead of StaticPHP itself, as this will keep you up-to-date with the latest StaticPHP features and provide easy customization options.
 
-## Step Two: Develop Your Website
+## Step Two: Setup Your Project Structure
+
+Inside your project folder/directory, decide what you want to call the folder/directory where your source files will be located (e.g. `src`) and create it.
+
+Decide on the name of the folder/directory where your generated output files will be located (e.g. `public`) and create it.
+
+If you are using, or plan to use, Git source control software, you may also want to create a `.gitignore` file now in the root of your project folder/directory.
+
+**Example .gitignore file:**
+
+```plaintext
+# Ignore Generated Output Files
+public
+# Ignore StaticPHP File
+StaticPHP.php
+```
+
+The above example will ensure that only the source files are commited to Git because the generated output files can be regenerated anytime, so make sure to replace `public` with your chosen folder/directory name. It alos includes an entry to ignore `StaticPHP.php` which is recommended when using the launcher to ensure the main StaticPHP file does not get commited too. If you are not using the launcher, you may want this file included, so simply remove that line. Lines that start with a hash symbol `#` are comments.
+
+## Step Three: Develop Your Website
 
 Start creating HTML and PHP files, and let StaticPHP handle the rest. Ensure that any file paths, such as those for including other files, are relative to the location of the StaticPHP file.
 
 Refer to the [MetaData](MetaData.md) feature to explore additional capabilities for your website files.
 
-## Step Three: Build and Deploy
+## Step Four: Build and Deploy
 
 Run StaticPHP to generate the static version of your website in the output folder/directory.
 
@@ -75,6 +94,24 @@ new StaticPHP
     $minify_js
 );
 ```
+
+## Step Five: Commit to Git
+
+This step is optional, but if you are using Git source control, you may want to commit it now to make sure your progress is saved.
+
+**Add All Files to Git**
+
+`git add .`
+
+**Commit Changes to Local Repository**
+
+`git commit -m "Commit Message Goes Here"`
+
+**Push to Remote**
+
+`git push origin master`
+
+## Conclusion
 
 By following these steps, you can get started with StaticPHP and easily build and deploy your static websites. For more detailed information, refer to the accompanying documentation and guides.
 
