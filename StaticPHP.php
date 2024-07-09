@@ -945,9 +945,11 @@ class StaticPHP
 		return $css;
 	}
 
-	private function minifyJS(String $js)
+	private function minifyJS( String $js )
 	{
 		echo "JavaScript Minification is disabled until a bug in the minification process can be fixed.\n";
+
+		return $js;
 	}	
 }
 
