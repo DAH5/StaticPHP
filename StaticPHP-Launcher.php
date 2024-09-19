@@ -102,7 +102,7 @@ $configurable_options[ 'auto_update' ] = true;
 
 
 $project_name = "StaticPHP";
-$project_author_username = "DAH5";
+$project_author_username = "StaticPHP";
 $project_branch = "master";
 
 $path_to_latest_code_on_github = "https://raw.githubusercontent.com/" . $project_author_username . "/" . $project_name . "/" . $project_branch . "/" . $project_name . ".php";
