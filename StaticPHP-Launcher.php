@@ -102,10 +102,11 @@ $configurable_options[ 'auto_update' ] = true;
 
 
 $project_name = "StaticPHP";
-$project_author_username = "Softwayr";
+$project_author_username = "DAH5";
 $project_branch = "master";
 
 $path_to_latest_code_on_github = "https://raw.githubusercontent.com/" . $project_author_username . "/" . $project_name . "/" . $project_branch . "/" . $project_name . ".php";
+$path_to_latest_code_on_gitlab = "https://gitlab.com/" . $project_author_username . "/" . $project_name . "/-/raw/" . $project_branch . "/" . $project_name . ".php";
 
 $path_to_local_file = __DIR__ . DIRECTORY_SEPARATOR . $project_name . ".php";
 
@@ -136,10 +137,18 @@ if( ( isset( $configurable_options[ 'auto_update' ] ) && is_bool( $configurable_
 	
 	if( $github_headers && strpos( $github_headers[ 0 ], '200' ) )
 		$latest_code = file_get_contents( $path_to_latest_code_on_github );
+	else
+	{
+		echo "\nAttempting to fetch latest " . $project_name . " code from GitLab: " . $path_to_latest_code_on_gitlab . "\n";
+		$gitlab_headers = @get_headers( $path_to_latest_code_on_gitlab );
+
+		if( $gitlab_headers && strpos( $gitlab_headers[ 0 ], '200' ) )
+			$latest_code = file_get_contents( $path_to_latest_code_on_gitlab );
+	}
 
 	if( $latest_code == "" )
 	{
-		echo "\nUnable to access latest code on GitHub. Please check your network connection.\n\n";
+		echo "\nUnable to access latest code on GitHub or GitLab. Please check your network connection.\n\n";
 
 		echo "\nThank you for using the " . $project_name . " Launcher!\n\n";
 
