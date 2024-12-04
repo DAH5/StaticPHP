@@ -190,6 +190,14 @@ class StaticPHP
 				$this->processMarkdown( $path_to_input_directory_item, $path_to_output_directory_item );
 				continue;
 			}
+
+			if( is_file( $path_to_input_directory_item ) && $directory_item == "_bulk_redirects" )
+			{
+				$redirect_list_file_contents = file_get_contents( $path_to_input_directory_item );
+
+				$this->processBulkRedirects( $redirect_list_file_contents, $path_to_output_directory );
+				continue;
+			}
 			
 			if( is_file( $path_to_input_directory_item ) )
 			{
@@ -630,6 +638,82 @@ class StaticPHP
 			$input_file_contents = $this->minifyHTML( $input_file_contents );
 		
 		$this->outputFile( $path_to_output_file, $input_file_contents );
+	}
+
+	private function processBulkRedirects( String $redirect_list, String $path_to_output_directory )
+	{
+		//echo "path_to_output_directory: " . $path_to_output_directory . "\n";
+		//return;
+
+		echo "Processing redirection list...\n\n";
+
+		// Split the contents into lines
+		$lines = explode( "\n", $redirect_list );
+    
+		// Loop through each line
+		foreach( $lines as $line )
+		{
+			// Skip empty lines or lines starting with a comment (#)
+			$line = trim( $line );
+
+			if( empty( $line ) || strpos( $line, '#' ) === 0 )
+			{
+				continue;
+			}
+			
+			// Split the line into the old path and new destination
+			[ $oldPath, $newDestination ] = explode( ' ', $line, 2 );
+			
+			// Ensure both parts are present
+			if( empty( $oldPath ) || empty( $newDestination ) )
+			{
+				echo "Invalid redirect entry: $line\n";
+				continue;
+			}
+			
+			$filePath = $path_to_output_directory . DIRECTORY_SEPARATOR . $oldPath;
+
+			if( strpos( $filePath, '.' ) === false )
+				$filePath = $filePath . DIRECTORY_SEPARATOR . 'index.html';
+			
+			$this->processRedirection( $filePath, $oldPath, $newDestination );
+		}
+
+		echo "\nRedirection list processed!\n\n";
+	}
+
+	private function processRedirection( String $filePath, String $oldPath, String $newDestination )
+	{
+		// Ensure the directory exists
+		$fileDir = dirname( $filePath );
+
+		if ( ! is_dir( $fileDir ) )
+		{
+			mkdir( $fileDir, 0755, true );
+		}
+		
+		// Create the redirection HTML file
+		$htmlContent = <<<HTML
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta http-equiv="refresh" content="0; url='$newDestination'" />
+	<title>Redirecting...</title>
+</head>
+
+<body>
+	<p>If you are not redirected, <a href="$newDestination">click here</a>.</p>
+</body>
+</html>
+
+HTML;
+		
+		if( $this->minify_html === true )
+			$htmlContent = $this->minifyHTML( $htmlContent );
+
+		$this->outputFile( $filePath, $htmlContent );
+		
+		echo "Redirect generated for $oldPath to $newDestination\n";
 	}
 
 	private function processFunctionalBlocks( String $content, array $metadata )
