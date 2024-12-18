@@ -1,12 +1,12 @@
 # Redirections
 
-StaticPHP supports URL redirection, which allows you to automatically redirect users from one page to another. This is particularly useful when moving or renaming pages, ensuring that old URLs continue to work seamlessly.
+StaticPHP supports URL redirection, allowing you to automatically redirect users from one page to another. This is particularly useful when moving or renaming pages, ensuring that old URLs continue to work seamlessly.
 
-**Note:** Redirections are only applicable to web pages. For other types of redirects (e.g., for assets or non-HTML files), you'll need to use alternative methods.
+**Note:** Redirections apply only to web pages. For redirects involving assets or non-HTML files, you'll need to use alternative methods.
 
 ## Bulk Redirects
 
-The Bulk Redirects feature in StaticPHP enables you to manage multiple redirects easily using a single file: `_bulk_redirects`. This file allows you to list all your redirection rules in one place, making it simple to update or add new redirects without altering your codebase.
+The **Bulk Redirects** feature in StaticPHP enables you to manage multiple redirects easily using a single file: `_bulk_redirects`. This file allows you to list all your redirection rules in one place, making it simple to update or add new redirects without modifying your codebase.
 
 ### Format
 
@@ -33,9 +33,39 @@ In the example above:
 
 ### Notes:
 - Ensure that paths in the old URL are relative (without domain or protocol) and use forward slashes `/`.
-- The destination can be an absolute URL or relative path. If using an absolute URL (e.g., `https://example.tld/new`), make sure it includes the full URL structure.
+- The destination can be either an absolute URL or relative path. If using an absolute URL (e.g., `https://example.tld/new`), make sure it includes the full URL structure.
 
 This system makes it easy to handle large-scale redirects in bulk, simplifying site maintenance and ensuring a smooth user experience even after restructuring or updating content.
+
+## Single Redirections
+
+The **Single Redirections** feature in StaticPHP allows you to easily redirect from one page to another, either within your site or to an external URL. This is useful in cases where you want to redirect users from an outdated or temporary URL while still preserving the content of the original page in your project source files.
+
+You can define the special metadata key `redirect` at the top of your page's source file. The value of `redirect` should be the target path or URL where the page should redirect. StaticPHP will process this metadata and automatically handle the redirection for you, without rendering the original page content.
+
+### How It Works
+
+When StaticPHP encounters a page with a `redirect` key in the metadata, it won't output the page's regular content. Instead, it will generate a response that instructs the browser to perform a redirection to the specified URL or path.
+
+### Example
+
+Let’s say you have a file named `old.html` and you want to redirect users to a new page located at `https://example.tld/new`. You would add the following metadata at the top of the file:
+
+```plaintext
+---
+redirect: https://example.tld/new
+---
+```
+
+In this example:
+- The `redirect` key specifies the target URL: `https://example.tld/new`.
+- When StaticPHP processes this file, it will **not render the content of `old.html`**. Instead, it will generate an HTTP response that tells the browser to redirect to the specified URL.
+
+The user’s browser will automatically follow the redirect, and they will be taken to `https://example.tld/new`.
+
+### Notes:
+- The `redirect` URL can be either an absolute URL (e.g., `https://example.tld/new`) or a relative URL (e.g., `/new`).
+- This feature is ideal for temporary redirects or handling legacy URLs.
 
 ## How Does the Redirection Work?
 
