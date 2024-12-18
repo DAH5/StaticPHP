@@ -454,6 +454,13 @@ class StaticPHP
 		else
 			$this->processOutputPath( $path_to_output_file, $metadata, $friendly_urls );
 		
+		if( isset( $metadata[ 'redirect' ] ) )
+		{
+			// File Path, Old Path, New Destination
+			$this->processRedirection( $path_to_output_file, str_replace( $this->output_dir_path, '', $path_to_output_file ), $metadata[ 'redirect' ] );
+			return;
+		}
+		
 		if( $this->minify_html === true )
 			$input_file_contents = $this->minifyHTML( $input_file_contents );
 		
@@ -492,6 +499,13 @@ class StaticPHP
 			$this->processOutputPath( $path_to_output_file, $metadata, $friendly_urls, $custom_output_path );
 		else
 			$this->processOutputPath( $path_to_output_file, $metadata, $friendly_urls );
+		
+		if( isset( $metadata[ 'redirect' ] ) )
+		{
+			// File Path, Old Path, New Destination
+			$this->processRedirection( $path_to_output_file, str_replace( $this->output_dir_path, '', $path_to_output_file ), $metadata[ 'redirect' ] );
+			return;
+		}
 		
 		if( $this->minify_html === true )
 			$input_file_contents = $this->minifyHTML( $input_file_contents );
@@ -633,6 +647,13 @@ class StaticPHP
 			$friendly_urls = $this->friendly_urls;
 
 		$this->processOutputPath( $path_to_output_file, $metadata, $friendly_urls );
+		
+		if( isset( $metadata[ 'redirect' ] ) )
+		{
+			// File Path, Old Path, New Destination
+			$this->processRedirection( $path_to_output_file, str_replace( $this->output_dir_path, '', $path_to_output_file ), $metadata[ 'redirect' ] );
+			return;
+		}
 		
 		if( $this->minify_html === true )
 			$input_file_contents = $this->minifyHTML( $input_file_contents );
