@@ -78,6 +78,9 @@ class StaticPHP
 			$this->minify_js = true;
 		// End Arguments Method
 
+		// Ensure Special Files are Ignored
+		$this->items_to_ignore[] = "_redirection_template.html";
+
 		$this->source_dir_path = str_replace( [ "\\", "/" ], DIRECTORY_SEPARATOR, $this->source_dir_path );
 		$this->output_dir_path = str_replace( [ "\\", "/" ], DIRECTORY_SEPARATOR, $this->output_dir_path );
 
@@ -728,6 +731,12 @@ class StaticPHP
 </html>
 
 HTML;
+
+		if( is_file( $this->source_dir_path . DIRECTORY_SEPARATOR . '_redirection_template.html' ) )
+		{
+			$htmlContent = file_get_contents( $this->source_dir_path . DIRECTORY_SEPARATOR . '_redirection_template.html' );
+			$htmlContent = str_replace( [ '$newDestination', '$oldPath' ], [ $newDestination, $oldPath ], $htmlContent );
+		}
 		
 		if( $this->minify_html === true )
 			$htmlContent = $this->minifyHTML( $htmlContent );
