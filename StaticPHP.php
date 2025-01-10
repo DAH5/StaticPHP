@@ -245,8 +245,10 @@ class StaticPHP
 	{
 		if( ! isset( $metadata['staticphp_path'] ) )
 			$metadata['staticphp_path'] = __DIR__;
+
+		$input_contents = str_replace( array( "\r\n", "\r" ), "\n", $input_contents );
 		
-        $input_lines = explode( "\n", $input_contents );
+		$input_lines = explode( "\n", $input_contents );
 		
 		if( count( $input_lines ) > 0 && trim( $input_lines[ 0 ] ) == $delimiter )
 		{
@@ -276,7 +278,7 @@ class StaticPHP
 				$metadata[ $metadata_key ] = $metadata_value;
 			}
 			
-			$output_contents = join( "\r\n", $input_lines );
+			$output_contents = join( "\n", $input_lines );
 			
 			echo "End of MetaData.\n\n";
 		}
