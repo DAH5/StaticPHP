@@ -93,7 +93,7 @@ class StaticPHP
 		if( ! is_dir( $path_to_directory ) )
 			return;
 		
-		echo "Emptying Directory: " . $path_to_directory . "\n";
+		echo "Emptying Directory: " . $path_to_directory . PHP_EOL;
 		
 		$directory_items = scandir( $path_to_directory );
 		
@@ -110,21 +110,21 @@ class StaticPHP
 			if( is_dir( $path_to_directory_item ) )
 			{
 				$this->emptyDirectory( $path_to_directory_item );
-				echo "Removing Directory: " . $path_to_directory_item . "\n";
+				echo "Removing Directory: " . $path_to_directory_item . PHP_EOL;
 				rmdir( $path_to_directory_item );
 				continue;
 			}
 			
 			if( is_file( $path_to_directory_item ) )
 			{
-				echo "Deleting File: " . $path_to_directory_item . "\n";
+				echo "Deleting File: " . $path_to_directory_item . PHP_EOL;
 				unlink( $path_to_directory_item );
 				continue;
 			}
 		}
 		
 		if( count( $directory_items ) > 2 )
-			echo "Done. \n";
+			echo "Done." . PHP_EOL;
 	}
 	
 	private function processDirectory( String $path_to_input_directory, String $path_to_output_directory )
@@ -132,19 +132,19 @@ class StaticPHP
 		if( ! is_dir( $path_to_input_directory ) )
 			die( "Directory does not exist: " . $path_to_input_directory );
         	
-		echo "Processing Directory: " . $path_to_input_directory . "\n";
+		echo "Processing Directory: " . $path_to_input_directory . PHP_EOL;
 		
 		$directory_items = scandir( $path_to_input_directory );
 		
 		if( ! is_dir( $path_to_output_directory ) && count( $directory_items ) > 2 )
 		{
-			echo "Created New Directory: " . $path_to_output_directory . "\n";
+			echo "Created New Directory: " . $path_to_output_directory . PHP_EOL;
 			mkdir( $path_to_output_directory );
 		}
 		
 		if( count( $directory_items ) == 2 )
 		{
-			echo "Input directory is empty. Nothing to process.\n";
+			echo "Input directory is empty. Nothing to process." . PHP_EOL;
 		}
 		
 		foreach( $directory_items as $directory_item )
@@ -161,7 +161,7 @@ class StaticPHP
 				{
 					if( $item_to_ignore != "" && strpos( $directory_item, $item_to_ignore ) !== false )
 					{
-						echo "Ignoring Directory Item: " . $path_to_input_directory_item . "\n";
+						echo "Ignoring Directory Item: " . $path_to_input_directory_item . PHP_EOL;
 						continue( 2 );
 					}
 				}
@@ -197,6 +197,7 @@ class StaticPHP
 			if( is_file( $path_to_input_directory_item ) && $directory_item == "_bulk_redirects" )
 			{
 				$redirect_list_file_contents = file_get_contents( $path_to_input_directory_item );
+				$redirect_list_file_contents = str_replace( array( "\r\n", "\r", "\n" ), PHP_EOL, $redirect_list_file_contents );
 
 				$this->processBulkRedirects( $redirect_list_file_contents, $path_to_output_directory );
 				continue;
@@ -206,7 +207,7 @@ class StaticPHP
 			{
 				if( $this->minify_css === true && substr( $path_to_input_directory_item, -4 ) == ".css" )
 				{
-					echo "Minifying CSS File: " . $path_to_input_directory_item . "\n";
+					echo "Minifying CSS File: " . $path_to_input_directory_item . PHP_EOL;
 
 					$css = file_get_contents( $path_to_input_directory_item );
 
@@ -219,7 +220,7 @@ class StaticPHP
 
 				if( $this->minify_js === true && substr( $path_to_input_directory_item, -3 ) == ".js" )
 				{
-					echo "Minifying JS File: " . $path_to_input_directory_item . "\n";
+					echo "Minifying JS File: " . $path_to_input_directory_item . PHP_EOL;
 
 					$js = file_get_contents( $path_to_input_directory_item );
 
@@ -230,7 +231,7 @@ class StaticPHP
 					continue;
 				}
 
-				echo "Copying File: " . $path_to_input_directory_item . " to " . $path_to_output_directory_item . "\n";
+				echo "Copying File: " . $path_to_input_directory_item . " to " . $path_to_output_directory_item . PHP_EOL;
 				copy( $path_to_input_directory_item, $path_to_output_directory_item );
 			}
 		}
@@ -246,13 +247,13 @@ class StaticPHP
 		if( ! isset( $metadata['staticphp_path'] ) )
 			$metadata['staticphp_path'] = __DIR__;
 
-		$input_contents = str_replace( array( "\r\n", "\r" ), "\n", $input_contents );
+		$input_contents = str_replace( array( "\r\n", "\r", "\n" ), PHP_EOL, $input_contents );
 		
-		$input_lines = explode( "\n", $input_contents );
+		$input_lines = explode( PHP_EOL, $input_contents );
 		
 		if( count( $input_lines ) > 0 && trim( $input_lines[ 0 ] ) == $delimiter )
 		{
-			echo "Processing MetaData...\n\n";
+			echo "Processing MetaData..." . PHP_EOL . PHP_EOL;
 			
 			unset( $input_lines[ 0 ] );
 			
@@ -273,20 +274,20 @@ class StaticPHP
 				$metadata_key = trim( $data[ 0 ] );
 				$metadata_value = trim( $data[ 1 ] );
 				
-				echo "Setting MetaData Key: " . $metadata_key . "\n";
-				echo "with matching value: " . $metadata_value . "\n\n";
+				echo "Setting MetaData Key: " . $metadata_key . PHP_EOL;
+				echo "with matching value: " . $metadata_value . PHP_EOL . PHP_EOL;
 				$metadata[ $metadata_key ] = $metadata_value;
 			}
 			
-			$output_contents = join( "\n", $input_lines );
+			$output_contents = join( PHP_EOL, $input_lines );
 			
-			echo "End of MetaData.\n\n";
+			echo "End of MetaData." . PHP_EOL . PHP_EOL;
 		}
 	}
 	
 	private function processMetaDataPlaceHolders( String $delimiter, String $input_contents, array $metadata, String &$output_contents, String $prefix = 'metadata' )
 	{
-		echo "Processing MetaData PlaceHolders...\n";
+		echo "Processing MetaData PlaceHolders..." . PHP_EOL;
 		$pattern = '/' . $delimiter . '\s*' . $prefix . '\.(\S+)\s*' . $delimiter . '/';
 		
 		$output_contents = preg_replace_callback
@@ -299,7 +300,7 @@ class StaticPHP
 				if( array_key_exists( $key, $metadata ) )
 				{
 					$value = $metadata[ $key ];
-					echo "Replacing " . $key . " with " . $value . "\n";
+					echo "Replacing " . $key . " with " . $value . PHP_EOL;
 					return $value;
 				}
 				else
@@ -322,7 +323,7 @@ class StaticPHP
 			
 			if( $layout_path && is_file( $layout_path ) )
 			{
-				echo "Processing layout file: " . $layout_path . "\n";
+				echo "Processing layout file: " . $layout_path . PHP_EOL;
 				
 				// Get contents of base layout file.
 				$layout_contents = file_get_contents( $layout_path );
@@ -349,10 +350,10 @@ class StaticPHP
 	private function processTemporaryFile( string $path_to_file, string &$file_contents, array $metadata )
 	{
 		$temp_file_path = tempnam( dirname( $path_to_file ), "staticphp_" );
-		echo "Creating temporary file (" . $temp_file_path . ")...\n";
+		echo "Creating temporary file (" . $temp_file_path . ")..." . PHP_EOL;
 		file_put_contents( $temp_file_path, $file_contents );
 		
-		echo "Including temporary file...\n";
+		echo "Including temporary file..." . PHP_EOL;
         
 		ob_start();
 		
@@ -361,7 +362,7 @@ class StaticPHP
 		
 		ob_end_clean();
 		
-		echo "Removing temporary file...\n";
+		echo "Removing temporary file..." . PHP_EOL;
 		unlink( $temp_file_path );
 	}
 	
@@ -410,7 +411,7 @@ class StaticPHP
 	
 	private function outputFile( string $path_to_file, string $file_contents )
 	{
-		echo "Outputting File: "  . $path_to_file . "\n";
+		echo "Outputting File: "  . $path_to_file . PHP_EOL;
 		
 		@chmod( $path_to_file, 0755 );
 		$open_file_for_writing = fopen( $path_to_file, "w" );
@@ -426,7 +427,7 @@ class StaticPHP
 		if( ! is_file( $path_to_input_file ) )
 			return;
 		
-		echo "Processing PHP File: " . $path_to_input_file . "\n";
+		echo "Processing PHP File: " . $path_to_input_file . PHP_EOL;
 		
 		ob_start();
 		
@@ -477,7 +478,7 @@ class StaticPHP
 		if( ! is_file( $path_to_input_file ) )
 			return;
 
-		echo "Processing HTML File: " . $path_to_input_file . "\n";
+		echo "Processing HTML File: " . $path_to_input_file . PHP_EOL;
 
 		$input_file_contents = file_get_contents( $path_to_input_file );
 
@@ -523,15 +524,17 @@ class StaticPHP
 		if( ! is_file( $path_to_input_file ) )
 			return;
 
-		echo "Processing Markdown File: " . $path_to_input_file . "\n";
+		echo "Processing Markdown File: " . $path_to_input_file . PHP_EOL;
 
 		$input_file_contents = file_get_contents( $path_to_input_file );
+
+		$input_file_contents = str_replace( array( "\r\n", "\r" ), PHP_EOL, $input_file_contents );
 
 		$metadata = array();
 
 		$this->processMetaData( $this->metaDataDelimiter, $input_file_contents, $metadata, $input_file_contents );
 
-		$input_file_lines = explode( "\n", $input_file_contents );
+		$input_file_lines = explode( PHP_EOL, $input_file_contents );
 
 		$isCodeblock = false;
 		$codeblockName = "";
@@ -636,7 +639,7 @@ class StaticPHP
 			$input_file_lines[ $ifl ] .= "</p>";
 		}
 
-		$input_file_contents = join( "\n", $input_file_lines );
+		$input_file_contents = join( PHP_EOL, $input_file_lines );
 
 		$layout_contents = "";
 		$this->processLayoutMetaData( $metadata, $this->metaDataDelimiter, $layout_contents );
@@ -671,10 +674,10 @@ class StaticPHP
 		//echo "path_to_output_directory: " . $path_to_output_directory . "\n";
 		//return;
 
-		echo "Processing redirection list...\n\n";
+		echo "Processing redirection list..." . PHP_EOL . PHP_EOL;
 
 		// Split the contents into lines
-		$lines = explode( "\n", $redirect_list );
+		$lines = explode( PHP_EOL, $redirect_list );
     
 		// Loop through each line
 		foreach( $lines as $line )
@@ -693,7 +696,7 @@ class StaticPHP
 			// Ensure both parts are present
 			if( empty( $oldPath ) || empty( $newDestination ) )
 			{
-				echo "Invalid redirect entry: $line\n";
+				echo "Invalid redirect entry: $line" . PHP_EOL;
 				continue;
 			}
 			
@@ -790,7 +793,7 @@ HTML;
 			$content
 		);
 
-		echo "...Functional Blocks Processed.\n";
+		echo "...Functional Blocks Processed." . PHP_EOL;
 
 		return $output;
 	}
@@ -802,7 +805,7 @@ HTML;
 			return null;
 		}
 
-		echo "Processing Loop Functional Block...\n";
+		echo "Processing Loop Functional Block..." . PHP_EOL;
 
 		$dir = __DIR__ . DIRECTORY_SEPARATOR . $params[ 'dir' ];
 
@@ -830,7 +833,7 @@ HTML;
 				}
 			}
 			
-			echo "Outputting JSON File: " . $jsonFilePath . "\n";
+			echo "Outputting JSON File: " . $jsonFilePath . PHP_EOL;
 			file_put_contents( $jsonFilePath, json_encode( $output ) );
 			echo "JSON File Complete.\n";
 		}
@@ -842,14 +845,14 @@ HTML;
 			$output_str .= $output_item['outputContent'];
 		}
 
-		echo "...Loop Functional Block Processed.\n";
+		echo "...Loop Functional Block Processed." . PHP_EOL;
 
 		return $output_str;
 	}
 
 	private function processIfFunctionalBlock( String $paramStr, String $content, array $metadata )
 	{
-		echo "Processing If Functional Block...\n";
+		echo "Processing If Functional Block..." . PHP_EOL;
 
 		$condition_state = true;
 
@@ -889,7 +892,7 @@ HTML;
 			}
 		}
 
-		echo "...If Functional Block Processed.\n";
+		echo "...If Functional Block Processed." . PHP_EOL;
 
 		if( $condition_state )
 			return $content;
@@ -901,7 +904,7 @@ HTML;
 		if( ! is_dir( $dirPath ) )
 			return;
 
-		echo "Processing Loop Directory: " . $dirPath . "\n";
+		echo "Processing Loop Directory: " . $dirPath . PHP_EOL;
 
 		$dirContents = scandir( $dirPath );
 
@@ -945,7 +948,7 @@ HTML;
 				{
 					if( $item_to_ignore != "" && strpos( $dirItemPath, $item_to_ignore ) !== false )
 					{
-						echo "Loop Ignoring Item: " . $dirItemPath . "\n";
+						echo "Loop Ignoring Item: " . $dirItemPath . PHP_EOL;
 						continue( 2 );
 					}
 				}
@@ -961,7 +964,7 @@ HTML;
 					
 					if( strpos( $dirItemPath, $ignore_item ) !== false )
 					{
-						echo "Loop Ignoring Item: " . $dirItemPath . "\n";
+						echo "Loop Ignoring Item: " . $dirItemPath . PHP_EOL;
 						continue( 2 );
 					}
 				}
@@ -1006,7 +1009,7 @@ HTML;
 
 			$output[] = $toOutput;
 
-			echo "...Loop Directory Processed.\n";
+			echo "...Loop Directory Processed." . PHP_EOL;
 		}
 
 		return $output;
@@ -1028,7 +1031,7 @@ HTML;
 
 	private function minifyHTML( String $html )
 	{
-		echo "Minifying HTML...\n";
+		echo "Minifying HTML..." . PHP_EOL;
 
 		// Remove comments
 		$html = preg_replace( '/<!--(?!<!)[^\[>][\s\S]*?-->/s', '', $html );
@@ -1044,7 +1047,7 @@ HTML;
 
 	private function minifyCSS( String $css )
 	{
-		echo "Minifying CSS...\n";
+		echo "Minifying CSS..." . PHP_EOL;
 
 		// Remove comments
 		$css = preg_replace( '!/\*.*?\*/!s', '', $css );
@@ -1063,7 +1066,7 @@ HTML;
 
 	private function minifyJS( String $js )
 	{
-		echo "JavaScript Minification is disabled until a bug in the minification process can be fixed.\n";
+		echo "JavaScript Minification is disabled until a bug in the minification process can be fixed." . PHP_EOL;
 
 		return $js;
 	}	

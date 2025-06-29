@@ -110,26 +110,26 @@ $path_to_latest_code_on_gitlab = "https://gitlab.com/" . $project_author_usernam
 
 $path_to_local_file = __DIR__ . DIRECTORY_SEPARATOR . $project_name . ".php";
 
-echo "Welcome to the " . $project_name . " Launcher!\n\n";
+echo "Welcome to the " . $project_name . " Launcher!" . PHP_EOL . PHP_EOL;
 
 if( isset( $configurable_options[ 'source_dir_path' ] ) && is_string( $configurable_options[ 'source_dir_path' ] ) && trim( $configurable_options[ 'source_dir_path' ] ) != "" )
-	echo "Setting source directory path to: " . $configurable_options[ 'source_dir_path' ] . "\n";
+	echo "Setting source directory path to: " . $configurable_options[ 'source_dir_path' ] . PHP_EOL;
 
 if( isset( $configurable_options[ 'output_dir_path' ] ) && is_string( $configurable_options[ 'output_dir_path' ] ) && trim( $configurable_options[ 'output_dir_path' ] ) != "" )
-	echo "Setting output directory path to: " . $configurable_options[ 'output_dir_path' ] . "\n";
+	echo "Setting output directory path to: " . $configurable_options[ 'output_dir_path' ] . PHP_EOL;
 
 if( isset( $configurable_options[ 'paths_to_ignore' ] ) && is_array( $configurable_options[ 'paths_to_ignore' ] ) && count( $configurable_options[ 'paths_to_ignore'] ) > 0 )
-	echo "Setting paths to ignore to: " . join( ", ", $configurable_options[ 'paths_to_ignore' ] ) . "\n";
+	echo "Setting paths to ignore to: " . join( ", ", $configurable_options[ 'paths_to_ignore' ] ) . PHP_EOL;
 
 if( isset( $configurable_options[ 'friendly_urls' ] ) && is_bool( $configurable_options[ 'friendly_urls' ] ) )
-	echo "Setting Friendly URLs to: " . ( $configurable_options[ 'friendly_urls' ] ? "Enabled" : "Disabled" ) . "\n";
+	echo "Setting Friendly URLs to: " . ( $configurable_options[ 'friendly_urls' ] ? "Enabled" : "Disabled" ) . PHP_EOL;
 
 if( isset( $configurable_options[ 'metadata_delimiter' ] ) && is_string( $configurable_options[ 'metadata_delimiter' ] ) && trim( $configurable_options[ 'metadata_delimiter' ] ) )
 	echo "Setting MetaData Delimiter to: " . $configurable_options[ 'metadata_delimiter' ];
 
 if( ( isset( $configurable_options[ 'auto_update' ] ) && is_bool( $configurable_options[ 'auto_update' ] ) && $configurable_options[ 'auto_update' ] === true ) || ! is_file( $path_to_local_file ) )
 {
-	echo "\nAttempting to fetch latest " . $project_name . " code from GitHub: " . $path_to_latest_code_on_github . "\n";
+	echo PHP_EOL . "Attempting to fetch latest " . $project_name . " code from GitHub: " . $path_to_latest_code_on_github . PHP_EOL;
 
 	$latest_code = "";
 
@@ -139,7 +139,7 @@ if( ( isset( $configurable_options[ 'auto_update' ] ) && is_bool( $configurable_
 		$latest_code = file_get_contents( $path_to_latest_code_on_github );
 	else
 	{
-		echo "\nAttempting to fetch latest " . $project_name . " code from GitLab: " . $path_to_latest_code_on_gitlab . "\n";
+		echo PHP_EOL . "Attempting to fetch latest " . $project_name . " code from GitLab: " . $path_to_latest_code_on_gitlab . PHP_EOL;
 		$gitlab_headers = @get_headers( $path_to_latest_code_on_gitlab );
 
 		if( $gitlab_headers && strpos( $gitlab_headers[ 0 ], '200' ) )
@@ -148,33 +148,33 @@ if( ( isset( $configurable_options[ 'auto_update' ] ) && is_bool( $configurable_
 
 	if( $latest_code == "" )
 	{
-		echo "\nUnable to access latest code on GitHub or GitLab. Please check your network connection.\n\n";
+		echo PHP_EOL . "Unable to access latest code on GitHub or GitLab. Please check your network connection." . PHP_EOL . PHP_EOL;
 
-		echo "\nThank you for using the " . $project_name . " Launcher!\n\n";
+		echo PHP_EOL . "Thank you for using the " . $project_name . " Launcher!" . PHP_EOL . PHP_EOL;
 
 		exit;
 	}
 
-	echo "Saving to local path " . $path_to_local_file . "\n";
+	echo "Saving to local path " . $path_to_local_file . PHP_EOL;
 	file_put_contents( $path_to_local_file, $latest_code );
 
 	echo "Verifying local file...\n";
 	if( ! is_file( $path_to_local_file ) && file_get_contents( $path_to_local_file ) != $latest_code )
 	{
-		echo "Local file check failed!\n\n";
+		echo "Local file check failed!" . PHP_EOL . PHP_EOL;
 
-		echo "\nThank you for using the " . $project_name . " Launcher!\n\n";
+		echo PHP_EOL . "Thank you for using the " . $project_name . " Launcher!" . PHP_EOL . PHP_EOL;
 
 		exit;
 	}
 }
 
-echo "Loading " . $project_name . "...\n";
+echo "Loading " . $project_name . "..." . PHP_EOL;
 include $path_to_local_file;
 
 if( class_exists( $project_name ) )
 {
-	echo "Running " . $project_name . "...\n\n";
+	echo "Running " . $project_name . "..." . PHP_EOL . PHP_EOL;
 
 	if( isset( $configurable_options ) && is_array( $configurable_options ) )
 		$project = new $project_name( $configurable_options );
@@ -184,8 +184,8 @@ if( class_exists( $project_name ) )
 
 if( isset( $configurable_options[ 'auto_update' ] ) && is_bool( $configurable_options[ 'auto_update' ] ) && $configurable_options[ 'auto_update' ] === true )
 {
-	echo "\n\nRemoving local " . $project_name . " file...\n";
+	echo PHP_EOL . PHP_EOL . "Removing local " . $project_name . " file..." . PHP_EOL;
 	unlink( $path_to_local_file );
 }
 	
-echo "\nThank you for using the " . $project_name . " Launcher!\n\n";
+echo PHP_EOL . "Thank you for using the " . $project_name . " Launcher!" . PHP_EOL . PHP_EOL;
