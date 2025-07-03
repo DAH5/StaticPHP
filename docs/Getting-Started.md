@@ -52,7 +52,7 @@ This method is less recommended due to the potential difficulty in remembering c
 Open a terminal in your project directory/folder, and type the following command, adjusting the parameters to suit your project:
 
 ```bash
-php StaticPHP.php source_dir_path output_dir_path items_to_ignore friendly_urls metadata_delimiter minify_html minify_css minify_js
+php StaticPHP.php source_dir_path output_dir_path items_to_ignore friendly_urls metadata_delimiter minify_html minify_css minify_js minify_html_tags_to_preserve
 ```
 
 - `source_dir_path`: The path relative to StaticPHP that contains your source input files.
@@ -63,6 +63,7 @@ php StaticPHP.php source_dir_path output_dir_path items_to_ignore friendly_urls 
 - `minify_html`: A boolean indicating whether StaticPHP should minify HTML files. This affects only the output files; source files remain unminified.
 - `minify_css`: A boolean indicating whether StaticPHP should minify CSS files. This affects only the output files; source files remain unminified.
 - `minify_js`: A boolean indicating whether StaticPHP should minify JavaScript files. This affects only the output files; source files remain unminified.
+- `minify_html_tags_to_preserve`: A string containing a single HTML tag name to preserve and not minify. Useful for things like code snippets using the `<pre>` tag. Ommit entirely if not needed.
 
 ### Using a Custom Launcher Script
 
@@ -79,6 +80,7 @@ $metadata_delimiter = '---';
 $minify_html = true;
 $minify_css = true;
 $minify_js = true;
+$minify_html_tags_to_preserve = array();
 
 include __DIR__ . DIRECTORY_SEPARATOR . 'StaticPHP.php';
 
@@ -91,7 +93,8 @@ new StaticPHP
     $metadata_delimiter,
     $minify_html,
     $minify_css,
-    $minify_js
+    $minify_js,
+    $minify_html_tags_to_preserve
 );
 ```
 
