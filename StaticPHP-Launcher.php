@@ -83,6 +83,17 @@ $configurable_options[ 'minify_js' ] = false;
 
 
 /*
+	Minify HTML Tags to Preserve
+
+	Preserves the following tags as-is during the Minify HTML process, resulting in them not being minified like the rest of the code.
+
+	Set to an array of tag names (e.g. "pre") to enable, set to an empty array, or remove the option entirely to disable.
+*/
+
+$configurable_options[ 'minify_html_tags_to_preserve' ] = array();
+
+
+/*
 	Auto Update
 
 	Downloads the latest version of StaticPHP upon every run to ensure you always run the latest version.

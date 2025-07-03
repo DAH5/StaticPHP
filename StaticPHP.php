@@ -10,6 +10,7 @@ class StaticPHP
 	private $minify_html = false;
 	private $minify_css = false;
 	private $minify_js = false;
+	private $minify_html_tags_to_preserve = array();
 
 	public function __construct()
 	{
@@ -46,6 +47,10 @@ class StaticPHP
 				$this->minify_js = $configurable_options[ 'minify_js' ];
 			if( isset( $configurable_options[ 'minify_js' ] ) && is_string( $configurable_options[ 'minify_js' ] ) && trim( $configurable_options[ 'minify_js' ] ) == "true" )
 				$this->minify_js = true;
+			if( isset( $configurable_options[ 'minify_html_tags_to_preserve' ] ) && is_array( $configurable_options[ 'minify_html_tags_to_preserve' ] ) && count( $configurable_options[ 'minify_html_tags_to_preserve' ] ) > 0 )
+				$this->minify_html_tags_to_preserve = $configurable_options[ 'minify_html_tags_to_preserve' ];
+			if( isset( $configurable_options[ 'minify_html_tags_to_preserve' ] ) && is_string( $configurable_options[ 'minify_html_tags_to_preserve' ] ) && trim( $configurable_options[ 'minify_html_tags_to_preserve' ] ) != "" )
+				$this->minify_html_tags_to_preserve = array( trim( $configurable_options[ 'minify_html_tags_to_preserve' ] ) );
 		}
 		// End Array Method
 
@@ -76,6 +81,10 @@ class StaticPHP
 			$this->minify_js = $args[ 7 ];
 		if( count( $args ) >= 8 && is_string( $args[ 7 ] ) && trim( $args[ 7 ] ) == "true" )
 			$this->minify_js = true;
+		if( count( $args ) >= 9 && is_array( $args[ 8 ] ) && count( $args[ 8 ] ) > 0 )
+			$this->minify_html_tags_to_preserve = trim( $args[ 8 ] );
+		if( count( $args ) >= 9 && is_string( $args[ 8 ] ) && trim( $args[ 8 ] ) != "" )
+			$this->minify_html_tags_to_preserve = array( trim( $args[ 8 ] ) );
 		// End Arguments Method
 
 		// Ensure Special Files are Ignored
@@ -98,7 +107,7 @@ class StaticPHP
 		$directory_items = scandir( $path_to_directory );
 		
 		if( count( $directory_items ) == 2 )
-			echo "Directory Already Empty.\n";
+			echo "Directory Already Empty." . PHP_EOL;
 		
 		foreach( $directory_items as $directory_item )
 		{
@@ -197,7 +206,7 @@ class StaticPHP
 			if( is_file( $path_to_input_directory_item ) && $directory_item == "_bulk_redirects" )
 			{
 				$redirect_list_file_contents = file_get_contents( $path_to_input_directory_item );
-				$redirect_list_file_contents = str_replace( array( "\r\n", "\r", "\n" ), PHP_EOL, $redirect_list_file_contents );
+				$redirect_list_file_contents = $this->convertEndOfLines( $redirect_list_file_contents );
 
 				$this->processBulkRedirects( $redirect_list_file_contents, $path_to_output_directory );
 				continue;
@@ -247,7 +256,7 @@ class StaticPHP
 		if( ! isset( $metadata['staticphp_path'] ) )
 			$metadata['staticphp_path'] = __DIR__;
 
-		$input_contents = str_replace( array( "\r\n", "\r", "\n" ), PHP_EOL, $input_contents );
+		$input_contents = $this->convertEndOfLines( $input_contents );
 		
 		$input_lines = explode( PHP_EOL, $input_contents );
 		
@@ -435,6 +444,9 @@ class StaticPHP
 		$input_file_contents = ob_get_contents();
 		
 		ob_end_clean();
+
+		// Convert end of lines
+		$input_file_contents = $this->convertEndOfLines( $input_file_contents );
 		
 		$metadata = array();
 		
@@ -482,6 +494,9 @@ class StaticPHP
 
 		$input_file_contents = file_get_contents( $path_to_input_file );
 
+		// Convert end of lines
+		$input_file_contents = $this->convertEndOfLines( $input_file_contents );
+
 		$metadata = array();
 
 		$this->processMetaData( $this->metaDataDelimiter, $input_file_contents, $metadata, $input_file_contents );
@@ -528,7 +543,8 @@ class StaticPHP
 
 		$input_file_contents = file_get_contents( $path_to_input_file );
 
-		$input_file_contents = str_replace( array( "\r\n", "\r" ), PHP_EOL, $input_file_contents );
+		// Convert end of lines
+		$input_file_contents = $this->convertEndOfLines( $input_file_contents );
 
 		$metadata = array();
 
@@ -1033,6 +1049,28 @@ HTML;
 	{
 		echo "Minifying HTML..." . PHP_EOL;
 
+		// Convert all HTML end of lines to use system specific end of lines using PHP_EOL
+		$html = $this->convertEndOfLines( $html );
+
+		$preserved_html_tags = array();
+
+		// Extract HTML tags to be preserved
+		if( count( $this->minify_html_tags_to_preserve ) >= 1 )
+		{
+			foreach( $this->minify_html_tags_to_preserve as $tag_to_preserve )
+			{
+				preg_match_all( "#<{$tag_to_preserve}[^>]*>.*?</{$tag_to_preserve}>#is", $html, $preserve_tag_matches );
+				$preserve_tag_matches = isset( $preserve_tag_matches[ 0 ] ) ? $preserve_tag_matches[ 0 ] : array();
+
+				foreach( $preserve_tag_matches as $preserve_tag_num => $preserve_tag_match )
+				{
+					$preserved_tag_key = "__STATICPHP_PRESERVED_{$tag_to_preserve}_CODE_BLOCK_{$preserve_tag_num}__";
+					$preserved_html_tags[ $preserved_tag_key ] = $preserve_tag_match;
+					$html = str_replace( $preserve_tag_match, $preserved_tag_key, $html );
+				}
+			}
+		}
+
 		// Remove comments
 		$html = preg_replace( '/<!--(?!<!)[^\[>][\s\S]*?-->/s', '', $html );
 		
@@ -1041,6 +1079,12 @@ HTML;
 		
 		// Remove unnecessary spaces
 		$html = preg_replace( '/\s+/', ' ', $html );
+
+		// Restore preserved HTML tags
+		foreach( $preserved_html_tags as $preserved_tag_key => $preserved_tag )
+		{
+			$html = str_replace( $preserved_tag_key, $preserved_tag, $html );
+		}
 		
 		return $html;
 	}
@@ -1070,6 +1114,11 @@ HTML;
 
 		return $js;
 	}	
+
+	private function convertEndOfLines( $text )
+	{
+		return preg_replace( "/\r\n|\r|\n/", PHP_EOL, $text );
+	}
 }
 
 if( isset( $argv[ 0 ] ) && basename( $argv[ 0 ] ) == basename( __FILE__ ) )
