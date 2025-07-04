@@ -52,7 +52,7 @@ This method is less recommended due to the potential difficulty in remembering c
 Open a terminal in your project directory/folder, and type the following command, adjusting the parameters to suit your project:
 
 ```bash
-php StaticPHP.php source_dir_path output_dir_path items_to_ignore friendly_urls metadata_delimiter minify_html minify_css minify_js minify_html_tags_to_preserve
+php StaticPHP.php source_dir_path output_dir_path items_to_ignore friendly_urls metadata_delimiter minify_html minify_css minify_js minify_html_tags_to_preserve bulk_redirects_filename redirection_template_filename
 ```
 
 - `source_dir_path`: The path relative to StaticPHP that contains your source input files.
@@ -64,6 +64,8 @@ php StaticPHP.php source_dir_path output_dir_path items_to_ignore friendly_urls 
 - `minify_css`: A boolean indicating whether StaticPHP should minify CSS files. This affects only the output files; source files remain unminified.
 - `minify_js`: A boolean indicating whether StaticPHP should minify JavaScript files. This affects only the output files; source files remain unminified.
 - `minify_html_tags_to_preserve`: A string containing a single HTML tag name to preserve and not minify. Useful for things like code snippets using the `<pre>` tag. Ommit entirely if not needed.
+- `bulk_redirects_filename`: A string containing your preferred filename for the bulk redirects file. Defaults to `_bulk_redirects` if not specified.
+- `redirection_template_filename`: A string containing your preferred filename for the redirection template file. Defaults to `_redirection_template.html` if not specified.
 
 ### Using a Custom Launcher Script
 
@@ -81,6 +83,8 @@ $minify_html = true;
 $minify_css = true;
 $minify_js = true;
 $minify_html_tags_to_preserve = array();
+$bulk_redirects_filename = "_bulk_redirects";
+$redirection_template_filename = "_redirection_template.html";
 
 include __DIR__ . DIRECTORY_SEPARATOR . 'StaticPHP.php';
 
@@ -94,7 +98,9 @@ new StaticPHP
     $minify_html,
     $minify_css,
     $minify_js,
-    $minify_html_tags_to_preserve
+    $minify_html_tags_to_preserve,
+    $bulk_redirects_filename,
+    $redirection_template_filename
 );
 ```
 

@@ -6,17 +6,17 @@ To get StaticPHP for your own project, you have two options.
 
 The StaticPHP Launcher makes it easy to save your build configuration and stay up to date with the latest developments in StaticPHP.
 
-[StaticPHP-Launcher.php on GitHub](http://raw.githubusercontent.com/StaticPHP/StaticPHP/master/StaticPHP-Launcher.php)
+[StaticPHP-Launcher.php on GitHub](https://redirect.dah5.me.uk/github/staticphp/StaticPHP-Launcher)
 
-[StaticPHP-Launcher.php on GitLab](http://gitlab.com/StaticPHP/StaticPHP/-/raw/master/StaticPHP-Launcher.php)
+[StaticPHP-Launcher.php on GitLab](https://redirect.dah5.me.uk/gitlab/staticphp/StaticPHP-Launcher)
 
 ## Download StaticPHP
 
 Alternatively, you can download the actual StaticPHP class file for use with the commandline or your own launcher script.
 
-[StaticPHP.php on GitHub](http://raw.githubusercontent.com/StaticPHP/StaticPHP/master/StaticPHP.php)
+[StaticPHP.php on GitHub](https://redirect.dah5.me.uk/github/staticphp/StaticPHP)
 
-[StaticPHP.php on GitLab](http://gitlab.com/StaticPHP/StaticPHP/-/raw/master/StaticPHP.php)
+[StaticPHP.php on GitLab](https://redirect.dah5.me.uk/gitlab/staticphp/StaticPHP)
 
 ___
 

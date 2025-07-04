@@ -11,6 +11,8 @@ class StaticPHP
 	private $minify_css = false;
 	private $minify_js = false;
 	private $minify_html_tags_to_preserve = array();
+	private $bulk_redirects_filename = "_bulk_redirects";
+	private $redirection_template_filename = "_redirection_template.html";
 
 	public function __construct()
 	{
@@ -51,6 +53,10 @@ class StaticPHP
 				$this->minify_html_tags_to_preserve = $configurable_options[ 'minify_html_tags_to_preserve' ];
 			if( isset( $configurable_options[ 'minify_html_tags_to_preserve' ] ) && is_string( $configurable_options[ 'minify_html_tags_to_preserve' ] ) && trim( $configurable_options[ 'minify_html_tags_to_preserve' ] ) != "" )
 				$this->minify_html_tags_to_preserve = array( trim( $configurable_options[ 'minify_html_tags_to_preserve' ] ) );
+			if( isset( $configurable_options[ 'bulk_redirects_filename' ] ) && is_string( $configurable_options[ 'bulk_redirects_filename' ] ) && trim( $configurable_options[ 'bulk_redirects_filename' ] ) != "" )
+				$this->bulk_redirects_filename = trim( $configurable_options[ 'bulk_redirects_filename' ] );
+			if( isset( $configurable_options[ 'redirection_template_filename' ] ) && is_string( $configurable_options[ 'redirection_template_filename' ] ) && trim( $configurable_options[ 'redirection_template_filename' ] ) != "" )
+				$this->redirection_template_filename = trim( $configurable_options[ 'redirection_template_filename' ] );
 		}
 		// End Array Method
 
@@ -85,10 +91,17 @@ class StaticPHP
 			$this->minify_html_tags_to_preserve = trim( $args[ 8 ] );
 		if( count( $args ) >= 9 && is_string( $args[ 8 ] ) && trim( $args[ 8 ] ) != "" )
 			$this->minify_html_tags_to_preserve = array( trim( $args[ 8 ] ) );
+		if( count( $args ) >= 10 && is_string( $args[ 9 ] ) && trim( $args[ 9 ] ) != "" )
+			$this->bulk_redirects_filename = trim( $args[ 9 ] );
+		if( count( $args ) >= 11 && is_string( $args[ 10 ] ) && trim( $args[ 10 ] ) != "" )
+			$this->redirection_template_filename = trim( $args[ 10 ] );
 		// End Arguments Method
 
 		// Ensure Special Files are Ignored
-		$this->items_to_ignore[] = "_redirection_template.html";
+		if( ! in_array( $this->bulk_redirects_filename, $this->items_to_ignore ) )
+			$this->items_to_ignore[] = $this->bulk_redirects_filename;
+		if( ! in_array( $this->redirection_template_filename, $this->items_to_ignore ) )
+			$this->items_to_ignore[] = $this->redirection_template_filename;
 
 		$this->source_dir_path = str_replace( [ "\\", "/" ], DIRECTORY_SEPARATOR, $this->source_dir_path );
 		$this->output_dir_path = str_replace( [ "\\", "/" ], DIRECTORY_SEPARATOR, $this->output_dir_path );
@@ -203,7 +216,7 @@ class StaticPHP
 				continue;
 			}
 
-			if( is_file( $path_to_input_directory_item ) && $directory_item == "_bulk_redirects" )
+			if( is_file( $path_to_input_directory_item ) && $directory_item == $this->bulk_redirects_filename )
 			{
 				$redirect_list_file_contents = file_get_contents( $path_to_input_directory_item );
 				$redirect_list_file_contents = $this->convertEndOfLines( $redirect_list_file_contents );
@@ -753,9 +766,9 @@ class StaticPHP
 
 HTML;
 
-		if( is_file( $this->source_dir_path . DIRECTORY_SEPARATOR . '_redirection_template.html' ) )
+		if( is_file( $this->source_dir_path . DIRECTORY_SEPARATOR . $this->redirection_template_filename ) )
 		{
-			$htmlContent = file_get_contents( $this->source_dir_path . DIRECTORY_SEPARATOR . '_redirection_template.html' );
+			$htmlContent = file_get_contents( $this->source_dir_path . DIRECTORY_SEPARATOR . $this->redirection_template_filename );
 			$htmlContent = str_replace( [ '$newDestination', '$oldPath' ], [ $newDestination, $oldPath ], $htmlContent );
 		}
 		
@@ -1147,6 +1160,12 @@ if( isset( $argv[ 0 ] ) && basename( $argv[ 0 ] ) == basename( __FILE__ ) )
 			$configurable_options[ 'minify_css' ] = $argv[ 6 ];
 		if( isset( $argv[ 7 ] ) )
 			$configurable_options[ 'minify_js' ] = $argv[ 7 ];
+		if( isset( $argv[ 8 ] ) )
+			$configurable_options[ 'minify_html_tags_to_preserve' ] = $argv[ 8 ];
+		if( isset( $argv[ 9 ] ) )
+			$configurable_options[ 'bulk_redirects_filename' ] = $argv[ 9 ];
+		if( isset( $argv[ 10 ] ) )
+			$configurable_options[ 'redirection_template_filename' ] = $argv[ 10 ];
 	}
 	
 	new StaticPHP( $configurable_options );

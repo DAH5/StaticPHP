@@ -48,6 +48,13 @@ You can choose which types of files to minify (`HTML`, `CSS`, `JS`) in your buil
 
 **HTML Tag Preservation:** Sometimes you may want certain tags, like `<pre>`, to remain unminified so that things like code snippets remain intact. Simply set `minify_html_tags_to_preserve` to an array of tag names in your StaticPHP configuration.
 
+## Bulk Redirects Filename
+
+StaticPHP supports defining all your redirection rules in a single file. By default, this filename is `_bulk_redirects`, but you can change it by setting the configuration option `bulk_redirects_filename` to your preferred filename as a string.
+
+## Redirection Template Filename
+StaticPHP outputs a simple HTML file whenever a redirection takes place. You can change the contents of the redirection file by specifying a filename for a template to use instead. Set the configuration option `redirection_template_filename` to your chosen filename relative to your source directory.
+
 ---
 
 For more information on customising StaticPHP, be sure to check out the [Getting Started](Getting-Started.md) guide. For options available to be overridden on a per-file basis, refer to the [MetaData](MetaData.md) guide.

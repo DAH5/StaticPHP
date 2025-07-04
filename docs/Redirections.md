@@ -8,6 +8,8 @@ StaticPHP supports URL redirection, allowing you to automatically redirect users
 
 The **Bulk Redirects** feature in StaticPHP enables you to manage multiple redirects easily using a single file: `_bulk_redirects`. This file allows you to list all your redirection rules in one place, making it simple to update or add new redirects without modifying your codebase.
 
+You can customise the name of this file in your build configuration by setting `bulk_redirects_filename` to your preferred filename.
+
 ### Format
 
 Each redirection rule should be placed on a new line. The format consists of two parts:
@@ -92,6 +94,8 @@ In this example, the `<meta>` tag tells the browser to wait 0 seconds before red
 ### Custom Redirection Template
 
 You can specify your own HTML structure for the redirection page by creating a file in the root of your source directory called `_redirection_template.html`. If this file exists, StaticPHP will use its contents when generating the redirection page, giving you full control over the design, layout, and even the timing of the redirection.
+
+You can customise the name of this file in your build configuration by setting `redirection_template_filename` to your preferred filename.
 
 This customization allows you to adjust the timing of the redirection, should you want to delay it for any reason (e.g., to display a message to users before they are redirected).
 
