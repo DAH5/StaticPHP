@@ -98,8 +98,6 @@ class StaticPHP
 		// End Arguments Method
 
 		// Ensure Special Files are Ignored
-		if( ! in_array( $this->bulk_redirects_filename, $this->items_to_ignore ) )
-			$this->items_to_ignore[] = $this->bulk_redirects_filename;
 		if( ! in_array( $this->redirection_template_filename, $this->items_to_ignore ) )
 			$this->items_to_ignore[] = $this->redirection_template_filename;
 
