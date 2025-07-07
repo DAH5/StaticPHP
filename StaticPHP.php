@@ -1126,6 +1126,19 @@ HTML;
 				$lines[ $l ] = htmlentities( $lines[ $l ] );
 				continue;
 			}
+			
+			$inlineCodeTokens = array();
+			$inlineCodeIndex = 0;
+			
+			if( preg_match_all( "/\`([^\`]+)\`/", $lines[ $l ], $matches ) )
+			{
+				foreach( $matches[ 1 ] as $match )
+				{
+					$token = '{{INLINECODE' . $inlineCodeIndex++ . '}}';
+					$inlineCodeTokens[ $token ] = '<code>' . htmlentities( $match ) . '</code>';
+					$lines[ $l ] = str_replace( "`$match`", $token, $lines[ $l ] );
+				}
+			}
 
 			if( preg_match( "/(#{6}\s)(.*)/", $lines[ $l ] ) )
 			{
@@ -1168,7 +1181,6 @@ HTML;
 			$lines[ $l ] = preg_replace( "/\*([^\*]+)\*/", "<em>$1</em>", $lines[ $l ] );
 			$lines[ $l ] = preg_replace( "/\_([^\_]+)\_/", "<em>$1</em>", $lines[ $l ] );
 			$lines[ $l ] = preg_replace( "/\~\~([^\~]+)\~\~/", "<del>$1</del>", $lines[ $l ] );
-			$lines[ $l ] = preg_replace( "/\`([^\`]+)\`/", "<code>$1</code>", $lines[ $l ] );
 
 			$lines[ $l ] = preg_replace( "/\!\[([^\]]+)\]\(([^\"\)]+) \"([^\"]+)\"\)/", "<img src=\"$2\" alt=\"$1\" title=\"$3\">", $lines[ $l ] );
 			$lines[ $l ] = preg_replace( "/\!\[([^\]]+)\]\(([^\"\)]+)\)/", "<img src=\"$2\" alt=\"$1\">", $lines[ $l ] );
@@ -1199,6 +1211,11 @@ HTML;
 				$lines[ $l ] = "<p>" . $lines[ $l ];
 
 			$lines[ $l ] .= "</p>";
+			
+			if( ! empty( $inlineCodeTokens ) )
+			{
+				$lines[ $l ] = str_replace( array_keys( $inlineCodeTokens ), array_values( $inlineCodeTokens ), $lines[ $l ] );
+			}
 		}
 
 		$html = implode( PHP_EOL, $lines );
