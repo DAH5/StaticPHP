@@ -482,6 +482,20 @@ class StaticPHP
 			$this->processOutputPath( $path_to_output_file, $metadata, $friendly_urls, $custom_output_path );
 		else
 			$this->processOutputPath( $path_to_output_file, $metadata, $friendly_urls );
+
+		if( isset( $metadata[ 'remote_content_url' ] ) && isset( $metadata[ 'remote_content_placeholder' ] ) )
+		{
+			$remote_content_url = $metadata[ 'remote_content_url' ];
+			$remote_content_placeholder = $metadata[ 'remote_content_placeholder' ];
+			$remote_content_from_url = $this->getRemoteContentFromURL( $remote_content_url );
+			$remote_content_from_url = $this->convertEndOfLines( $remote_content_from_url );
+
+			if( substr( $remote_content_url, -3 ) == ".md" )
+			{
+				$remote_markdown_content = $this->convertMarkdownToHTML( $remote_content_from_url, $metadata, $friendly_urls, $path_to_output_file );
+				$input_file_contents = str_replace( $remote_content_placeholder, $remote_markdown_content, $input_file_contents );
+			}
+		}
 		
 		if( isset( $metadata[ 'redirect' ] ) )
 		{
@@ -532,6 +546,20 @@ class StaticPHP
 		else
 			$this->processOutputPath( $path_to_output_file, $metadata, $friendly_urls );
 		
+		if( isset( $metadata[ 'remote_content_url' ] ) && isset( $metadata[ 'remote_content_placeholder' ] ) )
+		{
+			$remote_content_url = $metadata[ 'remote_content_url' ];
+			$remote_content_placeholder = $metadata[ 'remote_content_placeholder' ];
+			$remote_content_from_url = $this->getRemoteContentFromURL( $remote_content_url );
+			$remote_content_from_url = $this->convertEndOfLines( $remote_content_from_url );
+
+			if( substr( $remote_content_url, -3 ) == ".md" )
+			{
+				$remote_markdown_content = $this->convertMarkdownToHTML( $remote_content_from_url, $metadata, $friendly_urls, $path_to_output_file );
+				$input_file_contents = str_replace( $remote_content_placeholder, $remote_markdown_content, $input_file_contents );
+			}
+		}
+		
 		if( isset( $metadata[ 'redirect' ] ) )
 		{
 			// File Path, Old Path, New Destination
@@ -561,112 +589,10 @@ class StaticPHP
 
 		$this->processMetaData( $this->metaDataDelimiter, $input_file_contents, $metadata, $input_file_contents );
 
-		$input_file_lines = explode( PHP_EOL, $input_file_contents );
+		if( ! isset( $friendly_urls ) )
+			$friendly_urls = $this->friendly_urls;
 
-		$isCodeblock = false;
-		$codeblockName = "";
-
-		for( $ifl = 0; $ifl < count( $input_file_lines ); $ifl++ )
-		{
-			$input_file_lines[ $ifl ] = trim( $input_file_lines[ $ifl ] );
-
-			if( preg_match( "/(#{6}\s)(.*)/", $input_file_lines[ $ifl ] ) )
-			{
-				$input_file_lines[ $ifl ] = preg_replace( "/(#{6}\s)(.*)/", "<h6>$2</h6>", $input_file_lines[ $ifl ] );
-				continue;
-			}
-			
-			if( preg_match( "/(#{5}\s)(.*)/", $input_file_lines[ $ifl ] ) )
-			{
-				$input_file_lines[ $ifl ] = preg_replace( "/(#{5}\s)(.*)/", "<h5>$2</h5>", $input_file_lines[ $ifl ] );
-				continue;
-			}
-
-			if( preg_match( "/(#{4}\s)(.*)/", $input_file_lines[ $ifl ] ) )
-			{
-				$input_file_lines[ $ifl ] = preg_replace( "/(#{4}\s)(.*)/", "<h4>$2</h4>", $input_file_lines[ $ifl ] );
-				continue;
-			}
-
-			if( preg_match( "/(#{3}\s)(.*)/", $input_file_lines[ $ifl ] ) )
-			{
-				$input_file_lines[ $ifl ] = preg_replace( "/(#{3}\s)(.*)/", "<h3>$2</h3>", $input_file_lines[ $ifl ] );
-				continue;
-			}
-
-			if( preg_match( "/(#{2}\s)(.*)/", $input_file_lines[ $ifl ] ) )
-			{
-				$input_file_lines[ $ifl ] = preg_replace( "/(#{2}\s)(.*)/", "<h2>$2</h2>", $input_file_lines[ $ifl ] );
-				continue;
-			}
-
-			if( preg_match( "/(#{1}\s)(.*)/", $input_file_lines[ $ifl ] ) )
-			{
-				$input_file_lines[ $ifl ] = preg_replace( "/(#{1}\s)(.*)/", "<h1>$2</h1>", $input_file_lines[ $ifl ] );
-				continue;
-			}
-
-			if( preg_match( "/\`\`\`(.*)/", $input_file_lines[ $ifl ], $matches ) )
-			{
-				if( ! $isCodeblock )
-				{
-					$codeblockName = $matches[ 1 ];
-					$isCodeblock = true;
-					$input_file_lines[ $ifl ] = preg_replace( "/\`\`\`(.*)/", "<code class=\"codeblock-" . $codeblockName . "\"><pre>", $input_file_lines[ $ifl ] );
-					continue;
-				}
-			}
-
-			if( preg_match( "/\`\`\`/", $input_file_lines[ $ifl ], $matches ) )
-			{
-				if( $isCodeblock )
-				{
-					$input_file_lines[ $ifl ] = preg_replace( "/\`\`\`/", "</pre></code>", $input_file_lines[ $ifl ] );
-
-					if( $this->minify_html )
-						$input_file_lines[ $ifl -1 ] = substr( $input_file_lines[ $ifl -1 ], 0, -4 );
-				}
-
-				$isCodeblock = false;
-
-				continue;
-			}
-
-			if( $isCodeblock )
-			{
-				$input_file_lines[ $ifl ] = htmlentities( $input_file_lines[ $ifl ] );
-
-				if( $this->minify_html )
-					$input_file_lines[ $ifl ] .= "<br>";
-
-				continue;
-			}
-
-			$input_file_lines[ $ifl ] = preg_replace( "/\*\*([^\*]+)\*\*/", "<strong>$1</strong>", $input_file_lines[ $ifl ] );
-			$input_file_lines[ $ifl ] = preg_replace( "/\_\_([^\_]+)\_\_/", "<strong>$1</strong>", $input_file_lines[ $ifl ] );
-			$input_file_lines[ $ifl ] = preg_replace( "/\*([^\*]+)\*/", "<em>$1</em>", $input_file_lines[ $ifl ] );
-			$input_file_lines[ $ifl ] = preg_replace( "/\_([^\_]+)\_/", "<em>$1</em>", $input_file_lines[ $ifl ] );
-			$input_file_lines[ $ifl ] = preg_replace( "/\~\~([^\~]+)\~\~/", "<del>$1</del>", $input_file_lines[ $ifl ] );
-			$input_file_lines[ $ifl ] = preg_replace( "/\`([^\`]+)\`/", "<code>$1</code>", $input_file_lines[ $ifl ] );
-
-			$input_file_lines[ $ifl ] = preg_replace( "/\!\[([^\]]+)\]\(([^\"\)]+) \"([^\"]+)\"\)/", "<img src=\"$2\" alt=\"$1\" title=\"$3\">", $input_file_lines[ $ifl ] );
-			$input_file_lines[ $ifl ] = preg_replace( "/\!\[([^\]]+)\]\(([^\"\)]+)\)/", "<img src=\"$2\" alt=\"$1\">", $input_file_lines[ $ifl ] );
-
-			$input_file_lines[ $ifl ] = preg_replace( "/\[([^\]]+)\]\(([^\"\)]+) \"([^\"]+)\"\)/", "<a href=\"$2\" title=\"$3\">$1</a>", $input_file_lines[ $ifl ] );
-			$input_file_lines[ $ifl ] = preg_replace( "/\[([^\]]+)\]\(([^\"\)]+)\)/", "<a href=\"$2\">$1</a>", $input_file_lines[ $ifl ] );
-
-			if( $input_file_lines[ $ifl ] == "" )
-				continue;
-
-			if( $ifl != 0 && $input_file_lines[ $ifl -1 ] != "" )
-				$input_file_lines[ $ifl -1 ] = substr( $input_file_lines[ $ifl -1 ], 0, -4 ) . "<br>";
-			elseif( $ifl == 0 || ( $ifl != 0 && $input_file_lines[ $ifl -1 ] == "" ) )
-				$input_file_lines[ $ifl ] = "<p>" . $input_file_lines[ $ifl ];
-
-			$input_file_lines[ $ifl ] .= "</p>";
-		}
-
-		$input_file_contents = join( PHP_EOL, $input_file_lines );
+		$input_file_contents = $this->convertMarkdownToHTML( $input_file_contents, $metadata, $friendly_urls );
 
 		$layout_contents = "";
 		$this->processLayoutMetaData( $metadata, $this->metaDataDelimiter, $layout_contents );
@@ -678,11 +604,22 @@ class StaticPHP
 
 		$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $input_file_contents, $metadata, $input_file_contents );
 
-		if( ! isset( $friendly_urls ) )
-			$friendly_urls = $this->friendly_urls;
-
 		$this->processOutputPath( $path_to_output_file, $metadata, $friendly_urls );
 		
+		if( isset( $metadata[ 'remote_content_url' ] ) && isset( $metadata[ 'remote_content_placeholder' ] ) )
+		{
+			$remote_content_url = $metadata[ 'remote_content_url' ];
+			$remote_content_placeholder = $metadata[ 'remote_content_placeholder' ];
+			$remote_content_from_url = $this->getRemoteContentFromURL( $remote_content_url );
+			$remote_content_from_url = $this->convertEndOfLines( $remote_content_from_url );
+
+			if( substr( $remote_content_url, -3 ) == ".md" )
+			{
+				$remote_markdown_content = $this->convertMarkdownToHTML( $remote_content_from_url, $metadata, $friendly_urls, $path_to_output_file );
+				$input_file_contents = str_replace( $remote_content_placeholder, $remote_markdown_content, $input_file_contents );
+			}
+		}
+
 		if( isset( $metadata[ 'redirect' ] ) )
 		{
 			// File Path, Old Path, New Destination
@@ -1129,6 +1066,144 @@ HTML;
 	private function convertEndOfLines( $text )
 	{
 		return preg_replace( "/\r\n|\r|\n/", PHP_EOL, $text );
+	}
+
+	private function getRemoteContentFromURL( String $URL )
+	{
+		echo "Attempting to fetch from remote URL: " . $URL . PHP_EOL;
+
+		$remote_file_headers = @get_headers( $URL );
+
+		if( ! $remote_file_headers && strpos( $remote_file_headers[ 0 ], '200' ) === false )
+		{
+			echo "Unable to fetch from remote URL. Remote content is either unavailable or returned non-200 HTTP code." . PHP_EOL;
+			return "";
+		}
+
+		$remote_content = @file_get_contents( $URL );
+
+		if( $remote_content === false )
+		{
+			echo "Unable to fetch from remote URL. Error: " . error_get_last() . PHP_EOL;
+			return "";
+		}
+
+		return $remote_content;
+	}
+
+	private function convertMarkdownToHTML( String $markdown, array $metadata, bool $friendly_urls, String $path_to_output_file )
+	{
+		$lines = explode( PHP_EOL, $markdown );
+
+		$codeblockName = "";
+		$isCodeblock = false;
+
+		for( $l = 0; $l < count( $lines ); $l++ )
+		{
+			if( preg_match( "/\`\`\`(.*)/", $lines[ $l ], $matches ) )
+			{
+				if( ! $isCodeblock )
+				{
+					$codeblockName = $matches[ 1 ];
+					$isCodeblock = true;
+					$lines[ $l ] = preg_replace( "/\`\`\`(.*)/", "<pre><code class=\"codeblock-" . $codeblockName . "\">", $lines[ $l ] );
+					continue;
+				}
+			}
+
+			if( preg_match( "/\`\`\`/", $lines[ $l ], $matches ) )
+			{
+				if( $isCodeblock )
+				{
+					$lines[ $l ] = preg_replace( "/\`\`\`/", "</code></pre>", $lines[ $l ] );
+					$isCodeblock = false;
+					continue;
+				}
+			}
+
+			if( $isCodeblock )
+			{
+				$lines[ $l ] = htmlentities( $lines[ $l ] );
+				continue;
+			}
+
+			if( preg_match( "/(#{6}\s)(.*)/", $lines[ $l ] ) )
+			{
+				$lines[ $l ] = preg_replace( "/(#{6}\s)(.*)/", "<h6>$2</h6>", $lines[ $l ] );
+				continue;
+			}
+			
+			if( preg_match( "/(#{5}\s)(.*)/", $lines[ $l ] ) )
+			{
+				$lines[ $l ] = preg_replace( "/(#{5}\s)(.*)/", "<h5>$2</h5>", $lines[ $l ] );
+				continue;
+			}
+
+			if( preg_match( "/(#{4}\s)(.*)/", $lines[ $l ] ) )
+			{
+				$lines[ $l ] = preg_replace( "/(#{4}\s)(.*)/", "<h4>$2</h4>", $lines[ $l ] );
+				continue;
+			}
+
+			if( preg_match( "/(#{3}\s)(.*)/", $lines[ $l ] ) )
+			{
+				$lines[ $l ] = preg_replace( "/(#{3}\s)(.*)/", "<h3>$2</h3>", $lines[ $l ] );
+				continue;
+			}
+
+			if( preg_match( "/(#{2}\s)(.*)/", $lines[ $l ] ) )
+			{
+				$lines[ $l ] = preg_replace( "/(#{2}\s)(.*)/", "<h2>$2</h2>", $lines[ $l ] );
+				continue;
+			}
+
+			if( preg_match( "/(#{1}\s)(.*)/", $lines[ $l ] ) )
+			{
+				$lines[ $l ] = preg_replace( "/(#{1}\s)(.*)/", "<h1>$2</h1>", $lines[ $l ] );
+				continue;
+			}
+
+			$lines[ $l ] = preg_replace( "/\*\*([^\*]+)\*\*/", "<strong>$1</strong>", $lines[ $l ] );
+			$lines[ $l ] = preg_replace( "/\_\_([^\_]+)\_\_/", "<strong>$1</strong>", $lines[ $l ] );
+			$lines[ $l ] = preg_replace( "/\*([^\*]+)\*/", "<em>$1</em>", $lines[ $l ] );
+			$lines[ $l ] = preg_replace( "/\_([^\_]+)\_/", "<em>$1</em>", $lines[ $l ] );
+			$lines[ $l ] = preg_replace( "/\~\~([^\~]+)\~\~/", "<del>$1</del>", $lines[ $l ] );
+			$lines[ $l ] = preg_replace( "/\`([^\`]+)\`/", "<code>$1</code>", $lines[ $l ] );
+
+			$lines[ $l ] = preg_replace( "/\!\[([^\]]+)\]\(([^\"\)]+) \"([^\"]+)\"\)/", "<img src=\"$2\" alt=\"$1\" title=\"$3\">", $lines[ $l ] );
+			$lines[ $l ] = preg_replace( "/\!\[([^\]]+)\]\(([^\"\)]+)\)/", "<img src=\"$2\" alt=\"$1\">", $lines[ $l ] );
+
+			if( preg_match( "/\[([^\]]+)\]\(([^\"\)]+) \"([^\"]+)\"\)/", $lines[ $l ], $matches ) )
+			{
+				$text = $matches[ 1 ];
+				$href = $matches[ 2 ];
+				$title = $matches[ 3 ];
+				
+				$lines[ $l ] = preg_replace( "/\[([^\]]+)\]\(([^\"\)]+) \"([^\"]+)\"\)/", "<a href=\"" . $href . "\" title=\"" . $title . "\">" . $text . "</a>", $lines[ $l ] );
+			}
+
+			if( preg_match( "/\[([^\]]+)\]\(([^\"\)]+)\)/", $lines[ $l ], $matches ) )
+			{
+				$text = $matches[ 1 ];
+				$href = $matches[ 2 ];
+
+				$lines[ $l ] = preg_replace( "/\[([^\]]+)\]\(([^\"\)]+)\)/", "<a href=\"" . $href . "\">" . $text . "</a>", $lines[ $l ] );
+			}
+
+			if( $lines[ $l ] == "" )
+				continue;
+
+			if( $l != 0 && $lines[ $l -1 ] != "" )
+				$lines[ $l -1 ] = substr( $lines[ $l -1 ], 0, -4 ) . "<br>";
+			elseif( $l == 0 || ( $l != 0 && $lines[ $l -1 ] == "" ) )
+				$lines[ $l ] = "<p>" . $lines[ $l ];
+
+			$lines[ $l ] .= "</p>";
+		}
+
+		$html = implode( PHP_EOL, $lines );
+
+		return $html;
 	}
 }
 
