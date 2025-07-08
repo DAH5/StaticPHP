@@ -1103,6 +1103,7 @@ HTML;
 		$listStarts = array();
 		$listEnds = array();
 		$inList = false;
+		$endOfList = false;
 
 		// Start of List Detection Code
 		for( $l = 0; $l < count( $lines ); $l++ )
@@ -1204,7 +1205,7 @@ HTML;
 			if( in_array( $l, $listEnds ) )
 			{
 				$lines[ $l ] .= PHP_EOL . '</ul>';
-				$inList = false;
+				$endOfList = true;
 			}
 
 			if( preg_match( "/(#{6}\s)(.*)/", $lines[ $l ] ) )
@@ -1291,6 +1292,12 @@ HTML;
 			if( ! empty( $inlineCodeTokens ) )
 			{
 				$lines[ $l ] = str_replace( array_keys( $inlineCodeTokens ), array_values( $inlineCodeTokens ), $lines[ $l ] );
+			}
+
+			if( $endOfList )
+			{
+				$inList = false;
+				$endOfList = false;
 			}
 		}
 
