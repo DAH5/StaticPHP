@@ -1100,6 +1100,37 @@ HTML;
 		$codeblockName = "";
 		$isCodeblock = false;
 
+		$listStarts = array();
+		$listEnds = array();
+		$inList = false;
+
+		// Start of List Detection Code
+		for( $l = 0; $l < count( $lines ); $l++ )
+		{
+			if( preg_match( "/^\s*[-*+]\s+/", $lines[ $l ] ) )
+			{
+				if( ! $inList )
+				{
+					$listStarts[] = $l;
+					$inList = true;
+				}
+ 			}
+			else
+			{
+				if( $inList )
+				{
+					$listEnds[] = $l - 1;
+					$inList = false;
+				}
+			}
+		}
+
+		if( $inList )
+		{
+			$listEnds[] = $l - 1;
+		}
+		// End of List Detection Code
+
 		for( $l = 0; $l < count( $lines ); $l++ )
 		{
 			if( preg_match( "/\`\`\`(.*)/", $lines[ $l ], $matches ) )
@@ -1142,6 +1173,23 @@ HTML;
 				}
 			}
 
+			if( in_array( $l, $listStarts ) )
+			{
+				$lines[ $l ] = '<ul>' . PHP_EOL;
+				$inList = true;
+			}
+
+			if( preg_match( "/^\s*-\s+(.*)/", $lines[ $l ], $matches ) )
+			{
+				$lines[ $l ] = "<li>" . htmlspecialchars( $matches[ 1 ] ) . "</li>";
+			}
+
+			if( in_array( $l, $listEnds ) )
+			{
+				$lines[ $l ] .= PHP_EOL . '</ul>';
+				$inList = false;
+			}
+
 			if( preg_match( "/(#{6}\s)(.*)/", $lines[ $l ] ) )
 			{
 				$lines[ $l ] = preg_replace( "/(#{6}\s)(.*)/", "<h6>$2</h6>", $lines[ $l ] );
@@ -1178,6 +1226,12 @@ HTML;
 				continue;
 			}
 
+			if( preg_match( "/^\s*(-{3,}|\*{3,}|_{3,})\s*$/", $lines[ $l ] ) )
+			{
+				$lines[ $l ] = preg_replace( "/^\s*(-{3,}|\*{3,}|_{3,})\s*$/", "<hr>", $lines[ $l ] );
+				continue;
+			}
+
 			$lines[ $l ] = preg_replace( "/\*\*([^\*]+)\*\*/", "<strong>$1</strong>", $lines[ $l ] );
 			$lines[ $l ] = preg_replace( "/\_\_([^\_]+)\_\_/", "<strong>$1</strong>", $lines[ $l ] );
 			$lines[ $l ] = preg_replace( "/\*([^\*]+)\*/", "<em>$1</em>", $lines[ $l ] );
@@ -1207,12 +1261,15 @@ HTML;
 			if( $lines[ $l ] == "" )
 				continue;
 
-			if( $l != 0 && $lines[ $l -1 ] != "" )
-				$lines[ $l -1 ] = substr( $lines[ $l -1 ], 0, -4 ) . "<br>";
-			elseif( $l == 0 || ( $l != 0 && $lines[ $l -1 ] == "" ) )
-				$lines[ $l ] = "<p>" . $lines[ $l ];
+			if( ! $inList )
+			{
+				if( $l != 0 && $lines[ $l -1 ] != "" && substr( $lines[ $l -1 ], -4 ) == "</p>" )
+					$lines[ $l -1 ] = substr( $lines[ $l -1 ], 0, -4 ) . "<br>";
+				elseif( $l == 0 || ( $l != 0 && substr( $lines[ $l -1 ], -4 ) != "<br>" ) )
+					$lines[ $l ] = "<p>" . $lines[ $l ];
 
-			$lines[ $l ] .= "</p>";
+				$lines[ $l ] .= "</p>";
+			}
 			
 			if( ! empty( $inlineCodeTokens ) )
 			{
