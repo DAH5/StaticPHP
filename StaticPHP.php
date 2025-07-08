@@ -270,14 +270,16 @@ class StaticPHP
 		$input_contents = $this->convertEndOfLines( $input_contents );
 		
 		$input_lines = explode( PHP_EOL, $input_contents );
+
+		$input_line_count = count( $input_lines );
 		
-		if( count( $input_lines ) > 0 && trim( $input_lines[ 0 ] ) == $delimiter )
+		if( count( $input_lines ) > 1 && trim( $input_lines[ 0 ] ) == $delimiter )
 		{
 			echo "Processing MetaData..." . PHP_EOL . PHP_EOL;
 			
 			unset( $input_lines[ 0 ] );
 			
-			for( $line_number = 1; $line_number <= count( $input_lines ); $line_number++ )
+			for( $line_number = 1; $line_number <= $input_line_count; $line_number++ )
 			{
 				$input_line = trim( $input_lines[ $line_number ] );
 				
