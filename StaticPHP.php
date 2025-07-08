@@ -1139,7 +1139,12 @@ HTML;
 				{
 					$codeblockName = $matches[ 1 ];
 					$isCodeblock = true;
-					$lines[ $l ] = preg_replace( "/\`\`\`(.*)/", "<pre><code class=\"codeblock-" . $codeblockName . "\">", $lines[ $l ] );
+
+					if( $codeblockName )
+						$lines[ $l ] = preg_replace( "/\`\`\`(.*)/", "<pre><code class=\"codeblock-" . $codeblockName . "\">", $lines[ $l ] );
+					else
+						$lines[ $l ] = preg_replace( "/\`\`\`(.*)/", "<pre><code class=\"codeblock\">", $lines[ $l ] );
+
 					continue;
 				}
 			}
@@ -1163,13 +1168,25 @@ HTML;
 			$inlineCodeTokens = array();
 			$inlineCodeIndex = 0;
 			
-			if( preg_match_all( "/\`([^\`]+)\`/", $lines[ $l ], $matches ) )
+			// First: match and replace double backtick inline code blocks (e.g. `` ` ``)
+			if( preg_match_all( '/``(.*?)``/', $lines[$l], $matches, PREG_SET_ORDER ) )
 			{
-				foreach( $matches[ 1 ] as $match )
+				foreach( $matches as $match )
 				{
 					$token = '{{INLINECODE' . $inlineCodeIndex++ . '}}';
-					$inlineCodeTokens[ $token ] = '<code>' . htmlentities( $match ) . '</code>';
-					$lines[ $l ] = str_replace( "`$match`", $token, $lines[ $l ] );
+					$inlineCodeTokens[$token] = '<code>' . htmlentities( $match[ 1 ] ) . '</code>';
+					$lines[ $l ] = str_replace( $match[ 0 ], $token, $lines[ $l ] );
+				}
+			}
+
+			// Second: match and replace single backtick inline code blocks (e.g. `code`)
+			if( preg_match_all( '/`(.*?)`/', $lines[$l], $matches, PREG_SET_ORDER ) )
+			{
+				foreach( $matches as $match )
+				{
+					$token = '{{INLINECODE' . $inlineCodeIndex++ . '}}';
+					$inlineCodeTokens[ $token ] = '<code>' . htmlentities( $match[ 1 ] ) . '</code>';
+					$lines[$l] = str_replace( $match[ 0 ], $token, $lines[ $l ] );
 				}
 			}
 
