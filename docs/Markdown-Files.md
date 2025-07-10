@@ -76,6 +76,16 @@ You can write lines of code inline by surrounding the content with single backti
 
 And you can write multiline codeblocks using three backticks on the start and end lines. You can optionally supply a name after the opening backticks.
 
+### Unordered Lists
+
+You can write unordered lists by putting each list item on its own line, with each item starting with a hyphen.
+
+```
+- Item 1
+- Item 2
+- Another List Item
+- Yet Another List Item
+```
 
 ## MetaData Support
 
