@@ -13,6 +13,7 @@ class StaticPHP
 	private $minify_html_tags_to_preserve = array();
 	private $bulk_redirects_filename = "_bulk_redirects";
 	private $redirection_template_filename = "_redirection_template.html";
+	private $minify_css_inplace = true;
 
 	public function __construct()
 	{
@@ -57,6 +58,8 @@ class StaticPHP
 				$this->bulk_redirects_filename = trim( $configurable_options[ 'bulk_redirects_filename' ] );
 			if( isset( $configurable_options[ 'redirection_template_filename' ] ) && is_string( $configurable_options[ 'redirection_template_filename' ] ) && trim( $configurable_options[ 'redirection_template_filename' ] ) != "" )
 				$this->redirection_template_filename = trim( $configurable_options[ 'redirection_template_filename' ] );
+			if( isset( $configurable_options[ 'minify_css_inplace' ] ) && is_bool( $configurable_options[ 'minify_css_inplace' ] ) )
+				$this->minify_css_inplace = $configurable_options[ 'minify_css_inplace' ];
 		}
 		// End Array Method
 
@@ -95,6 +98,8 @@ class StaticPHP
 			$this->bulk_redirects_filename = trim( $args[ 9 ] );
 		if( count( $args ) >= 11 && is_string( $args[ 10 ] ) && trim( $args[ 10 ] ) != "" )
 			$this->redirection_template_filename = trim( $args[ 10 ] );
+		if( count( $args ) >= 12 && is_bool( $args[ 11 ] ) )
+			$this->minify_css_inplace = $args[ 11 ];
 		// End Arguments Method
 
 		// Ensure Special Files are Ignored
@@ -230,12 +235,20 @@ class StaticPHP
 					echo "Minifying CSS File: " . $path_to_input_directory_item . PHP_EOL;
 
 					$css = file_get_contents( $path_to_input_directory_item );
+					
+					$css_minified = $this->minifyCSS( $css );
 
-					$css = $this->minifyCSS( $css );
-
-					$this->outputFile( $path_to_output_directory_item, $css );
-
-					continue;
+					if( $this->minify_css_inplace )
+					{
+						$this->outputFile( $path_to_output_directory_item, $css_minified );
+						continue;
+					}
+					else
+					{
+						$this->outputFile( str_replace( ".css", ".min.css", $path_to_output_directory_item ), $css_minified );
+						$this->outputFile( $path_to_output_directory_item, $css );
+						continue;
+					}
 				}
 
 				if( $this->minify_js === true && substr( $path_to_input_directory_item, -3 ) == ".js" )
@@ -1339,6 +1352,8 @@ if( isset( $argv[ 0 ] ) && basename( $argv[ 0 ] ) == basename( __FILE__ ) )
 			$configurable_options[ 'bulk_redirects_filename' ] = $argv[ 9 ];
 		if( isset( $argv[ 10 ] ) )
 			$configurable_options[ 'redirection_template_filename' ] = $argv[ 10 ];
+		if( isset( $args[ 11 ] ) )
+			$configurable_options[ 'minify_css_inplace' ];
 	}
 	
 	new StaticPHP( $configurable_options );

@@ -116,6 +116,17 @@ $configurable_options[ 'redirection_template_filename' ] = "_redirection_templat
 
 
 /*
+	Minify CSS In-Place
+
+	Whether to output CSS files in minified form only, or to output both original and minified versions (minified ending in .min.css).
+
+	Set to true to just minify CSS files, or false to output both versions. Defaults to true.
+*/
+
+$configurable_options[ 'minify_css_inplace' ] = true;
+
+
+/*
 	Auto Update
 
 	Downloads the latest version of StaticPHP upon every run to ensure you always run the latest version.
