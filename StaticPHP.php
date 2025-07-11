@@ -1272,22 +1272,18 @@ HTML;
 			$lines[ $l ] = preg_replace( "/\!\[([^\]]+)\]\(([^\"\)]+) \"([^\"]+)\"\)/", "<img src=\"$2\" alt=\"$1\" title=\"$3\">", $lines[ $l ] );
 			$lines[ $l ] = preg_replace( "/\!\[([^\]]+)\]\(([^\"\)]+)\)/", "<img src=\"$2\" alt=\"$1\">", $lines[ $l ] );
 
-			if( preg_match( "/\[([^\]]+)\]\(([^\"\)]+) \"([^\"]+)\"\)/", $lines[ $l ], $matches ) )
-			{
-				$text = $matches[ 1 ];
-				$href = $matches[ 2 ];
-				$title = $matches[ 3 ];
-				
-				$lines[ $l ] = preg_replace( "/\[([^\]]+)\]\(([^\"\)]+) \"([^\"]+)\"\)/", "<a href=\"" . $href . "\" title=\"" . $title . "\">" . $text . "</a>", $lines[ $l ] );
-			}
-
-			if( preg_match( "/\[([^\]]+)\]\(([^\"\)]+)\)/", $lines[ $l ], $matches ) )
-			{
-				$text = $matches[ 1 ];
-				$href = $matches[ 2 ];
-
-				$lines[ $l ] = preg_replace( "/\[([^\]]+)\]\(([^\"\)]+)\)/", "<a href=\"" . $href . "\">" . $text . "</a>", $lines[ $l ] );
-			}
+			$lines[ $l ] = preg_replace_callback
+			(
+				'/\[([^\]]+)\]\(([^)\s]+)(?:\s+"([^"]+)")?\)/',
+				function( $matches )
+				{
+					$text  = $matches[ 1 ];
+					$href  = $matches[ 2 ];
+					$title = isset( $matches[ 3 ] ) ? ' title="' . htmlspecialchars( $matches[ 3 ] ) . '"' : '';
+					return '<a href="' . htmlspecialchars( $href ) . '"' . $title . '>' . htmlspecialchars( $text ) . '</a>';
+				},
+				$lines[ $l ]
+			);
 
 			if( $lines[ $l ] == "" )
 				continue;
