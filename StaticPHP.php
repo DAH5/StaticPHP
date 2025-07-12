@@ -1155,7 +1155,7 @@ HTML;
 					$isCodeblock = true;
 
 					if( $codeblockName )
-						$lines[ $l ] = preg_replace( "/\`\`\`(.*)/", "<pre><code class=\"codeblock-" . $codeblockName . "\">", $lines[ $l ] );
+						$lines[ $l ] = preg_replace( "/\`\`\`(.*)/", "<pre><code class=\"codeblock codeblock-" . $codeblockName . "\">", $lines[ $l ] );
 					else
 						$lines[ $l ] = preg_replace( "/\`\`\`(.*)/", "<pre><code class=\"codeblock\">", $lines[ $l ] );
 
