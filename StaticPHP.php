@@ -1204,15 +1204,15 @@ HTML;
 				}
 			}
 
-			if( in_array( $l, $listStarts ) )
-			{
-				$lines[ $l ] = '<ul>' . PHP_EOL;
-				$inList = true;
-			}
-
 			if( preg_match( "/^\s*-\s+(.*)/", $lines[ $l ], $matches ) )
 			{
 				$lines[ $l ] = "<li>" . htmlspecialchars( $matches[ 1 ] ) . "</li>";
+			}
+
+			if( in_array( $l, $listStarts ) )
+			{
+				$lines[ $l ] = '<ul>' . PHP_EOL . $lines[ $l ];
+				$inList = true;
 			}
 
 			if( in_array( $l, $listEnds ) )
