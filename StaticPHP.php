@@ -1280,7 +1280,12 @@ HTML;
 					$text  = $matches[ 1 ];
 					$href  = $matches[ 2 ];
 					$title = isset( $matches[ 3 ] ) ? ' title="' . htmlspecialchars( $matches[ 3 ] ) . '"' : '';
-					return '<a href="' . htmlspecialchars( $href ) . '"' . $title . '>' . htmlspecialchars( $text ) . '</a>';
+					$external = false;
+
+					if( strpos( $href, '://' ) )
+						$external = true;
+
+					return '<a href="' . htmlspecialchars( $href ) . '"' . $title . ( $external ? ' target="_blank" rel="noopener noreferrer"' : '' ) . '>' . htmlspecialchars( $text ) . '</a>';
 				},
 				$lines[ $l ]
 			);
