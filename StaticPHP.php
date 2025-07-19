@@ -14,6 +14,7 @@ class StaticPHP
 	private $bulk_redirects_filename = "_bulk_redirects";
 	private $redirection_template_filename = "_redirection_template.html";
 	private $minify_css_inplace = true;
+	private $items_to_passthrough = array();
 
 	public function __construct()
 	{
@@ -60,6 +61,10 @@ class StaticPHP
 				$this->redirection_template_filename = trim( $configurable_options[ 'redirection_template_filename' ] );
 			if( isset( $configurable_options[ 'minify_css_inplace' ] ) && is_bool( $configurable_options[ 'minify_css_inplace' ] ) )
 				$this->minify_css_inplace = $configurable_options[ 'minify_css_inplace' ];
+			if( isset( $configurable_options[ 'items_to_passthrough' ] ) && is_array( $configurable_options[ 'items_to_passthrough' ] ) && count( $configurable_options[ 'items_to_passthrough' ] ) > 0 )
+				$this->items_to_passthrough = $configurable_options[ 'items_to_passthrough' ];
+			if( isset( $configurable_options[ 'items_to_passthrough' ] ) && is_string( $configurable_options[ 'items_to_passthrough' ] ) && trim( $configurable_options[ 'items_to_passthrough' ] ) != "" )
+				$this->items_to_passthrough = array( $configurable_options[ 'items_to_passthrough' ] );
 		}
 		// End Array Method
 
@@ -100,6 +105,8 @@ class StaticPHP
 			$this->redirection_template_filename = trim( $args[ 10 ] );
 		if( count( $args ) >= 12 && is_bool( $args[ 11 ] ) )
 			$this->minify_css_inplace = $args[ 11 ];
+		if( count( $args ) >= 13 && is_array( $args[ 12 ] ) )
+			$this->items_to_passthrough = $args[ 12 ];
 		// End Arguments Method
 
 		// Ensure Special Files are Ignored
@@ -187,6 +194,19 @@ class StaticPHP
 					if( $item_to_ignore != "" && strpos( $directory_item, $item_to_ignore ) !== false )
 					{
 						echo "Ignoring Directory Item: " . $path_to_input_directory_item . PHP_EOL;
+						continue( 2 );
+					}
+				}
+			}
+
+			if( is_array( $this->items_to_passthrough ) )
+			{
+				foreach( $this->items_to_passthrough as $item_to_passthrough )
+				{
+					if( $item_to_passthrough != "" && strpos( $directory_item, $item_to_passthrough ) !== false )
+					{
+						echo "Passing Through Directory Item: " . $path_to_input_directory_item . PHP_EOL;
+						copy( $path_to_input_directory_item, $path_to_output_directory_item );
 						continue( 2 );
 					}
 				}
@@ -1386,6 +1406,8 @@ function parse_cli_args_into_configurable_options( array $args )
 		$configurable_options[ 'redirection_template_filename' ] = $args[ 10 ];
 	if( isset( $args[ 11 ] ) )
 		$configurable_options[ 'minify_css_inplace' ] = $args[ 11 ];
+	if( isset( $args[ 12 ] ) )
+		$configurable_options[ 'items_to_passthrough' ] = $args[ 12 ];
 
 	return $configurable_options;
 }

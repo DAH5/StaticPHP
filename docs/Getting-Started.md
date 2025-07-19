@@ -63,6 +63,7 @@ Firstly, you need to know what each configurable option does when defined via co
 - `bulk_redirects_filename`: A string containing your preferred filename for the bulk redirects file. Defaults to `_bulk_redirects` if not specified.
 - `redirection_template_filename`: A string containing your preferred filename for the redirection template file. Defaults to `_redirection_template.html` if not specified.
 - `minify_css_inplace`: A boolean indicating whether StaticPHP should minify CSS files in-place or separate. Defaults to `true`. See the [Customisation](Customisation.md) page for more details.
+- `items_to_passthrough`: Any string of text in file paths that StaticPHP should passthrough instead of process. Useful if you want a PHP script to remain intact and exist in the output.
 
 To define these options via command line arguments, make sure you have a terminal open with the path set to your project directory/folder.
 
@@ -99,7 +100,7 @@ You simply define the above options in order by just specifying their value in t
 ##### Syntax of Positional Arguments Command
 
 ```bash
-php StaticPHP.php source_dir_path output_dir_path items_to_ignore friendly_urls metadata_delimiter minify_html minify_css minify_js minify_html_tags_to_preserve bulk_redirects_filename redirection_template_filename minify_css_inplace
+php StaticPHP.php source_dir_path output_dir_path items_to_ignore friendly_urls metadata_delimiter minify_html minify_css minify_js minify_html_tags_to_preserve bulk_redirects_filename redirection_template_filename minify_css_inplace items_to_passthrough
 ```
 
 ##### Example Positional Arguments Command
@@ -131,6 +132,7 @@ $minify_html_tags_to_preserve = array();
 $bulk_redirects_filename = "_bulk_redirects";
 $redirection_template_filename = "_redirection_template.html";
 $minify_css_inplace = true;
+$items_to_passthrough = array();
 
 include __DIR__ . DIRECTORY_SEPARATOR . 'StaticPHP.php';
 
@@ -147,7 +149,8 @@ new StaticPHP
     $minify_html_tags_to_preserve,
     $bulk_redirects_filename,
     $redirection_template_filename,
-    $minify_css_inplace
+    $minify_css_inplace,
+    $items_to_passthrough
 );
 ```
 

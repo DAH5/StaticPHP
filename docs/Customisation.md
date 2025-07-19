@@ -65,6 +65,10 @@ StaticPHP supports defining all your redirection rules in a single file. By defa
 ## Redirection Template Filename
 StaticPHP outputs a simple HTML file whenever a redirection takes place. You can change the contents of the redirection file by specifying a filename for a template to use instead. Set the configuration option `redirection_template_filename` to your chosen filename relative to your source directory.
 
+## Passing Through Items
+
+Sometimes you may wish a PHP script or file that StaticPHP would normally process, remain in the output as-is. To make this happen, you can define the configurable option `items_to_passthrough` to an array of strings that will be matched against file paths. These can be partial matches, such as `_passthrough` as a value will match any path that has `_passthrough` as part of it.
+
 ---
 
 For more information on customising StaticPHP, be sure to check out the [Getting Started](Getting-Started.md) guide. For options available to be overridden on a per-file basis, refer to the [MetaData](MetaData.md) guide.
