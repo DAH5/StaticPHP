@@ -1321,40 +1321,85 @@ HTML;
 	}
 }
 
+function detect_and_parse_cli_args_into_configurable_options( array $args )
+{
+	if( count( $args ) < 1 )
+		return;
+
+	// Detect Named Flags
+	if( substr( $args[ 0 ], 0, 2 ) == "--" )
+	{
+		return parse_cli_named_flags_into_configurable_options( $args );
+	}
+
+	// Otherwise assume normal cli args
+	return parse_cli_args_into_configurable_options( $args );
+}
+
+function parse_cli_named_flags_into_configurable_options( array $args )
+{
+	$configurable_options = array();
+
+	foreach( $args as $arg )
+	{
+		if( substr( $arg, 0, 2 ) == "--" )
+			$arg = substr( $arg, 2 );
+		if( ! strpos( $arg, "=" ) )
+			continue;
+
+		$arg = explode( "=", $arg, 2 );
+
+		$configurable_key = $arg[ 0 ];
+		$configurable_value = $arg[ 1 ];
+
+		$configurable_options[ $configurable_key ] = $configurable_value;
+	}
+
+	return $configurable_options;
+}
+
+function parse_cli_args_into_configurable_options( array $args )
+{
+	$configurable_options = array();
+
+	if( isset( $args[ 0 ] ) )
+		$configurable_options[ 'source_dir_path' ] = $args[ 0 ];
+	if( isset( $args[ 1 ] ) )
+		$configurable_options[ 'output_dir_path' ] = $args[ 1 ];
+	if( isset( $args[ 2 ] ) )
+		$configurable_options[ 'items_to_ignore' ] = $args[ 2 ];
+	if( isset( $args[ 3 ] ) )
+		$configurable_options[ 'friendly_urls '] = $args[ 3 ];
+	if( isset( $args[ 4 ] ) )
+		$configurable_options[ 'metadata_delimiter' ] = $args[ 4 ];
+	if( isset( $args[ 5 ] ) )
+		$configurable_options[ 'minify_html' ] = $args[ 5 ];
+	if( isset( $args[ 6 ] ) )
+		$configurable_options[ 'minify_css' ] = $args[ 6 ];
+	if( isset( $args[ 7 ] ) )
+		$configurable_options[ 'minify_js' ] = $args[ 7 ];
+	if( isset( $args[ 8 ] ) )
+		$configurable_options[ 'minify_html_tags_to_preserve' ] = $args[ 8 ];
+	if( isset( $args[ 9 ] ) )
+		$configurable_options[ 'bulk_redirects_filename' ] = $args[ 9 ];
+	if( isset( $args[ 10 ] ) )
+		$configurable_options[ 'redirection_template_filename' ] = $args[ 10 ];
+	if( isset( $args[ 11 ] ) )
+		$configurable_options[ 'minify_css_inplace' ] = $args[ 11 ];
+
+	return $configurable_options;
+}
+
 if( isset( $argv[ 0 ] ) && basename( $argv[ 0 ] ) == basename( __FILE__ ) )
 {
 	$configurable_options = array();
 	
 	unset( $argv[ 0 ] );
 	$argv = array_values( $argv );
-	$argc--;
 	
-	if( $argc >= 0 )
+	if( count( $argv ) >= 1 )
 	{
-		if( isset( $argv[ 0 ] ) )
-			$configurable_options[ 'source_dir_path' ] = $argv[ 0 ];
-		if( isset( $argv[ 1 ] ) )
-			$configurable_options[ 'output_dir_path' ] = $argv[ 1 ];
-		if( isset( $argv[ 2 ] ) )
-			$configurable_options[ 'items_to_ignore' ] = $argv[ 2 ];
-		if( isset( $argv[ 3 ] ) )
-			$configurable_options[ 'friendly_urls '] = $argv[ 3 ];
-		if( isset( $argv[ 4 ] ) )
-			$configurable_options[ 'metadata_delimiter' ] = $argv[ 4 ];
-		if( isset( $argv[ 5 ] ) )
-			$configurable_options[ 'minify_html' ] = $argv[ 5 ];
-		if( isset( $argv[ 6 ] ) )
-			$configurable_options[ 'minify_css' ] = $argv[ 6 ];
-		if( isset( $argv[ 7 ] ) )
-			$configurable_options[ 'minify_js' ] = $argv[ 7 ];
-		if( isset( $argv[ 8 ] ) )
-			$configurable_options[ 'minify_html_tags_to_preserve' ] = $argv[ 8 ];
-		if( isset( $argv[ 9 ] ) )
-			$configurable_options[ 'bulk_redirects_filename' ] = $argv[ 9 ];
-		if( isset( $argv[ 10 ] ) )
-			$configurable_options[ 'redirection_template_filename' ] = $argv[ 10 ];
-		if( isset( $args[ 11 ] ) )
-			$configurable_options[ 'minify_css_inplace' ];
+		$configurable_options = detect_and_parse_cli_args_into_configurable_options( $argv );
 	}
 	
 	new StaticPHP( $configurable_options );

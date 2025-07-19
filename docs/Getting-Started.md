@@ -47,13 +47,9 @@ For those using the StaticPHP file itself, there are two options:
 
 ### Using Command-Line Parameters
 
-This method is less recommended due to the potential difficulty in remembering configuration options. However, for those who prefer this approach, here’s how to do it:
+This method is less recommended due to the potential difficulty in remembering configuration options. However, for those who prefer this approach, there are two ways to do it.
 
-Open a terminal in your project directory/folder, and type the following command, adjusting the parameters to suit your project:
-
-```bash
-php StaticPHP.php source_dir_path output_dir_path items_to_ignore friendly_urls metadata_delimiter minify_html minify_css minify_js minify_html_tags_to_preserve bulk_redirects_filename redirection_template_filename minify_css_inplace
-```
+Firstly, you need to know what each configurable option does when defined via command line arguments.
 
 - `source_dir_path`: The path relative to StaticPHP that contains your source input files.
 - `output_dir_path`: The path relative to StaticPHP that contains your generated output files.
@@ -67,6 +63,54 @@ php StaticPHP.php source_dir_path output_dir_path items_to_ignore friendly_urls 
 - `bulk_redirects_filename`: A string containing your preferred filename for the bulk redirects file. Defaults to `_bulk_redirects` if not specified.
 - `redirection_template_filename`: A string containing your preferred filename for the redirection template file. Defaults to `_redirection_template.html` if not specified.
 - `minify_css_inplace`: A boolean indicating whether StaticPHP should minify CSS files in-place or separate. Defaults to `true`. See the [Customisation](Customisation.md) page for more details.
+
+To define these options via command line arguments, make sure you have a terminal open with the path set to your project directory/folder.
+
+Now choose which command line argument method you wish to use.
+
+#### Named Flags Method
+
+Named flags make it easy to define your configurable options via command line arguments in absolutely any order you choose. They look like `--configurable-option=value`.
+
+Form a command similar to the following...
+
+```bash
+php StaticPHP.php [named-flags]
+```
+
+Now replace `[named-flags]` with your list of flags in the format of `--configurable-option=value`, where `configurable-option` is the name from the above list, and `value` being what you want to set that configurable option to.
+
+##### Example Named Flags Command
+
+Here is an example command usage where the source directory path and output directory paths are defined...
+
+```bash
+php StaticPHP.php --source_dir_path=src --output_dir_path=public
+```
+
+You can define as many or as few options as you want. There are safe defaults set inside StaticPHP which will be used for any configurable option you have not specified your own value for.
+
+#### Positional Arguments Method
+
+This is the very first way StaticPHP came into operation, and was used mostly for internal testing. It's recommeended to be used due to its complexity and how messy it is, but it has been left intact incase it is needed during testing, or someone else wishes to use it too.
+
+You simply define the above options in order by just specifying their value in the order they appear.
+
+##### Syntax of Positional Arguments Command
+
+```bash
+php StaticPHP.php source_dir_path output_dir_path items_to_ignore friendly_urls metadata_delimiter minify_html minify_css minify_js minify_html_tags_to_preserve bulk_redirects_filename redirection_template_filename minify_css_inplace
+```
+
+##### Example Positional Arguments Command
+
+Here is an example command usage where the source directory path and output directory paths are defined...
+
+```bash
+php StaticPHP.php src public
+```
+
+You can define as many or as few options as you want. There are safe defaults set inside StaticPHP which will be used for any configurable option you have not specified your own value for.
 
 ### Using a Custom Launcher Script
 
