@@ -127,6 +127,19 @@ $configurable_options[ 'minify_css_inplace' ] = true;
 
 
 /*
+	Items To Passthrough
+
+	Sometimes you may wish a PHP script or file that StaticPHP would normally process, remain in the output as-is.
+
+	Set items_to_passthrough to an array of path parts you wish to match against, where StaticPHP will simply copy them over to output.
+
+	Defaults to an empty array.
+*/
+
+$configurable_options[ 'items_to_passthrough' ] = array();
+
+
+/*
 	Auto Update
 
 	Downloads the latest version of StaticPHP upon every run to ensure you always run the latest version.
