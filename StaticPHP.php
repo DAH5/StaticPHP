@@ -15,6 +15,10 @@ class StaticPHP
 	private $redirection_template_filename = "_redirection_template.html";
 	private $minify_css_inplace = true;
 	private $items_to_passthrough = array();
+	private $test_mode = false;
+	private $test_mode_input_dir_path = "tests/input";
+	private $test_mode_expected_dir_path = "tests/expected";
+	private $test_mode_output_dir_path = "tests/output";
 
 	public function __construct()
 	{
@@ -65,6 +69,14 @@ class StaticPHP
 				$this->items_to_passthrough = $configurable_options[ 'items_to_passthrough' ];
 			if( isset( $configurable_options[ 'items_to_passthrough' ] ) && is_string( $configurable_options[ 'items_to_passthrough' ] ) && trim( $configurable_options[ 'items_to_passthrough' ] ) != "" )
 				$this->items_to_passthrough = array( $configurable_options[ 'items_to_passthrough' ] );
+			if( isset( $configurable_options[ 'test_mode' ] ) && is_bool( $configurable_options[ 'test_mode' ] ) )
+				$this->test_mode = $configurable_options[ 'test_mode' ];
+			if( isset( $configurable_options[ 'test_mode_input_dir_path' ] ) && is_string( $configurable_options[ 'test_mode_input_dir_path' ] ) && trim( $configurable_options[ 'test_mode_input_dir_path' ] ) != "" )
+				$this->test_mode_input_dir_path = $configurable_options[ 'test_mode_input_dir_path' ];
+			if( isset( $configurable_options[ 'test_mode_expected_dir_path' ] ) && is_string( $configurable_options[ 'test_mode_expected_dir_path' ] ) && trim( $configurable_options[ 'test_mode_expected_dir_path' ] ) != "" )
+				$this->test_mode_expected_dir_path = $configurable_options[ 'test_mode_expected_dir_path' ];
+			if( isset( $configurable_options[ 'test_mode_output_dir_path' ] ) && is_string( $configurable_options[ 'test_mode_output_dir_path' ] ) && trim( $configurable_options[ 'test_mode_output_dir_path' ] ) != "" )
+				$this->test_mode_output_dir_path = $configurable_options[ 'test_mode_output_dir_path' ];
 		}
 		// End Array Method
 
@@ -115,6 +127,18 @@ class StaticPHP
 
 		$this->source_dir_path = str_replace( [ "\\", "/" ], DIRECTORY_SEPARATOR, $this->source_dir_path );
 		$this->output_dir_path = str_replace( [ "\\", "/" ], DIRECTORY_SEPARATOR, $this->output_dir_path );
+
+		if( $this->test_mode )
+		{
+			$this->test_mode_input_dir_path = str_replace( [ "\\", "/" ], DIRECTORY_SEPARATOR, $this->test_mode_input_dir_path );
+			$this->test_mode_expected_dir_path = str_replace( [ "\\", "/" ], DIRECTORY_SEPARATOR, $this->test_mode_expected_dir_path );
+			$this->test_mode_output_dir_path = str_replace( [ "\\", "/" ], DIRECTORY_SEPARATOR, $this->test_mode_output_dir_path );
+
+			$this->emptyDirectory( $this->test_mode_output_dir_path );
+			$this->processDirectory( $this->test_mode_input_dir_path, $this->test_mode_output_dir_path );
+
+			exit;
+		}
 
 		$this->emptyDirectory( $this->output_dir_path );
 		$this->processDirectory( $this->source_dir_path, $this->output_dir_path );
@@ -541,6 +565,12 @@ class StaticPHP
 		
 		if( $this->minify_html === true )
 			$input_file_contents = $this->minifyHTML( $input_file_contents );
+
+		if( $this->test_mode )
+		{
+			$this->prepareForTest( $input_file_contents, $path_to_output_file );
+			return;
+		}
 		
 		$this->outputFile( $path_to_output_file, $input_file_contents );
 	}
@@ -604,6 +634,12 @@ class StaticPHP
 		
 		if( $this->minify_html === true )
 			$input_file_contents = $this->minifyHTML( $input_file_contents );
+
+		if( $this->test_mode )
+		{
+			$this->prepareForTest( $input_file_contents, $path_to_output_file );
+			return;
+		}
 		
 		$this->outputFile( $path_to_output_file, $input_file_contents );
 	}
@@ -650,7 +686,7 @@ class StaticPHP
 
 			if( substr( $remote_content_url, -3 ) == ".md" )
 			{
-				$remote_markdown_content = $this->convertMarkdownToHTML( $remote_content_from_url, $metadata, $friendly_urls, $path_to_output_file );
+				$remote_markdown_content = $this->convertMarkdownToHTML( $remote_content_from_url, $metadata, $friendly_urls );
 				$input_file_contents = str_replace( $remote_content_placeholder, $remote_markdown_content, $input_file_contents );
 			}
 		}
@@ -665,6 +701,12 @@ class StaticPHP
 		if( $this->minify_html === true )
 			$input_file_contents = $this->minifyHTML( $input_file_contents );
 		
+		if( $this->test_mode )
+		{
+			$this->prepareForTest( $input_file_contents, $path_to_output_file );
+			return;
+		}
+
 		$this->outputFile( $path_to_output_file, $input_file_contents );
 	}
 
@@ -736,14 +778,23 @@ class StaticPHP
 
 HTML;
 
-		if( is_file( $this->source_dir_path . DIRECTORY_SEPARATOR . $this->redirection_template_filename ) )
+		$source_dir_path = $this->test_mode ? $this->test_mode_input_dir_path : $this->source_dir_path;
+
+		if( is_file( $source_dir_path . DIRECTORY_SEPARATOR . $this->redirection_template_filename ) )
 		{
-			$htmlContent = file_get_contents( $this->source_dir_path . DIRECTORY_SEPARATOR . $this->redirection_template_filename );
+			$htmlContent = file_get_contents( $source_dir_path . DIRECTORY_SEPARATOR . $this->redirection_template_filename );
 			$htmlContent = str_replace( [ '$newDestination', '$oldPath' ], [ $newDestination, $oldPath ], $htmlContent );
 		}
 		
 		if( $this->minify_html === true )
 			$htmlContent = $this->minifyHTML( $htmlContent );
+
+		if( $this->test_mode )
+		{
+			$this->prepareForTest( $htmlContent, $filePath );
+			echo "Redirect generated for $oldPath to $newDestination\n";
+			return;
+		}
 
 		$this->outputFile( $filePath, $htmlContent );
 		
@@ -832,9 +883,16 @@ HTML;
 				}
 			}
 			
-			echo "Outputting JSON File: " . $jsonFilePath . PHP_EOL;
-			file_put_contents( $jsonFilePath, json_encode( $output ) );
-			echo "JSON File Complete.\n";
+			if( $this->test_mode )
+			{
+				$this->prepareForTest( json_encode( $output ), $jsonFilePath );
+			}
+			else
+			{
+				echo "Outputting JSON File: " . $jsonFilePath . PHP_EOL;
+				file_put_contents( $jsonFilePath, json_encode( $output ) );
+				echo "JSON File Complete.\n";
+			}
 		}
 
 		$output_str = "";
@@ -979,8 +1037,14 @@ HTML;
 			$this->processMetaData( $this->metaDataDelimiter, $fileContents, $metadata, $fileContents );
 
 			unset( $metadata['staticphp_path'] );
+
+			$source_dir_path = $this->test_mode ? $this->test_mode_input_dir_path : $this->source_dir_path;
+			$output_dir_path = $this->test_mode ? $this->test_mode_output_dir_path : $this->output_dir_path;
+
+			$source_dir_path = str_replace( [ "\\", "/" ], DIRECTORY_SEPARATOR, $source_dir_path );
+			$output_dir_path = str_replace( [ "\\", "/" ], DIRECTORY_SEPARATOR, $output_dir_path );
 			
-			$fileOutputPath = str_replace( [ $this->source_dir_path, ".php" ], [ $this->output_dir_path, ".html" ], $dirItemPath );
+			$fileOutputPath = str_replace( [ $source_dir_path, ".php" ], [ $output_dir_path, ".html" ], $dirItemPath );
 
 			$fileURI = $fileOutputPath;
 
@@ -989,9 +1053,7 @@ HTML;
 			
 			$this->processOutputPath( $fileURI, $metadata, $friendly_urls );
 
-			$fileURI = str_replace( $this->output_dir_path, "", $fileURI );
-
-			$fileURI = str_replace( [ "\\", "index.html" ], [ "/", "" ], $fileURI );
+			$fileURI = str_replace( [ $output_dir_path, "index.html", "\\" ], [ "", "", "/" ], $fileURI );
 			
 			$metadata[ 'uri' ] = $fileURI;
 			
@@ -1126,7 +1188,7 @@ HTML;
 		return $remote_content;
 	}
 
-	private function convertMarkdownToHTML( String $markdown, array $metadata, bool $friendly_urls, String $path_to_output_file )
+	private function convertMarkdownToHTML( String $markdown, array $metadata, bool $friendly_urls )
 	{
 		$lines = explode( PHP_EOL, $markdown );
 
@@ -1338,6 +1400,62 @@ HTML;
 		$html = implode( PHP_EOL, $lines );
 
 		return $html;
+	}
+
+	private function prepareForTest( $input_contents, $path_to_output_file )
+	{
+		echo "Preparing for test..." . PHP_EOL;
+
+		$path_to_output_file = str_replace( [ "\\", "/" ], DIRECTORY_SEPARATOR, $path_to_output_file );
+
+		if( substr( $path_to_output_file, 0, strlen( __DIR__ . DIRECTORY_SEPARATOR ) ) != __DIR__ . DIRECTORY_SEPARATOR )
+			$path_to_output_file = __DIR__ . DIRECTORY_SEPARATOR . $path_to_output_file;
+		
+		echo "Path to Output file: " . $path_to_output_file . PHP_EOL;
+
+		$expected_file_path = str_replace( $this->test_mode_output_dir_path, $this->test_mode_expected_dir_path, $path_to_output_file );
+
+		if( ! is_file( $expected_file_path ) )
+		{
+			echo "ERROR: Expected file missing: " . $expected_file_path . PHP_EOL;
+			$this->runTest( $input_contents, "", $path_to_output_file );
+			return;
+		}
+		
+		$expected_file_contents = file_get_contents( $expected_file_path );
+
+		$this->runTest( $input_contents, $expected_file_contents, $path_to_output_file );
+	}
+
+	private function runTest( $input_contents, $expected_contents, $path_to_output_file )
+	{
+		echo "Running test..." . PHP_EOL;
+
+		$path_to_output_dir = substr( $path_to_output_file, 0, strrpos( $path_to_output_file, DIRECTORY_SEPARATOR ) + 1 );
+
+		$output_file_name = substr( $path_to_output_file, strrpos( $path_to_output_file, DIRECTORY_SEPARATOR ) + 1 );
+
+		if( $input_contents != $expected_contents )
+		{
+			if( $expected_contents == "" )
+				$path_to_output_file = $path_to_output_dir . "UNKNOWN." . $output_file_name;
+			else
+				$path_to_output_file = $path_to_output_dir . "FAILED." . $output_file_name;
+
+			$this->outputFile( $path_to_output_file, $input_contents );
+
+			echo "TEST FAILED: Check output file!" . PHP_EOL;
+
+			return;
+		}
+
+		$path_to_output_file = $path_to_output_dir . "PASSED." . $output_file_name;
+
+		$this->outputFile( $path_to_output_file, $input_contents );
+
+		echo "TEST PASSED!" . PHP_EOL;
+
+		return;
 	}
 }
 

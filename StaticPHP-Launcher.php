@@ -140,6 +140,50 @@ $configurable_options[ 'items_to_passthrough' ] = array();
 
 
 /*
+	Test Mode
+
+	Set to true to perform tests instead of normal processing.
+
+	Defaults to false.
+*/
+
+$configurable_options[ 'test_mode' ] = true;
+
+
+/*
+	Test Mode Input Directory Path
+
+	Directory path containing test input files.
+
+	Defaults to "tests/input".
+*/
+
+$configurable_options[ 'test_mode_input_dir_path' ] = __DIR__ . DIRECTORY_SEPARATOR . "tests" . DIRECTORY_SEPARATOR . "input";
+
+
+/*
+	Test Mode Expected Directory Path
+
+	Directory path containing test expected output files.
+
+	Defaults to "tests/expected".
+*/
+
+$configurable_options[ 'test_mode_expected_dir_path' ] = __DIR__ . DIRECTORY_SEPARATOR . "tests" . DIRECTORY_SEPARATOR . "expected";
+
+
+/*
+	Test Mode Output Directory Path
+
+	Directory path for where to output test results.
+
+	Defaults to "tests/output".
+*/
+
+$configurable_options[ 'test_mode_output_dir_path' ] = __DIR__ . DIRECTORY_SEPARATOR . "tests" . DIRECTORY_SEPARATOR . "output";
+
+
+/*
 	Auto Update
 
 	Downloads the latest version of StaticPHP upon every run to ensure you always run the latest version.

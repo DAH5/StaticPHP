@@ -1,0 +1,55 @@
+# Testing
+
+With how big StaticPHP is now in terms of features and how much it is used in other projects, it is now time that testing is taken seriously.
+
+It is very easy to work on one feature, and not know that another feature has become broken. Testing helps detect when this has happened, so hopefully it can be fixed before it actually breaks a project.
+
+## How does it work?
+
+You need to enable `test_mode` in your configuration. This is limited to launcher setups, so those that use the command line methods won't be able to perform tests, at least for now.
+
+```php
+// Set test mode to true. Default value is false.
+$configurable_options[ 'test_mode' ] = true;
+```
+
+You then need to create three directories for the test: `input`, `expected`, and `output`. The names of these can be configured. For neatness, it is recommended you place these within a parent folder, e.g. `tests`.
+
+Define these in your launcher configuration.
+
+```php
+// Input Directory for Testing
+$configurable_options[ 'test_mode_input_dir_path' ] = __DIR__ . DIRECTORY_SEPARATOR . "tests" . DIRECTORY_SEPARATOR . "input";
+
+// Expected Directory for Testing
+$configurable_options[ 'test_mode_expected_dir_path' ] = __DIR__ . DIRECTORY_SEPARATOR . "tests" . DIRECTORY_SEPARATOR . "expected";
+
+// Output Directory for Testing
+$configurable_options[ 'test_mode_output_dir_path' ] = __DIR__ . DIRECTORY_SEPARATOR . "tests" . DIRECTORY_SEPARATOR . "output";
+```
+
+### Input Directory
+
+The input directory is where you put the tests you want to perform, as if you were putting that feature in your actual source code.
+
+### Expected Directory
+
+Put files in here that should appear in output with the expected names, structure, and contents.
+
+### Output Directory
+
+StaticPHP will generate files for this directory based on the input directory, and prefix their names with `SUCCESS` when the generated output matches the expected output, `FAILED` when the generated output differs from the expected, and `UNKNOWN` when an expected file cannot be found.
+
+## Performing the Tests
+
+You just run your launcher file as normal, and StaticPHP will take care of the rest.
+
+```bash
+php StaticPHP-Launcher.php
+```
+
+At a glance, you will notice which tests have succeeded and which ones have failed, and which ones are unknown, just by examining the files in your output directory.
+
+## Conclusion
+
+Hopefully you have fun testing StaticPHP's features to help keep them working as expected.
