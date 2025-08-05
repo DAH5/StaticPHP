@@ -227,15 +227,15 @@ class StaticPHP
 			{
 				foreach( $this->items_to_passthrough as $item_to_passthrough )
 				{
-					if( $item_to_passthrough != "" && strpos( $directory_item, $item_to_passthrough ) !== false )
+					if( $item_to_passthrough != "" && strpos( $path_to_input_directory_item, $item_to_passthrough ) !== false && is_file( $path_to_input_directory_item ) )
 					{
-						echo "Passing Through Directory Item: " . $path_to_input_directory_item . PHP_EOL;
+						echo "Passing Through File: " . $path_to_input_directory_item . PHP_EOL;
 						copy( $path_to_input_directory_item, $path_to_output_directory_item );
 						continue( 2 );
 					}
 				}
 			}
-			
+
 			if( is_dir( $path_to_input_directory_item ) )
 			{
 				$this->processDirectory( $path_to_input_directory_item, $path_to_output_directory_item );
@@ -1434,6 +1434,10 @@ HTML;
 		$path_to_output_dir = substr( $path_to_output_file, 0, strrpos( $path_to_output_file, DIRECTORY_SEPARATOR ) + 1 );
 
 		$output_file_name = substr( $path_to_output_file, strrpos( $path_to_output_file, DIRECTORY_SEPARATOR ) + 1 );
+
+		$input_contents = $this->convertEndOfLines( $input_contents );
+
+		$expected_contents = $this->convertEndOfLines( $expected_contents );
 
 		if( $input_contents != $expected_contents )
 		{
