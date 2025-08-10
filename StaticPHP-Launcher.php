@@ -147,7 +147,7 @@ $configurable_options[ 'items_to_passthrough' ] = array();
 	Defaults to false.
 */
 
-$configurable_options[ 'test_mode' ] = true;
+$configurable_options[ 'test_mode' ] = false;
 
 
 /*
