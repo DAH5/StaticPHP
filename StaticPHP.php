@@ -417,13 +417,19 @@ class StaticPHP
 	
 	private function processContentPlaceHolder( array $metadata, string &$file_contents, string $layout_contents )
 	{
-		// Check for a content placeholder defined in metadata (usually layout metadata).
-		if( isset( $metadata['content_placeholder'] ) && trim( $metadata['content_placeholder'] ) )
+		// Check for no layout content and return early.
+		if( ! $layout_contents )
+			return;
+
+		// Set a safe default content placeholder if a custom one has not been set.
+		if( ! isset( $metadata[ 'content_placeholder' ] ) || ! trim( $metadata[ 'content_placeholder' ] ) )
 		{
-			echo "Replacing content placeholder with page content...\n";
-			// Update current page content with the layout content, replacing the placeholder with the content of current page.
-			$file_contents = str_replace( trim( $metadata['content_placeholder'] ), $file_contents, $layout_contents );
+			$metadata[ 'content_placeholder' ] = "{{ content }}";
 		}
+
+		// Update current page content with the layout content, replacing the placeholder with the content of current page, and log the action.
+		echo "Replacing content placeholder with page content..." . PHP_EOL;
+		$file_contents = str_replace( trim( $metadata['content_placeholder'] ), $file_contents, $layout_contents );
 	}
 	
 	private function processTemporaryFile( string $path_to_file, string &$file_contents, array $metadata )
