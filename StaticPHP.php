@@ -19,6 +19,12 @@ class StaticPHP
 	private $test_mode_input_dir_path = "tests/input";
 	private $test_mode_expected_dir_path = "tests/expected";
 	private $test_mode_output_dir_path = "tests/output";
+	private $test_mode_output_results_file = true;
+	private $test_mode_results_file_path = "tests/output/results.html";
+
+	private $tests_successful = array();
+	private $tests_unknown = array();
+	private $tests_failed = array();
 
 	public function __construct()
 	{
@@ -77,6 +83,10 @@ class StaticPHP
 				$this->test_mode_expected_dir_path = $configurable_options[ 'test_mode_expected_dir_path' ];
 			if( isset( $configurable_options[ 'test_mode_output_dir_path' ] ) && is_string( $configurable_options[ 'test_mode_output_dir_path' ] ) && trim( $configurable_options[ 'test_mode_output_dir_path' ] ) != "" )
 				$this->test_mode_output_dir_path = $configurable_options[ 'test_mode_output_dir_path' ];
+			if( isset( $configurable_options[ 'test_mode_output_results_file' ] ) && is_bool( $configurable_options[ 'test_mode_output_results_file' ] ) )
+				$this->test_mode_output_results_file = $configurable_options[ 'test_mode_output_results_file' ];
+			if( isset( $configurable_options[ 'test_mode_results_file_path' ] ) && is_string( $configurable_options[ 'test_mode_results_file_path' ] ) && trim( $configurable_options[ 'test_mode_results_file_path' ] ) != "" )
+				$this->test_mode_results_file_path = $configurable_options[ 'test_mode_results_file_path' ];
 		}
 		// End Array Method
 
@@ -136,6 +146,64 @@ class StaticPHP
 
 			$this->emptyDirectory( $this->test_mode_output_dir_path );
 			$this->processDirectory( $this->test_mode_input_dir_path, $this->test_mode_output_dir_path );
+
+			echo "Test results: " . count( $this->tests_successful ) . " successful, " . count( $this->tests_failed ) . " failed, " . count( $this->tests_unknown ) . " unknown." . PHP_EOL . PHP_EOL;
+
+			if( isset( $this->test_mode_results_file_path ) && $this->test_mode_results_file_path && $this->test_mode_output_results_file )
+			{
+				$successful_results = implode( "<br>" . PHP_EOL, $this->tests_successful );
+				$failed_results = implode( "<br>" . PHP_EOL, $this->tests_failed );
+				$unknown_results = implode( "<br>" . PHP_EOL, $this->tests_unknown );
+
+				$successful_results_count = count( $this->tests_successful );
+				$failed_results_count = count( $this->tests_failed );
+				$unknow_results_count = count( $this->tests_unknown );
+
+				$resultsHTML = <<<HTML
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+		<title>StaticPHP Test Results</title>
+
+		<style type="text/css">
+			*, *::before, *::after { box-sizing: border-box; }
+			html, body { font-family: system-ui, sans-serif; font-size: 1rem; background-color: #eee; color: #333; }
+			.container { max-width: 1200px; margin-left: auto; margin-right: auto; padding: 1rem; }
+			@media ( prefers-color-scheme: dark )
+			{
+				html, body { background-color: #111; color: #ddd; }
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="container">
+			<h1>StaticPHP Test Results</h1>
+
+			<hr>
+
+			<h2 style="color: green;">$successful_results_count Successful</h2>
+			
+			$successful_results
+
+			<h2 style="color: red;">$failed_results_count Failed</h2>
+			
+			$failed_results
+
+			<h2 style="color: gray;">$unknow_results_count Unknown</h2>
+			
+			$unknown_results
+		</div>
+	</body>
+</html>
+
+HTML;
+
+				$this->outputFile( $this->test_mode_results_file_path, $resultsHTML );
+			}
 
 			exit;
 		}
@@ -1496,9 +1564,15 @@ HTML;
 		if( $input_contents != $expected_contents )
 		{
 			if( $expected_contents == "" )
+			{
 				$path_to_output_file = $path_to_output_dir . "UNKNOWN." . $output_file_name;
+				$this->tests_unknown[] = $path_to_output_file;
+			}
 			else
+			{
 				$path_to_output_file = $path_to_output_dir . "FAILED." . $output_file_name;
+				$this->tests_failed[] = $path_to_output_file;
+			}
 
 			$this->outputFile( $path_to_output_file, $input_contents );
 
@@ -1508,6 +1582,7 @@ HTML;
 		}
 
 		$path_to_output_file = $path_to_output_dir . "PASSED." . $output_file_name;
+		$this->tests_successful[] = $path_to_output_file;
 
 		$this->outputFile( $path_to_output_file, $input_contents );
 
