@@ -394,25 +394,27 @@ class StaticPHP
 	
 	private function processLayoutMetaData( array &$metadata, string $metaDataDelimiter, string &$layout_contents )
 	{
-		// Check if a base layout path is defined in metadata.
-		if( isset( $metadata['layout'] ) )
-		{
-			// Get full path to layout file assuming it is relative to StaticPHP.
-			$layout_path = __DIR__ . DIRECTORY_SEPARATOR . $metadata['layout'];
-			
-			if( $layout_path && is_file( $layout_path ) )
-			{
-				echo "Processing layout file: " . $layout_path . PHP_EOL;
-				
-				// Get contents of base layout file.
-				$layout_contents = file_get_contents( $layout_path );
-				// Get layout metadata.
-				$layout_metadata = array();
-				$this->processMetaData( $metaDataDelimiter, $layout_contents, $layout_metadata, $layout_contents );
-				// Update metadata with a merged version of the layout metadata and the current metadata, giving priority to current where conflicting keys exist.
-				$metadata = array_merge( $layout_metadata, $metadata );
-			}
-		}
+		if( ! isset( $metadata[ 'layout' ] ) )
+			return;
+		if( ! is_string( $metadata[ 'layout' ] ) )
+			return;
+		if( strlen( $metadata[ 'layout' ] ) <= 0 )
+			return;
+
+		$base_layout_path = __DIR__ . DIRECTORY_SEPARATOR . $metadata[ 'layout' ];
+
+		if( ! is_file( $base_layout_path ) )
+			return;
+
+		echo "Processing layout file: " . $base_layout_path . PHP_EOL;
+		
+		$layout_contents = file_get_contents( $base_layout_path );
+
+		$layout_metadata = array();
+
+		$this->processMetaData( $metaDataDelimiter, $layout_contents, $layout_metadata, $layout_contents );
+		
+		$metadata = array_merge( $layout_metadata, $metadata );
 	}
 	
 	private function processContentPlaceHolder( array $metadata, string &$file_contents, string $layout_contents )
@@ -493,15 +495,61 @@ class StaticPHP
 			$path_to_output_file = substr( $path_to_output_file, 0, -5 ) . DIRECTORY_SEPARATOR . "index.html";
 		}
 	}
-	
+
 	private function outputFile( string $path_to_file, string $file_contents )
 	{
-		echo "Outputting File: "  . $path_to_file . PHP_EOL;
+		echo "Outputting File: " . $path_to_file . PHP_EOL;
+
+		$dir = dirname( $path_to_file );
+
+		// 1) Ensure the output directory exists
+		if( $dir !== '' && ! is_dir( $dir ) )
+		{
+			if( ! @mkdir( $dir, 0775, true ) )
+			{
+				echo "✗ Could not create directory: '" . $dir . "'. Check permissions/ownership and available disk space." . PHP_EOL;
+				return;
+			}
+
+			// Best effort permission set (ignore failure)
+			@chmod( $dir, 0775 );
+		}
+
+		// 2) Open the file for writing (binary mode avoids newline surprises on Windows)
+		$fp = @fopen( $path_to_file, 'wb' );
 		
-		@chmod( $path_to_file, 0755 );
-		$open_file_for_writing = fopen( $path_to_file, "w" );
-		fputs( $open_file_for_writing, $file_contents, strlen( $file_contents ) );
-		fclose( $open_file_for_writing );
+		if( $fp === false )
+		{
+			echo "✗ Could not open file for writing: '" . $path_to_file . "'. Verify path, permissions, and that the parent directory is writable." . PHP_EOL;
+			return;
+		}
+
+		// 3) Write the contents robustly
+		$total = strlen( $file_contents );
+		$written = 0;
+
+		// Handle large strings by writing in chunks
+		while( $written < $total )
+		{
+			$chunk = substr( $file_contents, $written, 1_048_576 ); // 1 MB chunks
+			$n = @fwrite( $fp, $chunk );
+
+			if( $n === false )
+			{
+				echo "✗ Write failed part-way through: '" . $path_to_file . "'. Output may be incomplete." . PHP_EOL;
+				@fclose( $fp );
+				return;
+			}
+
+			$written += $n;
+		}
+
+		@fclose( $fp );
+
+		// 4) Set file permissions (0644 is typical for static files)
+		@chmod( $path_to_file, 0644 );
+
+		echo "✓ Wrote " . $written . " bytes → " . $path_to_file . "." . PHP_EOL;
 	}
 	
 	private function processPHP( $path_to_input_file, $path_to_output_file )
