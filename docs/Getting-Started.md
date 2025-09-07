@@ -23,7 +23,7 @@ public
 StaticPHP.php
 ```
 
-The above example will ensure that only the source files are commited to Git because the generated output files can be regenerated anytime, so make sure to replace `public` with your chosen folder/directory name. It alos includes an entry to ignore `StaticPHP.php` which is recommended when using the launcher to ensure the main StaticPHP file does not get commited too. If you are not using the launcher, you may want this file included, so simply remove that line. Lines that start with a hash symbol `#` are comments.
+The above example will ensure that only the source files are commited to Git because the generated output files can be regenerated anytime, so make sure to replace `public` with your chosen folder/directory name. It also includes an entry to ignore `StaticPHP.php` which is recommended when using the launcher to ensure the main StaticPHP file does not get commited too. If you are not using the launcher, you may want this file included, so simply remove that line. Lines that start with a hash symbol `#` are comments.
 
 ## Step Three: Develop Your Website
 
