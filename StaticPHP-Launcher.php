@@ -206,6 +206,28 @@ $configurable_options[ 'test_mode_results_file_path' ] = __DIR__ . DIRECTORY_SEP
 
 
 /*
+	Generate Standard Redirects File
+
+	Set this to true if you want a "_redirects" file to be generated based on your _bulk_redirects file.
+
+	Defaults to false.
+*/
+
+$configurable_options[ 'generate_standard_redirects_file' ] = false;
+
+
+/*
+	Generate Htaccess Redirections
+
+	Set this to true if you want a ".htaccess" file to be generated based on your _bulk_redirects file.
+
+	Defaults to false.
+*/
+
+$configurable_options[ 'generate_htaccess_redirections' ] = false;
+
+
+/*
 	Auto Update
 
 	Downloads the latest version of StaticPHP upon every run to ensure you always run the latest version.

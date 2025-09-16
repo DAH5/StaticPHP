@@ -21,6 +21,8 @@ class StaticPHP
 	private $test_mode_output_dir_path = "tests/output";
 	private $test_mode_output_results_file = true;
 	private $test_mode_results_file_path = "tests/output/results.html";
+	private $generate_standard_redirects_file = false;
+	private $generate_htaccess_redirections = false;
 
 	private $tests_successful = array();
 	private $tests_unknown = array();
@@ -87,6 +89,10 @@ class StaticPHP
 				$this->test_mode_output_results_file = $configurable_options[ 'test_mode_output_results_file' ];
 			if( isset( $configurable_options[ 'test_mode_results_file_path' ] ) && is_string( $configurable_options[ 'test_mode_results_file_path' ] ) && trim( $configurable_options[ 'test_mode_results_file_path' ] ) != "" )
 				$this->test_mode_results_file_path = $configurable_options[ 'test_mode_results_file_path' ];
+			if( isset( $configurable_options[ 'generate_standard_redirects_file' ] ) && is_bool( $configurable_options[ 'generate_standard_redirects_file' ] ) )
+				$this->generate_standard_redirects_file = $configurable_options[ 'generate_standard_redirects_file' ];
+			if( isset( $configurable_options[ 'generate_htaccess_redirections' ] ) && is_bool( $configurable_options[ 'generate_htaccess_redirections' ] ) )
+				$this->generate_htaccess_redirections = $configurable_options[ 'generate_htaccess_redirections' ];
 		}
 		// End Array Method
 
@@ -129,6 +135,10 @@ class StaticPHP
 			$this->minify_css_inplace = $args[ 11 ];
 		if( count( $args ) >= 13 && is_array( $args[ 12 ] ) )
 			$this->items_to_passthrough = $args[ 12 ];
+		if( count( $args ) >= 14 && is_bool( $args[ 13 ] ) )
+			$this->generate_standard_redirects_file = $args[ 13 ];
+		if( count( $args ) >= 15 && is_bool( $args[ 14 ] ) )
+			$this->generate_htaccess_redirections = $args[ 14 ];
 		// End Arguments Method
 
 		// Ensure Special Files are Ignored
@@ -832,46 +842,62 @@ HTML;
 		$this->outputFile( $path_to_output_file, $input_file_contents );
 	}
 
-	private function processBulkRedirects( String $redirect_list, String $path_to_output_directory )
+	private function processBulkRedirects( String $redirect_list, String $path_to_output_directory, int $default_redirect_code = 307 )
 	{
-		//echo "path_to_output_directory: " . $path_to_output_directory . "\n";
-		//return;
-
 		echo "Processing redirection list..." . PHP_EOL . PHP_EOL;
 
-		// Split the contents into lines
 		$lines = explode( PHP_EOL, $redirect_list );
-    
-		// Loop through each line
+
 		foreach( $lines as $line )
 		{
-			// Skip empty lines or lines starting with a comment (#)
 			$line = trim( $line );
 
-			if( empty( $line ) || strpos( $line, '#' ) === 0 )
+			if( $line === '' || substr( $line, 0, 1 ) === '#' )
+				continue;
+
+			$line = preg_replace( '/\s+#.*$/', '', $line );
+
+			$line_parts = preg_split( '/\s+/', $line, 3, PREG_SPLIT_NO_EMPTY );
+
+			if( ! $line_parts || empty( $line_parts ) )
+				continue;
+
+			if( count( $line_parts ) < 2 )
 			{
+				echo "Skipping redirection due to missing destination: " . $line_parts[ 0 ] . PHP_EOL;
 				continue;
 			}
-			
-			// Split the line into the old path and new destination
-			[ $oldPath, $newDestination ] = explode( ' ', $line, 2 );
-			
-			// Ensure both parts are present
-			if( empty( $oldPath ) || empty( $newDestination ) )
+
+			[ $oldPath, $newDestination ] = $line_parts;
+
+			$redirect_code = isset( $line_parts[ 2 ] ) && is_numeric( $line_parts[ 2 ] ) ? ( int ) $line_parts[ 2 ] : $default_redirect_code;
+
+			if( ! in_array( $redirect_code, [ 301, 302, 307, 308 ], true ) )
 			{
-				echo "Invalid redirect entry: $line" . PHP_EOL;
+				echo "Invalid redirect code (" . $redirect_code . "), using default code (" . $default_redirect_code . ")." . PHP_EOL;
+				$redirect_code = $default_redirect_code;
+			}
+
+			if( substr( $oldPath, 0, 1 ) !== '/' && substr( $newDestination, 0, 1 ) !== '/' && substr( $newDestination, 0, 7 ) !== 'http://' && substr( $newDestination, 0, 8 ) !== 'https://' )
+			{
+				echo "Skipping malformatted redirection: " . $oldPath . " -> " . $newDestination . PHP_EOL;
 				continue;
 			}
-			
+
 			$filePath = $path_to_output_directory . DIRECTORY_SEPARATOR . $oldPath;
 
 			if( strpos( $filePath, '.' ) === false )
 				$filePath = $filePath . DIRECTORY_SEPARATOR . 'index.html';
 			
 			$this->processRedirection( $filePath, $oldPath, $newDestination );
+
+			if( $this->generate_standard_redirects_file )
+				$this->generateStandardRedirectsFile( $oldPath, $newDestination, $redirect_code );
+			if( $this->generate_htaccess_redirections )
+				$this->generateHtaccessRedirections( $oldPath, $newDestination, $redirect_code );
 		}
 
-		echo "\nRedirection list processed!\n\n";
+		echo PHP_EOL . "Redirection list processed!" . PHP_EOL . PHP_EOL;
 	}
 
 	private function processRedirection( String $filePath, String $oldPath, String $newDestination )
@@ -921,6 +947,133 @@ HTML;
 		$this->outputFile( $filePath, $htmlContent );
 		
 		echo "Redirect generated for $oldPath to $newDestination\n";
+	}
+
+	private function generateStandardRedirectsFile( String $oldPath, String $newDestination, int $redirect_code )
+	{
+		$fileName = '_redirects';
+		$inputFilePath = $this->input_dir_path . DIRECTORY_SEPARATOR . $fileName;
+		$outputFilePath = $this->output_dir_path . DIRECTORY_SEPARATOR . $fileName;
+		
+		if( $this->test_mode && $this->test_mode_input_dir_path )
+			$inputFilePath = $this->test_mode_input_dir_path . DIRECTORY_SEPARATOR . $fileName;
+		if( $this->test_mode && $this->test_mode_output_dir_path )
+			$outputFilePath = $this->test_mode_output_dir_path . DIRECTORY_SEPARATOR . $fileName;
+
+		echo "Generating redirect for " . $fileName . " file." . PHP_EOL;
+
+		$file_contents = '';
+
+		if( is_file( $outputFilePath ) )
+			$file_contents = file_get_contents( $outputFilePath ) . PHP_EOL;
+		else if( ! is_file( $outputFilePath ) && is_file( $inputFilePath ) )
+			$file_contents = file_get_contents( $inputFilePath ) . PHP_EOL;
+
+		$file_contents .= $oldPath . ' ' . $newDestination . ' ' . $redirect_code;
+
+		$this->outputFile( $outputFilePath, $file_contents );
+	}
+
+	private function generateHtaccessRedirections( String $oldPath, String $newDestination, int $redirect_code )
+	{
+		$fileName = '.htaccess';
+		$inputFilePath = $this->input_dir_path . DIRECTORY_SEPARATOR . $fileName;
+		$outputFilePath = $this->output_dir_path . DIRECTORY_SEPARATOR . $fileName;
+
+		if( $this->test_mode && $this->test_mode_input_dir_path )
+			$inputFilePath = $this->test_mode_input_dir_path . DIRECTORY_SEPARATOR . $fileName;
+		if( $this->test_mode && $this->test_mode_output_dir_path )
+			$outputFilePath = $this->test_mode_output_dir_path . DIRECTORY_SEPARATOR . $fileName;
+
+		$file_contents = '';
+
+		if( is_file( $outputFilePath ) )
+			$file_contents = file_get_contents( $outputFilePath ) . PHP_EOL;
+		else if( ! is_file( $outputFilePath ) && is_file( $inputFilePath ) )
+			$file_contents = file_get_contents( $inputFilePath ) . PHP_EOL;
+
+		$begin = '# BEGIN StaticPHP Bulk Redirects';
+		$end = '# END StaticPHP Bulk Redirects';
+		$blockPattern = '/' . preg_quote( $begin, '/' ) . '.*?' . preg_quote( $end, '/' ) . '/s';
+
+		$existingRules = [];
+		$pre = $file_contents;
+		$hasBlock = preg_match( $blockPattern, $file_contents, $m ) === 1;
+
+		if( $hasBlock )
+		{
+			$block = $m[ 0 ];
+
+			if( preg_match_all( '/^\s*RewriteRule\s+(\S+)\s+(\S+)\s+\[R=(\d{3}),END\]\s*$/m', $block, $mm, PREG_SET_ORDER ) )
+			{
+				foreach( $mm as $match )
+				{
+					$pattern = $match[1];
+
+					$pattern = preg_replace( '/^\^|\$$/', '', $pattern );
+
+					$pattern = preg_replace( '/\\\\(.)/', '$1', $pattern );
+
+					$dest = $match[ 2 ];
+					$rcode = ( int ) $match[ 3 ];
+
+					$p = $pattern;
+					
+					if(  strlen( $p ) >= 2 && $p[ 0 ] === '^' )
+					{
+						$p = substr( $p, 1 );
+					}
+
+					if( substr( $p, -1 ) === '$' )
+					{
+						$p = substr( $p, 0, -1 );
+					}
+
+					$p = str_replace( [ '\/' ], [ '/' ], $p );
+					
+					$fromKey = '/' . ltrim( $p, '/' );
+
+					$existingRules[ $fromKey ] = [ 'to' => $dest, 'code' => $rcode ];
+				}
+			}
+
+			$pre = preg_replace( $blockPattern, '', $file_contents, 1 );
+		}
+
+		$existingRules[ $oldPath ] = [ 'to' => $newDestination, 'code' => $redirect_code ];
+
+		ksort( $existingRules, SORT_STRING );
+
+		$lines = [];
+		$lines[] = $begin;
+		$lines[] = '# Managed by StaticPHP. There is no need to manually edit between these markers.';
+		$lines[] = '';
+		$lines[] = '<IfModule mod_rewrite.c>';
+		$lines[] = "\tRewriteEngine On";
+
+		foreach( $existingRules as $f => $info )
+		{
+			$dest = $info[ 'to' ];
+			$rc = $info[ 'code' ];
+
+			$pattern = '^' . preg_quote( ltrim( $f, '/' ), '#' ) . '$';
+
+			$lines[] = "\t" . sprintf( 'RewriteRule %s %s [R=%d,END]', $pattern, $dest, $rc );
+		}
+
+		$lines[] = '</IfModule>';
+		$lines[] = '';
+		$lines[] = $end;
+		$newBlock = implode( PHP_EOL, $lines ) . PHP_EOL;
+
+		$pre = rtrim( $pre );
+
+		if( $pre )
+			$pre .= PHP_EOL . PHP_EOL;
+
+		$newContents = $pre . $newBlock;
+
+		$this->outputFile( $outputFilePath, $newContents );
 	}
 
 	private function processFunctionalBlocks( String $content, array $metadata )
