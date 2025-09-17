@@ -33,6 +33,13 @@ In the example above:
 - `/old.html` will be redirected to `/new.html`.
 - `/about` will redirect to `/about-us`.
 
+You can also optionally specify a redirection code as a third parameter, but this won't be used in the generated HTML file.
+
+```plaintext
+/from/here /to/there
+/old/page.html https://newsite.tld/new/page.html 307
+```
+
 ### Notes:
 - Ensure that paths in the old URL are relative (without domain or protocol) and use forward slashes `/`.
 - The destination can be either an absolute URL or relative path. If using an absolute URL (e.g., `https://example.tld/new`), make sure it includes the full URL structure.
@@ -135,3 +142,21 @@ In this example:
 ## Why Meta Refresh?
 
 The `<meta http-equiv="refresh">` tag has been used for automatic redirection for many years and is supported by nearly all browsers. While this method is generally reliable, StaticPHP ensures that if the redirect fails, a clickable link is provided as a backup.
+
+## Faster Redirections Where Supported
+
+The HTML Meta Refresh method is great. It means redirections should work regardless of server support, but it is a bit slower. The user makes the request, the server finds the file and sends the whole HTML file to the user (because to the server it is just an HTML file, not a redirection), the user sees that it is a redirect and follows it.
+
+If your website is hosted on a server that has path-based redirection support, it is technically a good bit faster. The user makes the request, the server matches it to a redirect rule and basically tells the user to "go here", and the user follows that instruction.
+
+StaticPHP can use your `_bulk_redirects` file as a single source of truth for path-based redirections across other files, such as `_redirects` used commonly with other static website hosting environments, and `.htaccess` using **mod_rewrite rules** for Apache-based servers, while also generating Meta Refresh HTML files as a solid fallback. **Your existing rules should remain intact**.
+
+This functionality is disabled by default. To enable it, set the configurable option `generate_standard_redirects_file` to `true` for `_redirects` file, and `generate_htaccess_redirections` to `true` for `.htaccess` file.
+
+You can optionally define a redirect code in your `_bulk_redirects` file.
+
+```plaintext
+/from/here /to/there 307
+```
+
+Supported codes are `301 (Moved Permanently)`, `302 (Found)`, `307 (Temporary Redirect)`, and `308 (Permanent Redirect)`. If no code is specified, or if you specify a code other than these, StaticPHP will default to `307 (Temporary Redirect)`.
