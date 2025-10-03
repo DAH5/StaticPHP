@@ -952,7 +952,7 @@ HTML;
 	private function generateStandardRedirectsFile( String $oldPath, String $newDestination, int $redirect_code )
 	{
 		$fileName = '_redirects';
-		$inputFilePath = $this->input_dir_path . DIRECTORY_SEPARATOR . $fileName;
+		$inputFilePath = $this->source_dir_path . DIRECTORY_SEPARATOR . $fileName;
 		$outputFilePath = $this->output_dir_path . DIRECTORY_SEPARATOR . $fileName;
 		
 		if( $this->test_mode && $this->test_mode_input_dir_path )
@@ -977,7 +977,7 @@ HTML;
 	private function generateHtaccessRedirections( String $oldPath, String $newDestination, int $redirect_code )
 	{
 		$fileName = '.htaccess';
-		$inputFilePath = $this->input_dir_path . DIRECTORY_SEPARATOR . $fileName;
+		$inputFilePath = $this->source_dir_path . DIRECTORY_SEPARATOR . $fileName;
 		$outputFilePath = $this->output_dir_path . DIRECTORY_SEPARATOR . $fileName;
 
 		if( $this->test_mode && $this->test_mode_input_dir_path )
