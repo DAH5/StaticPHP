@@ -1313,6 +1313,16 @@ HTML;
 
 			unset( $metadata['staticphp_path'] );
 
+			if( isset( $params[ 'filter-key' ] ) && $params[ 'filter-key' ] && isset( $metadata[ $params[ 'filter-key' ] ] ) && $metadata[ $params[ 'filter-key' ] ] && isset( $params[ 'filter-value' ] ) && $metadata[ $params[ 'filter-key' ] ] != $params[ 'filter-value' ] )
+			{
+				continue;
+			}
+			
+			if( isset( $params[ 'filter-key' ] ) && $params[ 'filter-key' ] && ( ! isset( $metadata[ $params[ 'filter-key' ] ] ) || ! $metadata[ $params[ 'filter-key' ] ] ) )
+			{
+				continue;
+			}
+
 			$source_dir_path = $this->test_mode ? $this->test_mode_input_dir_path : $this->source_dir_path;
 			$output_dir_path = $this->test_mode ? $this->test_mode_output_dir_path : $this->output_dir_path;
 

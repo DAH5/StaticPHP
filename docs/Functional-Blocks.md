@@ -82,6 +82,34 @@ Item Name: --- loop.item-name ---
 --- endloop ---
 ```
 
+### Filtering Items
+
+By default, any web page found in the specified directory will be listed, but you may want to filter this and only show certain ones. You can filter the items displayed in the rendered list using MetaData keys and values, and the `filter-key` and `filter-value` parameters.
+
+Example of filtering items based on key alone.
+
+```plaintext
+--- loop( dir = "src/items", filter-key = "item-name" ) ---
+
+Item Name: --- loop.item-name ---
+
+--- endloop ---
+```
+
+In the above example, only items containing the MetaData key `item-name` fill be displayed.
+
+Example of filtering items based on key and value.
+
+```plaintext
+--- loop( dir = "src/items", filter-key = "category", filter-value = "random" ) ---
+
+Item Name: --- loop.item-name ---
+
+--- endloop ---
+```
+
+In the above example, only items containing the MetaData key `category` with a value of `random` fill be displayed. This is useful for blog post listings for a specific category.
+
 ## The If Functional Block
 
 The `if` functional block allows you to perform conditional checks on MetaData.
