@@ -1215,9 +1215,35 @@ HTML;
 					$condition_state = false;
 				}
 			}
+			else if( strpos( $param, '!=' ) )
+			{
+				$param = preg_split( "/(\s*)(!=)(\s*)/", $param );
+				$param_key = $param[ 0 ];
+				$param_value = $param[ 1 ];
+
+				if( ! array_key_exists( $param_key, $metadata ) )
+				{
+					$condition_state = false;
+				}
+
+				if( substr( trim( $param_value ), 0, 1 ) != "\"" && substr( trim( $param_value ), -1, 1 ) != "\"" )
+				{
+					$condition_state = false;
+				}
+
+				if( array_key_exists( $param_key, $metadata ) && $metadata[ $param_key ] == substr( $param_value, 1, -1 ) )
+				{
+					$condition_state = false;
+				}
+			}
 			else
 			{
-				if( ! array_key_exists( trim( $param ), $metadata ) )
+				if( substr( trim( $param ), 0, 1 ) == "!" && array_key_exists( trim( $param ), $metadata ) )
+				{
+					$condition_state = false;
+				}
+				
+				if( substr( trim( $param ), 0, 1 ) != "!" && ! array_key_exists( trim( $param ), $metadata ) )
 				{
 					$condition_state = false;
 				}

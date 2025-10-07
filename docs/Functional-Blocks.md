@@ -162,6 +162,26 @@ When the condition is true, it will output the content inside.
 <h1>Welcome</h1>
 ```
 
+### Negation Checking
+
+Check if a MetaData key is NOT set, or if the value of that key is NOT a specific value.
+
+For example, check if the page does NOT have a title.
+
+```html
+--- if( !page-title ) ---
+<p>There is no page title.</p>
+--- endif ---
+```
+
+Another examaple, check if the current page is NOT `home`.
+
+```html
+--- if( current-page != "home" ) ---
+<p>This is not the home page.</p>
+--- endif ---
+```
+
 The if functional block is currently limited to this basic functionality. The functionality may get extended in the future.
 
 ## More Features Coming Soon
