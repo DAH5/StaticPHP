@@ -1291,14 +1291,19 @@ HTML;
 			}
 			else
 			{
-				if( substr( trim( $param ), 0, 1 ) == "!" && array_key_exists( trim( $param ), $metadata ) )
+				$param_key = trim( $param );
+
+				if( substr( $param_key, 0, 1 ) == "!" )
 				{
-					$condition_state = false;
+					$param_key = trim( substr( $param_key, 1 ) );
+
+					if( array_key_exists( $param_key, $metadata ) )
+						$condition_state = false;
 				}
-				
-				if( substr( trim( $param ), 0, 1 ) != "!" && ! array_key_exists( trim( $param ), $metadata ) )
+				else
 				{
-					$condition_state = false;
+					if( ! array_key_exists( $param_key, $metadata ) )
+						$condition_state = false;
 				}
 			}
 		}
