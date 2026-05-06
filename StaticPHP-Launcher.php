@@ -127,6 +127,17 @@ $configurable_options[ 'minify_css_inplace' ] = true;
 
 
 /*
+	Minify JavaScript In-Place
+
+	Whether to output JS files in minified form only, or to output both original and minified versions (minified ending in .min.js).
+
+	Set to true to just minify JS files, or false to output both versions. Defaults to true.
+*/
+
+$configurable_options[ 'minify_js_inplace' ] = true;
+
+
+/*
 	Items To Passthrough
 
 	Sometimes you may wish a PHP script or file that StaticPHP would normally process, remain in the output as-is.

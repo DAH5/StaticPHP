@@ -14,6 +14,7 @@ class StaticPHP
 	private $bulk_redirects_filename = "_bulk_redirects";
 	private $redirection_template_filename = "_redirection_template.html";
 	private $minify_css_inplace = true;
+	private $minify_js_inplace = true;
 	private $items_to_passthrough = array();
 	private $test_mode = false;
 	private $test_mode_input_dir_path = "tests/input";
@@ -73,6 +74,8 @@ class StaticPHP
 				$this->redirection_template_filename = trim( $configurable_options[ 'redirection_template_filename' ] );
 			if( isset( $configurable_options[ 'minify_css_inplace' ] ) && is_bool( $configurable_options[ 'minify_css_inplace' ] ) )
 				$this->minify_css_inplace = $configurable_options[ 'minify_css_inplace' ];
+			if( isset( $configurable_options[ 'minify_js_inplace' ] ) && is_bool( $configurable_options[ 'minify_js_inplace' ] ) )
+				$this->minify_js_inplace = $configurable_options[ 'minify_js_inplace' ];
 			if( isset( $configurable_options[ 'items_to_passthrough' ] ) && is_array( $configurable_options[ 'items_to_passthrough' ] ) && count( $configurable_options[ 'items_to_passthrough' ] ) > 0 )
 				$this->items_to_passthrough = $configurable_options[ 'items_to_passthrough' ];
 			if( isset( $configurable_options[ 'items_to_passthrough' ] ) && is_string( $configurable_options[ 'items_to_passthrough' ] ) && trim( $configurable_options[ 'items_to_passthrough' ] ) != "" )
@@ -139,6 +142,8 @@ class StaticPHP
 			$this->generate_standard_redirects_file = $args[ 13 ];
 		if( count( $args ) >= 15 && is_bool( $args[ 14 ] ) )
 			$this->generate_htaccess_redirections = $args[ 14 ];
+		if( count( $args ) >= 16 && is_bool( $args[ 15 ] ) )
+			$this->minify_js_inplace = $args[ 15 ];
 		// End Arguments Method
 
 		// Ensure Special Files are Ignored
@@ -362,11 +367,24 @@ HTML;
 
 					if( $this->minify_css_inplace )
 					{
+						if( $this->test_mode )
+						{
+							$this->prepareForTest( $css_minified, $path_to_output_directory_item );
+							continue;
+						}
+
 						$this->outputFile( $path_to_output_directory_item, $css_minified );
 						continue;
 					}
 					else
 					{
+						if( $this->test_mode )
+						{
+							$this->prepareForTest( $css_minified, str_replace( ".css", ".min.css", $path_to_output_directory_item ) );
+							$this->prepareForTest( $css, $path_to_output_directory_item );
+							continue;
+						}
+
 						$this->outputFile( str_replace( ".css", ".min.css", $path_to_output_directory_item ), $css_minified );
 						$this->outputFile( $path_to_output_directory_item, $css );
 						continue;
@@ -379,11 +397,32 @@ HTML;
 
 					$js = file_get_contents( $path_to_input_directory_item );
 
-					$js = $this->minifyJS( $js );
+					$js_minified = $this->minifyJS( $js );
 
-					$this->outputFile( $path_to_output_directory_item, $js );
+					if( $this->minify_js_inplace )
+					{
+						if( $this->test_mode )
+						{
+							$this->prepareForTest( $js_minified, $path_to_output_directory_item );
+							continue;
+						}
 
-					continue;
+						$this->outputFile( $path_to_output_directory_item, $js_minified );
+						continue;
+					}
+					else
+					{
+						if( $this->test_mode )
+						{
+							$this->prepareForTest( $js_minified, str_replace( ".js", ".min.js", $path_to_output_directory_item ) );
+							$this->prepareForTest( $js, $path_to_output_directory_item );
+							continue;
+						}
+
+						$this->outputFile( str_replace( ".js", ".min.js", $path_to_output_directory_item ), $js_minified );
+						$this->outputFile( $path_to_output_directory_item, $js );
+						continue;
+					}
 				}
 
 				echo "Copying File: " . $path_to_input_directory_item . " to " . $path_to_output_directory_item . PHP_EOL;
@@ -695,7 +734,14 @@ HTML;
 			return;
 		}
 		
-		if( $this->minify_html === true )
+		$should_minify = $this->minify_html;
+
+		if( isset( $metadata[ 'minify' ] ) && $metadata[ 'minify' ] == 'true' )
+			$should_minify = true;
+		if( isset( $metadata[ 'minify' ] ) && $metadata[ 'minify' ] == 'false' )
+			$should_minify = false;
+		
+		if( $should_minify )
 			$input_file_contents = $this->minifyHTML( $input_file_contents );
 
 		if( $this->test_mode )
@@ -763,8 +809,15 @@ HTML;
 			$this->processRedirection( $path_to_output_file, str_replace( $this->output_dir_path, '', $path_to_output_file ), $metadata[ 'redirect' ] );
 			return;
 		}
+
+		$should_minify = $this->minify_html;
+
+		if( isset( $metadata[ 'minify' ] ) && $metadata[ 'minify' ] == 'true' )
+			$should_minify = true;
+		if( isset( $metadata[ 'minify' ] ) && $metadata[ 'minify' ] == 'false' )
+			$should_minify = false;
 		
-		if( $this->minify_html === true )
+		if( $should_minify )
 			$input_file_contents = $this->minifyHTML( $input_file_contents );
 
 		if( $this->test_mode )
@@ -1466,10 +1519,134 @@ HTML;
 
 	private function minifyJS( String $js )
 	{
-		echo "JavaScript Minification is disabled until a bug in the minification process can be fixed." . PHP_EOL;
+		$out = '';
+		$len = strlen( $js );
 
-		return $js;
+		$inString = false;
+		$stringQuote = '';
+		$inLineComment = false;
+		$inBlockComment = false;
+		$lastWasSpace = false;
+
+		for( $i = 0; $i < $len; $i++ )
+		{
+			$char = $js[ $i ];
+			$next = $js[ $i + 1 ] ?? '';
+
+			// Inside a line comment
+			if( $inLineComment )
+			{
+				if( $char === "\n" || $char === "\r" )
+				{
+					$inLineComment = false;
+					$this->minifyJsAppendSpaceIfNeeded( $out, $lastWasSpace );
+				}
+
+				continue;
+			}
+
+			// Inside a block comment
+			if( $inBlockComment )
+			{
+				if( $char === '*' && $next === '/' )
+				{
+					$inBlockComment = false;
+					$i++;
+				}
+
+				continue;
+			}
+
+			// Inside a string/template literal
+			if( $inString )
+			{
+				$out .= $char;
+
+				if( $char === '\\' )
+				{
+					$i++;
+
+					if( $i < $len )
+					{
+						$out .= $js[ $i ];
+					}
+
+					continue;
+				}
+
+				if( $char === $stringQuote )
+				{
+					$inString = false;
+					$stringQuote = '';
+				}
+
+				continue;
+			}
+
+			// Start of string/template literal
+			if( $char === '"' || $char === "'" || $char === '`' )
+			{
+				$inString = true;
+				$stringQuote = $char;
+				$out .= $char;
+				$lastWasSpace = false;
+				continue;
+			}
+
+			// Start of line comment
+			if( $char === '/' && $next === '/' )
+			{
+				$inLineComment = true;
+				$i++;
+				continue;
+			}
+
+			// Start of block comment
+			if( $char === '/' && $next === '*')
+			{
+				$inBlockComment = true;
+				$i++;
+				continue;
+			}
+
+			// Whitespace
+			if( ctype_space( $char ) )
+			{
+				$this->minifyJsAppendSpaceIfNeeded( $out, $lastWasSpace );
+				continue;
+			}
+
+			// Remove unnecessary spaces around common punctuation
+			if( str_contains( '{}[]();,:+-*/%=<>!&|?', $char ) )
+			{
+				$out = rtrim( $out );
+				$out .= $char;
+				$lastWasSpace = false;
+				continue;
+			}
+
+			$out .= $char;
+			$lastWasSpace = false;
+		}
+
+		return trim( $out );
 	}	
+
+	private function minifyJsAppendSpaceIfNeeded( string &$out, bool &$lastWasSpace ): void
+	{
+		if( $out === '' || $lastWasSpace )
+		{
+			return;
+		}
+
+		$last = substr( $out, -1 );
+
+		if( ! str_contains( "{}[]();,:+-*/%=<>!&|?\n\r\t ", $last ) )
+		{
+			$out .= ' ';
+			$lastWasSpace = true;
+		}
+	}
 
 	private function convertEndOfLines( $text )
 	{

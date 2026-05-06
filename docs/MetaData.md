@@ -88,5 +88,33 @@ content_placeholder: {{ content }}
 </html>
 ```
 
+### HTML Code Minification Override
+
+For files where you wish the minification to differ from the site's global setting. Whether it be just specific files, or all except specific files, StaticPHP has you covered.
+
+Specify the MetaData key `minify` in the HTML and PHP files you wish the override to apply to and set the value to either `true` or `false` to enable or disable respectively, overriding the global setting for those specific files.
+
+#### Example
+
+```html
+---
+minify: true
+---
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>HTML Minification</title>
+    </head>
+
+    <body>
+        <h1>HTML Minification</h1>
+        <p>The code that makes up this file will be minified.</p>
+    </body>
+</html>
+```
+
 By following these steps, you can easily manage MetaData in your StaticPHP projects, enabling greater flexibility and control over your static website generation process. For more detailed information, refer to the accompanying documentation and guides.
 
