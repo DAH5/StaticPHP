@@ -102,7 +102,7 @@ class StaticPHP
 		if( count( $args ) >= 2 && is_string( $args[ 1 ] ) && trim( $args[ 1 ] ) != "" )
 			$this->output_dir_path = trim( $args[ 1 ] );
 		if( count( $args ) >= 3 && is_array( $args[ 2 ] ) && count( $args[ 2 ] ) > 0 )
-			$this->items_to_ignore = trim( $args[ 2 ] );
+			$this->items_to_ignore = trim( ( string ) $args[ 2 ] );
 		if( count( $args ) >= 3 && is_string( $args[ 2 ] ) && trim( $args[ 2 ] ) != "" )
 			$this->items_to_ignore = array( trim( $args[ 2 ] ) );
 		if( count( $args ) >= 4 && is_bool( $args[ 3 ] ) )
@@ -124,7 +124,7 @@ class StaticPHP
 		if( count( $args ) >= 8 && is_string( $args[ 7 ] ) && trim( $args[ 7 ] ) == "true" )
 			$this->minify_js = true;
 		if( count( $args ) >= 9 && is_array( $args[ 8 ] ) && count( $args[ 8 ] ) > 0 )
-			$this->minify_html_tags_to_preserve = trim( $args[ 8 ] );
+			$this->minify_html_tags_to_preserve = trim( ( string ) $args[ 8 ] );
 		if( count( $args ) >= 9 && is_string( $args[ 8 ] ) && trim( $args[ 8 ] ) != "" )
 			$this->minify_html_tags_to_preserve = array( trim( $args[ 8 ] ) );
 		if( count( $args ) >= 10 && is_string( $args[ 9 ] ) && trim( $args[ 9 ] ) != "" )
