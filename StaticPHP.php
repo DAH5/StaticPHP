@@ -338,6 +338,18 @@ HTML;
 				continue;
 			}
 
+			if( is_file( $path_to_input_directory_item ) && substr( $directory_item, -4 ) == ".css" )
+			{
+				$this->processCssFile( $path_to_input_directory_item, $path_to_output_directory_item );
+				continue;
+			}
+
+			if( is_file( $path_to_input_directory_item ) && substr( $directory_item, -3 ) == ".js" )
+			{
+				$this->processJsFile( $path_to_input_directory_item, $path_to_output_directory_item );
+				continue;
+			}
+
 			if( is_file( $path_to_input_directory_item ) && substr( $directory_item, -3 ) == ".md" )
 			{
 				$path_to_output_directory_item = substr( $path_to_output_directory_item, 0, -3 ) . ".html";
@@ -357,74 +369,6 @@ HTML;
 			
 			if( is_file( $path_to_input_directory_item ) )
 			{
-				if( $this->minify_css === true && substr( $path_to_input_directory_item, -4 ) == ".css" )
-				{
-					echo "Minifying CSS File: " . $path_to_input_directory_item . PHP_EOL;
-
-					$css = file_get_contents( $path_to_input_directory_item );
-					
-					$css_minified = $this->minifyCSS( $css );
-
-					if( $this->minify_css_inplace )
-					{
-						if( $this->test_mode )
-						{
-							$this->prepareForTest( $css_minified, $path_to_output_directory_item );
-							continue;
-						}
-
-						$this->outputFile( $path_to_output_directory_item, $css_minified );
-						continue;
-					}
-					else
-					{
-						if( $this->test_mode )
-						{
-							$this->prepareForTest( $css_minified, str_replace( ".css", ".min.css", $path_to_output_directory_item ) );
-							$this->prepareForTest( $css, $path_to_output_directory_item );
-							continue;
-						}
-
-						$this->outputFile( str_replace( ".css", ".min.css", $path_to_output_directory_item ), $css_minified );
-						$this->outputFile( $path_to_output_directory_item, $css );
-						continue;
-					}
-				}
-
-				if( $this->minify_js === true && substr( $path_to_input_directory_item, -3 ) == ".js" )
-				{
-					echo "Minifying JS File: " . $path_to_input_directory_item . PHP_EOL;
-
-					$js = file_get_contents( $path_to_input_directory_item );
-
-					$js_minified = $this->minifyJS( $js );
-
-					if( $this->minify_js_inplace )
-					{
-						if( $this->test_mode )
-						{
-							$this->prepareForTest( $js_minified, $path_to_output_directory_item );
-							continue;
-						}
-
-						$this->outputFile( $path_to_output_directory_item, $js_minified );
-						continue;
-					}
-					else
-					{
-						if( $this->test_mode )
-						{
-							$this->prepareForTest( $js_minified, str_replace( ".js", ".min.js", $path_to_output_directory_item ) );
-							$this->prepareForTest( $js, $path_to_output_directory_item );
-							continue;
-						}
-
-						$this->outputFile( str_replace( ".js", ".min.js", $path_to_output_directory_item ), $js_minified );
-						$this->outputFile( $path_to_output_directory_item, $js );
-						continue;
-					}
-				}
-
 				echo "Copying File: " . $path_to_input_directory_item . " to " . $path_to_output_directory_item . PHP_EOL;
 				copy( $path_to_input_directory_item, $path_to_output_directory_item );
 			}
@@ -827,6 +771,144 @@ HTML;
 		}
 		
 		$this->outputFile( $path_to_output_file, $input_file_contents );
+	}
+
+	private function processCssFile( $path_to_input_file, $path_to_output_file )
+	{
+		if( ! is_file( $path_to_input_file ) )
+			return;
+
+		echo "Processing CSS File: " . $path_to_input_file . PHP_EOL;
+
+		$input_file_contents = file_get_contents( $path_to_input_file );
+
+		$input_file_contents = $this->convertEndOfLines( $input_file_contents );
+
+		$metadata = array();
+
+		$this->processMetaData( $this->metaDataDelimiter, $input_file_contents, $metadata, $input_file_contents );
+
+		$css = $input_file_contents;
+		$css_minified = '';
+
+		$should_minify = $this->minify_css;
+
+		if( isset( $metadata[ 'minify' ] ) && $metadata[ 'minify' ] == 'true' )
+			$should_minify = true;
+		if( isset( $metadata[ 'minify' ] ) && $metadata[ 'minify' ] == 'false' )
+			$should_minify = false;
+
+		if( $should_minify )
+			$css_minified = $this->minifyCSS( $css );
+
+		$should_minify_inplace = $this->minify_css_inplace;
+
+		if( isset( $metadata[ 'minify_inplace' ] ) && $metadata[ 'minify_inplace' ] == 'true' )
+			$should_minify_inplace = true;
+		if( isset( $metadata[ 'minify_inplace' ] ) && $metadata[ 'minify_inplace' ] == 'false' )
+			$should_minify_inplace = false;
+
+		if( $should_minify && $should_minify_inplace )
+		{
+			if( $this->test_mode )
+			{
+				$this->prepareForTest( $css_minified, $path_to_output_file );
+				return;
+			}
+
+			$this->outputFile( $path_to_output_file, $css_minified );
+			return;
+		}
+		else if( $should_minify && ! $should_minify_inplace )
+		{
+			if( $this->test_mode )
+			{
+				$this->prepareForTest( $css_minified, str_replace( ".css", ".min.css", $path_to_output_file ) );
+				$this->prepareForTest( $css, $path_to_output_file );
+				return;
+			}
+
+			$this->outputFile( str_replace( ".css", ".min.css", $path_to_output_file ), $css_minified );
+			$this->outputFile( $path_to_output_file, $css );
+			return;
+		}
+
+		if( $this->test_mode )
+		{
+			$this->prepareForTest( $css, $path_to_output_file );
+			return;
+		}
+
+		$this->outputFile( $path_to_output_file, $css );
+	}
+
+	private function processJsFile( $path_to_input_file, $path_to_output_file )
+	{
+		if( ! is_file( $path_to_input_file ) )
+			return;
+
+		echo "Processing JavaScript File: " . $path_to_input_file . PHP_EOL;
+
+		$input_file_contents = file_get_contents( $path_to_input_file );
+
+		$input_file_contents = $this->convertEndOfLines( $input_file_contents );
+
+		$metadata = array();
+
+		$this->processMetaData( $this->metaDataDelimiter, $input_file_contents, $metadata, $input_file_contents );
+
+		$js = $input_file_contents;
+		$js_minified = '';
+
+		$should_minify = $this->minify_js;
+
+		if( isset( $metadata[ 'minify' ] ) && $metadata[ 'minify' ] == 'true' )
+			$should_minify = true;
+		if( isset( $metadata[ 'minify' ] ) && $metadata[ 'minify' ] == 'false' )
+			$should_minify = false;
+
+		if( $should_minify )
+			$js_minified = $this->minifyJS( $js );
+
+		$should_minify_inplace = $this->minify_js_inplace;
+
+		if( isset( $metadata[ 'minify_inplace' ] ) && $metadata[ 'minify_inplace' ] == 'true' )
+			$should_minify_inplace = true;
+		if( isset( $metadata[ 'minify_inplace' ] ) && $metadata[ 'minify_inplace' ] == 'false' )
+			$should_minify_inplace = false;
+
+		if( $should_minify && $should_minify_inplace )
+		{
+			if( $this->test_mode )
+			{
+				$this->prepareForTest( $js_minified, $path_to_output_file );
+				return;
+			}
+
+			$this->outputFile( $path_to_output_file, $js_minified );
+			return;
+		}
+		else if( $should_minify && ! $should_minify_inplace )
+		{
+			if( $this->test_mode )
+			{
+				$this->prepareForTest( $js_minified, str_replace( ".js", ".min.js", $path_to_output_file ) );
+				$this->prepareForTest( $js, $path_to_output_file );
+				return;
+			}
+
+			$this->outputFile( str_replace( ".js", ".min.js", $path_to_output_file ), $js_minified );
+			$this->outputFile( $path_to_output_file, $js );
+			return;
+		}
+
+		if( $this->test_mode )
+		{
+			$this->prepareForTest( $js, $path_to_output_file );
+			return;
+		}
+
+		$this->outputFile( $path_to_output_file, $js );
 	}
 
 	private function processMarkdown( $path_to_input_file, $path_to_output_file )

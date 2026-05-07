@@ -42,19 +42,19 @@ StaticPHP inherently speeds up your website by generating static files, but you 
 
 The code minification feature removes unnecessary spacing from your generated files, making them as small as possible while preserving content integrity. Your source files remain unaffected.
 
-You can choose which types of files to minify (`HTML`, `CSS`, `JS`) in your build configuration, by setting `minify_html`, `minify_css`, and `minify_js` to true or false.
+You can choose which types of files to minify (`HTML`, `CSS`, `JS`) in your build configuration, by setting `minify_html`, `minify_css`, and `minify_js` to true or false. You can also enable this on a per-file basis using the special MetaData key `minify` and set it to either `true` or `false` to override the global build config value for that file.
+
+**HTML Tag Preservation:** For HTML files, sometimes you may want certain tags, like `<pre>`, to remain unminified so that things like code snippets remain intact. Simply set `minify_html_tags_to_preserve` to an array of tag names in your StaticPHP configuration.
 
 ### Minify CSS and JS In-Place or Separate
 
 StaticPHP can output just the minified versions of your CSS and JS files, which is the default behaviour, and can output both minified and unminified versions.
 
-Set `minify_css_inplace` and/or `minify_js_inplace` in your build configuration to `true` (default) to just output minified version with same name, or set to `false` to output both versions.
+Set `minify_css_inplace` and/or `minify_js_inplace` in your build configuration to `true` (default) to just output minified version with same name, or set to `false` to output both versions. You can also control this on a per-file basis using the special MetaData key `minify_inplace`, which is exclusive to CSS and JS files.
 
-When outputing both versions, StaticPHP will put `.min.css` and/or `.min.js` on the end to signify the difference between the two. For example, say you have a file called `stylesheet.css`, and you set `minify_css_inplace` to `false`, StaticPHP will give you `stylesheet.css` (unminified), as well as `stylesheet.min.css` (minified) files. When set to `true`, StaticPHP will just give you the minified version as `stylesheet.css`. Similar behaviour for JavaScript files.
+When outputing both versions, StaticPHP will put `.min.css` and/or `.min.js` on the end to signify the difference between the two. For example, say you have a file called `stylesheet.css`, and you have set minification in place to `false`, StaticPHP will give you `stylesheet.css` (unminified), as well as `stylesheet.min.css` (minified) files. When set to `true`, StaticPHP will just give you the minified version as `stylesheet.css`. Similar behaviour for JavaScript files.
 
-Note that for your CSS and JS minification in-place preferences to take effect, `minify_css` and/or `minify_js` must be set to `true` for the feature you wish to use.
-
-**HTML Tag Preservation:** Sometimes you may want certain tags, like `<pre>`, to remain unminified so that things like code snippets remain intact. Simply set `minify_html_tags_to_preserve` to an array of tag names in your StaticPHP configuration.
+Note that for your CSS and JS minification in-place preferences to take effect, the build config settings `minify_css` and/or `minify_js` must be set to `true` for the feature you wish to use, or individually via the special MetaData key `minify` on a per-file basis.
 
 ## Bulk Redirects Filename
 

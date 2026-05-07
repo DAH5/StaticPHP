@@ -88,11 +88,11 @@ content_placeholder: {{ content }}
 </html>
 ```
 
-### HTML Code Minification Override
+### Code Minification Override
 
 For files where you wish the minification to differ from the site's global setting. Whether it be just specific files, or all except specific files, StaticPHP has you covered.
 
-Specify the MetaData key `minify` in the HTML and PHP files you wish the override to apply to and set the value to either `true` or `false` to enable or disable respectively, overriding the global setting for those specific files.
+Specify the MetaData key `minify` in the HTML and PHP files you wish the override to apply to and set the value to either `true` or `false` to enable or disable respectively, overriding the global setting for those specific files. Applies to HTML, CSS, and JavaScript files.
 
 #### Example
 
@@ -115,6 +115,60 @@ minify: true
     </body>
 </html>
 ```
+
+```css
+---
+minify: true
+---
+.minification
+{
+    font-family: sans-serif;
+}
+```
+
+```js
+---
+minify: true
+---
+function minification()
+{
+    alert( "Minification!" );
+}
+```
+
+### Minify In-Place Override
+
+Exclusive to CSS and JavaScript files, you can control on a per-file basis whether the contents of the file are output in minified form, or as-is with the minified varient in a separate file, overriding the global build config setting. Set `minify_inplace` to `true` to replace output with minified version, and set to `false` to output to a separate file ending in `.min.css` and `.min.js` respectively.
+
+Note: You must have minification enabled either in your build configuration or for the specific file for the in-place setting to take effect.
+
+#### Example
+
+```css
+---
+minify: true
+minify_inplace: false
+---
+.minification
+{
+    font-family: sans-serif;
+}
+```
+
+```js
+---
+minify: true
+minify_inplace: false
+---
+function minification()
+{
+    alert( "Minification!" );
+}
+```
+
+In some editors, the MetaData code in these files may flag errors or warnings, these can be safely ignored, as the MetaData settings at the top of the files are always removed from output.
+
+## Conclusion
 
 By following these steps, you can easily manage MetaData in your StaticPHP projects, enabling greater flexibility and control over your static website generation process. For more detailed information, refer to the accompanying documentation and guides.
 
