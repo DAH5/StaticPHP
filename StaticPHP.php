@@ -787,6 +787,7 @@ HTML;
 		$metadata = array();
 
 		$this->processMetaData( $this->metaDataDelimiter, $input_file_contents, $metadata, $input_file_contents );
+		$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $input_file_contents, $metadata, $input_file_contents );
 
 		$css = $input_file_contents;
 		$css_minified = '';
@@ -856,6 +857,7 @@ HTML;
 		$metadata = array();
 
 		$this->processMetaData( $this->metaDataDelimiter, $input_file_contents, $metadata, $input_file_contents );
+		$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $input_file_contents, $metadata, $input_file_contents );
 
 		$js = $input_file_contents;
 		$js_minified = '';

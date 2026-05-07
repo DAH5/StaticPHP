@@ -21,6 +21,8 @@ Keys and values are separated by a colon and a space for clarity. Replace `some_
 
 You can display MetaData values using placeholders. These are formed using the MetaData delimiter on either end, the word `metadata`, a dot, and then the key name. StaticPHP will replace this with the value associated with that key during the build process.
 
+#### HTML and PHP Files
+
 For example, given the MetaData above, you can retrieve these values like this:
 
 ```html
@@ -33,6 +35,66 @@ This will output:
 ```html
 <p>some value</p>
 <p>another value</p>
+```
+
+#### CSS Files
+
+For example, this CSS source code:
+
+```css
+---
+primary_color: #ff0000
+secondary_color: #ffff00
+---
+.metadata
+{
+    background-color: --- metadata.primary_color ---;
+    color: --- metadata.secondary_color ---;
+}
+
+.metadata-alt
+{
+    background-color: --- metadata.secondary_color ---;
+    color: --- metadata.primary_color ---;
+}
+```
+
+Will output this generated code:
+
+```css
+.metadata
+{
+    background-color: #ff0000;
+    color: #ffff00;
+}
+
+.metadata-alt
+{
+    background-color: #ffff00;
+    color: #ff0000;
+}
+```
+
+#### JavaScript Files
+
+For example, this JavaScript source code:
+
+```js
+---
+element_id: metadata
+text: Hello, world!
+---
+var metadata = document.getElementById( '--- metadata.element_id ---' );
+
+metadata.innerHTML = '--- metadata.text ---';
+```
+
+Will output this generated code:
+
+```js
+var metadata = document.getElementById( 'metadata' );
+
+metadata.innerHTML = 'Hello, world!';
 ```
 
 ## Special MetaData
