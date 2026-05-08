@@ -1213,58 +1213,76 @@ HTML;
 		$this->outputFile( $outputFilePath, $newContents );
 	}
 
-	private function processFunctionalBlocks( String $content, array $metadata )
+	private function processFunctionalBlocks( string $content, array $metadata )
 	{
 		echo "Processing Functional Blocks...\n";
 
-		$delimiter = $this->metaDataDelimiter;
+		$delimiter = preg_quote( $this->metaDataDelimiter, '/' );
 
-		$pattern = '/' . preg_quote($delimiter) . ' (\w+)\(([^)]*)\) ' . preg_quote($delimiter) . '(.*?)' . preg_quote($delimiter) . ' end\1 ' . preg_quote($delimiter) . '/s';
+		$tokenPattern = $delimiter . '\s*(?:\w+\([^)]*\)|end\w+)\s*' . $delimiter;
 
-		$output = preg_replace_callback(
-			$pattern, function( $matches ) use ( $delimiter, $metadata )
-			{
-				$funcName = $matches[ 1 ];
-				$paramStr = $matches[ 2 ];
-				$blockContent = $matches[ 3 ];
+		$pattern =
+			'/' .
+			$delimiter . '\s*(\w+)\(([^)]*)\)\s*' . $delimiter .
+			'((?:(?!' . $tokenPattern . ').)*)' .
+			$delimiter . '\s*end\1\s*' . $delimiter .
+			'/s';
 
-				switch( $funcName )
+		do
+		{
+			$changed = false;
+
+			$content = preg_replace_callback
+			(
+				$pattern,
+				function( $matches ) use ( $metadata, &$changed )
 				{
-					case 'loop':
-						$blockOutput = $this->processLoopFunctionalBlock( $this->parseFunctionalBlockParameters( $paramStr ), $blockContent );
+					$funcName = $matches[ 1 ];
+					$paramStr = $matches[ 2 ];
+					$blockContent = $matches[ 3 ];
 
-						if( $blockOutput !== null && $blockOutput !== "" )
-						{
-							return $blockOutput; // Replaced Content
-						}
+					$changed = true;
 
-						break;
-					case 'if':
-						$blockOutput = $this->processIfFunctionalBlock( $paramStr, $blockContent, $metadata );
+					switch( $funcName )
+					{
+						case 'loop':
+							$blockOutput = $this->processLoopFunctionalBlock
+							(
+								$this->parseFunctionalBlockParameters( $paramStr ),
+								$blockContent
+							);
 
-						if( $blockOutput !== null )
-						{
-							return $blockOutput; // Replaced Content
-						}
+							return $blockOutput ?? $matches[ 0 ];
 
-						break;
-				}
+						case 'if':
+							$blockOutput = $this->processIfFunctionalBlock
+							(
+								$paramStr,
+								$blockContent,
+								$metadata
+							);
 
-				return $matches[ 0 ]; // Original Content
-			},
-			$content
-		);
+							return $blockOutput ?? $matches[ 0 ];
+					}
+
+					return $matches[ 0 ];
+				},
+				$content
+			);
+
+		}
+		while( $changed );
 
 		echo "...Functional Blocks Processed." . PHP_EOL;
 
-		return $output;
+		return $content;
 	}
 
 	private function processLoopFunctionalBlock( array $params, String $loopContent )
 	{
 		if( ! isset( $params[ 'dir' ] ) || ! is_dir( $params[ 'dir' ] ) )
 		{
-			return null;
+			return '';
 		}
 
 		echo "Processing Loop Functional Block..." . PHP_EOL;
@@ -1331,7 +1349,7 @@ HTML;
 		{
 			$param = trim( $param );
 
-			if( strpos( $param, '==' ) )
+			if( strpos( $param, '==' ) !== false )
 			{
 				$param = preg_split( "/(\s*)(==)(\s*)/", $param );
 				$param_key = $param[ 0 ];
@@ -1352,7 +1370,7 @@ HTML;
 					$condition_state = false;
 				}
 			}
-			else if( strpos( $param, '!=' ) )
+			else if( strpos( $param, '!=' ) !== false )
 			{
 				$param = preg_split( "/(\s*)(!=)(\s*)/", $param );
 				$param_key = $param[ 0 ];
@@ -1363,7 +1381,7 @@ HTML;
 					$condition_state = false;
 				}
 
-				if( substr( trim( $param_value ), 0, 1 ) != "\"" && substr( trim( $param_value ), -1, 1 ) != "\"" )
+				if( substr( trim( $param_value ), 0, 1 ) != "\"" || substr( trim( $param_value ), -1, 1 ) != "\"" )
 				{
 					$condition_state = false;
 				}
