@@ -328,25 +328,25 @@ HTML;
 			{
 				$path_to_output_directory_item = substr( $path_to_output_directory_item, 0, -4 ) . ".html";
 				
-				$this->processPHP( $path_to_input_directory_item, $path_to_output_directory_item );
+				$this->processFile( $path_to_input_directory_item, $path_to_output_directory_item );
 				continue;
 			}
 
 			if( is_file( $path_to_input_directory_item ) && substr( $directory_item, -5 ) == ".html" )
 			{
-				$this->processHTML( $path_to_input_directory_item, $path_to_output_directory_item );
+				$this->processFile( $path_to_input_directory_item, $path_to_output_directory_item );
 				continue;
 			}
 
 			if( is_file( $path_to_input_directory_item ) && substr( $directory_item, -4 ) == ".css" )
 			{
-				$this->processCssFile( $path_to_input_directory_item, $path_to_output_directory_item );
+				$this->processFile( $path_to_input_directory_item, $path_to_output_directory_item );
 				continue;
 			}
 
 			if( is_file( $path_to_input_directory_item ) && substr( $directory_item, -3 ) == ".js" )
 			{
-				$this->processJsFile( $path_to_input_directory_item, $path_to_output_directory_item );
+				$this->processFile( $path_to_input_directory_item, $path_to_output_directory_item );
 				continue;
 			}
 
@@ -354,7 +354,7 @@ HTML;
 			{
 				$path_to_output_directory_item = substr( $path_to_output_directory_item, 0, -3 ) . ".html";
 
-				$this->processMarkdown( $path_to_input_directory_item, $path_to_output_directory_item );
+				$this->processFile( $path_to_input_directory_item, $path_to_output_directory_item );
 				continue;
 			}
 
@@ -612,23 +612,34 @@ HTML;
 
 		echo "✓ Wrote " . $written . " bytes → " . $path_to_file . "." . PHP_EOL;
 	}
-	
-	private function processPHP( $path_to_input_file, $path_to_output_file )
-	{
-		if( ! isset( $staticphp_path ) )
-			$staticphp_path = __DIR__;
 
+	private function processFile( $path_to_input_file, $path_to_output_file )
+	{
 		if( ! is_file( $path_to_input_file ) )
 			return;
-		
-		echo "Processing PHP File: " . $path_to_input_file . PHP_EOL;
-		
-		ob_start();
-		
-		include $path_to_input_file;
-		$input_file_contents = ob_get_contents();
-		
-		ob_end_clean();
+
+		$file_extension = $this->getFileExtensionFromPath( $path_to_input_file );
+
+		$file_type_name = $this->getFileTypeNameFromExtension( $file_extension );
+
+		if( ! $file_type_name )
+			return;
+
+		echo "Processing " . $file_type_name . " File: " . $path_to_input_file . PHP_EOL;
+
+		if( $file_extension == '.php' )
+		{
+			ob_start();
+			
+			include $path_to_input_file;
+			$input_file_contents = ob_get_contents();
+			
+			ob_end_clean();
+		}
+		else
+		{
+			$input_file_contents = file_get_contents( $path_to_input_file );
+		}
 
 		// Convert end of lines
 		$input_file_contents = $this->convertEndOfLines( $input_file_contents );
@@ -636,117 +647,50 @@ HTML;
 		$metadata = array();
 		
 		$this->processMetaData( $this->metaDataDelimiter, $input_file_contents, $metadata, $input_file_contents );
-		
-		$layout_contents = "";
-		$this->processLayoutMetaData( $metadata, $this->metaDataDelimiter, $layout_contents );
 
-		if( isset( $metadata['layout'] ) && $metadata['layout'] && substr( $metadata['layout'], -4 ) == ".php" )
-			$this->processTemporaryFile( $metadata['layout'], $layout_contents, $metadata );
-		
-		$this->processContentPlaceHolder( $metadata, $input_file_contents, $layout_contents );
-		
-		$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $input_file_contents, $metadata, $input_file_contents );
-
-		$input_file_contents = $this->processFunctionalBlocks( $input_file_contents, $metadata );
-
-		if( ! isset( $friendly_urls ) )
-			$friendly_urls = $this->friendly_urls;
-		
-		if( isset( $custom_output_path ) )
-			$this->processOutputPath( $path_to_output_file, $metadata, $friendly_urls, $custom_output_path );
-		else
-			$this->processOutputPath( $path_to_output_file, $metadata, $friendly_urls );
-
-		if( isset( $metadata[ 'remote_content_url' ] ) && isset( $metadata[ 'remote_content_placeholder' ] ) )
+		if( $file_extension == '.php' || $file_extension == '.html' || $file_extension == '.htm' || $file_extension == '.md' )
 		{
-			$remote_content_url = $metadata[ 'remote_content_url' ];
-			$remote_content_placeholder = $metadata[ 'remote_content_placeholder' ];
-			$remote_content_from_url = $this->getRemoteContentFromURL( $remote_content_url );
-			$remote_content_from_url = $this->convertEndOfLines( $remote_content_from_url );
+			$layout_contents = "";
+			$this->processLayoutMetaData( $metadata, $this->metaDataDelimiter, $layout_contents );
 
-			if( substr( $remote_content_url, -3 ) == ".md" )
-			{
-				$remote_markdown_content = $this->convertMarkdownToHTML( $remote_content_from_url, $metadata, $friendly_urls, $path_to_output_file );
-				$input_file_contents = str_replace( $remote_content_placeholder, $remote_markdown_content, $input_file_contents );
-			}
+			if( isset( $metadata['layout'] ) && $metadata['layout'] && substr( $metadata['layout'], -4 ) == ".php" )
+				$this->processTemporaryFile( $metadata['layout'], $layout_contents, $metadata );
+			
+			$this->processContentPlaceHolder( $metadata, $input_file_contents, $layout_contents );
+
+			if( ! isset( $friendly_urls ) )
+				$friendly_urls = $this->friendly_urls;
+
+			if( $file_extension == '.md' )
+				$input_file_contents = $this->convertMarkdownToHTML( $input_file_contents, $metadata, $friendly_urls );
+
+			if( isset( $custom_output_path ) )
+				$this->processOutputPath( $path_to_output_file, $metadata, $friendly_urls, $custom_output_path );
+			else
+				$this->processOutputPath( $path_to_output_file, $metadata, $friendly_urls );
 		}
-		
-		if( isset( $metadata[ 'redirect' ] ) )
-		{
-			// File Path, Old Path, New Destination
-			$this->processRedirection( $path_to_output_file, str_replace( $this->output_dir_path, '', $path_to_output_file ), $metadata[ 'redirect' ] );
-			return;
-		}
-		
-		$should_minify = $this->minify_html;
-
-		if( isset( $metadata[ 'minify' ] ) && $metadata[ 'minify' ] == 'true' )
-			$should_minify = true;
-		if( isset( $metadata[ 'minify' ] ) && $metadata[ 'minify' ] == 'false' )
-			$should_minify = false;
-		
-		if( $should_minify )
-			$input_file_contents = $this->minifyHTML( $input_file_contents );
-
-		if( $this->test_mode )
-		{
-			$this->prepareForTest( $input_file_contents, $path_to_output_file );
-			return;
-		}
-		
-		$this->outputFile( $path_to_output_file, $input_file_contents );
-	}
-
-	private function processHTML( $path_to_input_file, $path_to_output_file )
-	{
-		if( ! is_file( $path_to_input_file ) )
-			return;
-
-		echo "Processing HTML File: " . $path_to_input_file . PHP_EOL;
-
-		$input_file_contents = file_get_contents( $path_to_input_file );
-
-		// Convert end of lines
-		$input_file_contents = $this->convertEndOfLines( $input_file_contents );
-
-		$metadata = array();
-
-		$this->processMetaData( $this->metaDataDelimiter, $input_file_contents, $metadata, $input_file_contents );
-
-		$layout_contents = "";
-		$this->processLayoutMetaData( $metadata, $this->metaDataDelimiter, $layout_contents );
-
-		if( isset( $metadata['layout'] ) && $metadata['layout'] && substr( $metadata['layout'], -4 ) == ".php" )
-			$this->processTemporaryFile( $metadata['layout'], $layout_contents, $metadata );
-
-		$this->processContentPlaceHolder( $metadata, $input_file_contents, $layout_contents );
 
 		$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $input_file_contents, $metadata, $input_file_contents );
 
-		$input_file_contents = $this->processFunctionalBlocks( $input_file_contents, $metadata );
-
-		if( ! isset( $friendly_urls ) )
-			$friendly_urls = $this->friendly_urls;
-
-		if( isset( $custom_output_path ) )
-			$this->processOutputPath( $path_to_output_file, $metadata, $friendly_urls, $custom_output_path );
-		else
-			$this->processOutputPath( $path_to_output_file, $metadata, $friendly_urls );
-		
-		if( isset( $metadata[ 'remote_content_url' ] ) && isset( $metadata[ 'remote_content_placeholder' ] ) )
+		if( $file_extension == '.php' || $file_extension == '.html' || $file_extension == '.htm' )
 		{
-			$remote_content_url = $metadata[ 'remote_content_url' ];
-			$remote_content_placeholder = $metadata[ 'remote_content_placeholder' ];
-			$remote_content_from_url = $this->getRemoteContentFromURL( $remote_content_url );
-			$remote_content_from_url = $this->convertEndOfLines( $remote_content_from_url );
+			$input_file_contents = $this->processFunctionalBlocks( $input_file_contents, $metadata );
 
-			if( substr( $remote_content_url, -3 ) == ".md" )
+			if( isset( $metadata[ 'remote_content_url' ] ) && isset( $metadata[ 'remote_content_placeholder' ] ) )
 			{
-				$remote_markdown_content = $this->convertMarkdownToHTML( $remote_content_from_url, $metadata, $friendly_urls, $path_to_output_file );
-				$input_file_contents = str_replace( $remote_content_placeholder, $remote_markdown_content, $input_file_contents );
+				$remote_content_url = $metadata[ 'remote_content_url' ];
+				$remote_content_placeholder = $metadata[ 'remote_content_placeholder' ];
+				$remote_content_from_url = $this->getRemoteContentFromURL( $remote_content_url );
+				$remote_content_from_url = $this->convertEndOfLines( $remote_content_from_url );
+
+				if( substr( $remote_content_url, -3 ) == ".md" )
+				{
+					$remote_markdown_content = $this->convertMarkdownToHTML( $remote_content_from_url, $metadata, $friendly_urls );
+					$input_file_contents = str_replace( $remote_content_placeholder, $remote_markdown_content, $input_file_contents );
+				}
 			}
 		}
-		
+
 		if( isset( $metadata[ 'redirect' ] ) )
 		{
 			// File Path, Old Path, New Destination
@@ -754,222 +698,67 @@ HTML;
 			return;
 		}
 
-		$should_minify = $this->minify_html;
+		$should_minify = false;
+
+		if( $file_extension == '.php' || $file_extension == '.html' || $file_extension == '.htm' || $file_extension == '.md' )
+			$should_minify = $this->minify_html;
+		if( $file_extension == '.css' )
+			$should_minify = $this->minify_css;
+		if( $file_extension == '.js' )
+			$should_minify = $this->minify_js;
 
 		if( isset( $metadata[ 'minify' ] ) && $metadata[ 'minify' ] == 'true' )
 			$should_minify = true;
 		if( isset( $metadata[ 'minify' ] ) && $metadata[ 'minify' ] == 'false' )
 			$should_minify = false;
 		
-		if( $should_minify )
-			$input_file_contents = $this->minifyHTML( $input_file_contents );
+		if( $should_minify && ( $file_extension == '.php' || $file_extension == '.html' || $file_extension == '.htm' || $file_extension == '.md' ) )
+			$input_file_contents_minified = $this->minifyHTML( $input_file_contents );
+		if( $should_minify && $file_extension == '.css' )
+			$input_file_contents_minified = $this->minifyCSS( $input_file_contents );
+		if( $should_minify && $file_extension == '.js' )
+			$input_file_contents_minified = $this->minifyJS( $input_file_contents );
 
-		if( $this->test_mode )
+		$should_minify_inplace = true;
+
+		if( $file_extension == '.css' || $file_extension == '.js' )
 		{
-			$this->prepareForTest( $input_file_contents, $path_to_output_file );
-			return;
+			if( $file_extension == '.css' )
+				$should_minify_inplace = $this->minify_css_inplace;
+			if( $file_extension == '.js' )
+				$should_minify_inplace = $this->minify_js_inplace;
+
+			if( isset( $metadata[ 'minify_inplace' ] ) && $metadata[ 'minify_inplace' ] == 'true' )
+				$should_minify_inplace = true;
+			if( isset( $metadata[ 'minify_inplace' ] ) && $metadata[ 'minify_inplace' ] == 'false' )
+				$should_minify_inplace = false;
 		}
-		
-		$this->outputFile( $path_to_output_file, $input_file_contents );
-	}
-
-	private function processCssFile( $path_to_input_file, $path_to_output_file )
-	{
-		if( ! is_file( $path_to_input_file ) )
-			return;
-
-		echo "Processing CSS File: " . $path_to_input_file . PHP_EOL;
-
-		$input_file_contents = file_get_contents( $path_to_input_file );
-
-		$input_file_contents = $this->convertEndOfLines( $input_file_contents );
-
-		$metadata = array();
-
-		$this->processMetaData( $this->metaDataDelimiter, $input_file_contents, $metadata, $input_file_contents );
-		$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $input_file_contents, $metadata, $input_file_contents );
-
-		$css = $input_file_contents;
-		$css_minified = '';
-
-		$should_minify = $this->minify_css;
-
-		if( isset( $metadata[ 'minify' ] ) && $metadata[ 'minify' ] == 'true' )
-			$should_minify = true;
-		if( isset( $metadata[ 'minify' ] ) && $metadata[ 'minify' ] == 'false' )
-			$should_minify = false;
-
-		if( $should_minify )
-			$css_minified = $this->minifyCSS( $css );
-
-		$should_minify_inplace = $this->minify_css_inplace;
-
-		if( isset( $metadata[ 'minify_inplace' ] ) && $metadata[ 'minify_inplace' ] == 'true' )
-			$should_minify_inplace = true;
-		if( isset( $metadata[ 'minify_inplace' ] ) && $metadata[ 'minify_inplace' ] == 'false' )
-			$should_minify_inplace = false;
 
 		if( $should_minify && $should_minify_inplace )
 		{
 			if( $this->test_mode )
 			{
-				$this->prepareForTest( $css_minified, $path_to_output_file );
+				$this->prepareForTest( $input_file_contents_minified, $path_to_output_file );
 				return;
 			}
 
-			$this->outputFile( $path_to_output_file, $css_minified );
+			$this->outputFile( $path_to_output_file, $input_file_contents_minified );
 			return;
 		}
-		else if( $should_minify && ! $should_minify_inplace )
+		else if( $should_minify && ! $should_minify_inplace && ( $file_extension == '.css' || $file_extension == '.js' ) )
 		{
 			if( $this->test_mode )
 			{
-				$this->prepareForTest( $css_minified, str_replace( ".css", ".min.css", $path_to_output_file ) );
-				$this->prepareForTest( $css, $path_to_output_file );
+				$this->prepareForTest( $input_file_contents_minified, str_replace( $file_extension, ".min" . $file_extension, $path_to_output_file ) );
+				$this->prepareForTest( $input_file_contents, $path_to_output_file );
 				return;
 			}
 
-			$this->outputFile( str_replace( ".css", ".min.css", $path_to_output_file ), $css_minified );
-			$this->outputFile( $path_to_output_file, $css );
+			$this->outputFile( str_replace( $file_extension, ".min" . $file_extension, $path_to_output_file ), $input_file_contents_minified );
+			$this->outputFile( $path_to_output_file, $input_file_contents );
 			return;
 		}
 
-		if( $this->test_mode )
-		{
-			$this->prepareForTest( $css, $path_to_output_file );
-			return;
-		}
-
-		$this->outputFile( $path_to_output_file, $css );
-	}
-
-	private function processJsFile( $path_to_input_file, $path_to_output_file )
-	{
-		if( ! is_file( $path_to_input_file ) )
-			return;
-
-		echo "Processing JavaScript File: " . $path_to_input_file . PHP_EOL;
-
-		$input_file_contents = file_get_contents( $path_to_input_file );
-
-		$input_file_contents = $this->convertEndOfLines( $input_file_contents );
-
-		$metadata = array();
-
-		$this->processMetaData( $this->metaDataDelimiter, $input_file_contents, $metadata, $input_file_contents );
-		$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $input_file_contents, $metadata, $input_file_contents );
-
-		$js = $input_file_contents;
-		$js_minified = '';
-
-		$should_minify = $this->minify_js;
-
-		if( isset( $metadata[ 'minify' ] ) && $metadata[ 'minify' ] == 'true' )
-			$should_minify = true;
-		if( isset( $metadata[ 'minify' ] ) && $metadata[ 'minify' ] == 'false' )
-			$should_minify = false;
-
-		if( $should_minify )
-			$js_minified = $this->minifyJS( $js );
-
-		$should_minify_inplace = $this->minify_js_inplace;
-
-		if( isset( $metadata[ 'minify_inplace' ] ) && $metadata[ 'minify_inplace' ] == 'true' )
-			$should_minify_inplace = true;
-		if( isset( $metadata[ 'minify_inplace' ] ) && $metadata[ 'minify_inplace' ] == 'false' )
-			$should_minify_inplace = false;
-
-		if( $should_minify && $should_minify_inplace )
-		{
-			if( $this->test_mode )
-			{
-				$this->prepareForTest( $js_minified, $path_to_output_file );
-				return;
-			}
-
-			$this->outputFile( $path_to_output_file, $js_minified );
-			return;
-		}
-		else if( $should_minify && ! $should_minify_inplace )
-		{
-			if( $this->test_mode )
-			{
-				$this->prepareForTest( $js_minified, str_replace( ".js", ".min.js", $path_to_output_file ) );
-				$this->prepareForTest( $js, $path_to_output_file );
-				return;
-			}
-
-			$this->outputFile( str_replace( ".js", ".min.js", $path_to_output_file ), $js_minified );
-			$this->outputFile( $path_to_output_file, $js );
-			return;
-		}
-
-		if( $this->test_mode )
-		{
-			$this->prepareForTest( $js, $path_to_output_file );
-			return;
-		}
-
-		$this->outputFile( $path_to_output_file, $js );
-	}
-
-	private function processMarkdown( $path_to_input_file, $path_to_output_file )
-	{
-		if( ! is_file( $path_to_input_file ) )
-			return;
-
-		echo "Processing Markdown File: " . $path_to_input_file . PHP_EOL;
-
-		$input_file_contents = file_get_contents( $path_to_input_file );
-
-		// Convert end of lines
-		$input_file_contents = $this->convertEndOfLines( $input_file_contents );
-
-		$metadata = array();
-
-		$this->processMetaData( $this->metaDataDelimiter, $input_file_contents, $metadata, $input_file_contents );
-
-		if( ! isset( $friendly_urls ) )
-			$friendly_urls = $this->friendly_urls;
-
-		$input_file_contents = $this->convertMarkdownToHTML( $input_file_contents, $metadata, $friendly_urls );
-
-		$layout_contents = "";
-		$this->processLayoutMetaData( $metadata, $this->metaDataDelimiter, $layout_contents );
-
-		if( isset( $metadata['layout'] ) && $metadata['layout'] && substr( $metadata['layout'], -4 ) == ".php" )
-			$this->processTemporaryFile( $metadata['layout'], $layout_contents, $metadata );
-
-		$this->processContentPlaceHolder( $metadata, $input_file_contents, $layout_contents );
-
-		$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $input_file_contents, $metadata, $input_file_contents );
-
-		$this->processOutputPath( $path_to_output_file, $metadata, $friendly_urls );
-		
-		if( isset( $metadata[ 'remote_content_url' ] ) && isset( $metadata[ 'remote_content_placeholder' ] ) )
-		{
-			$remote_content_url = $metadata[ 'remote_content_url' ];
-			$remote_content_placeholder = $metadata[ 'remote_content_placeholder' ];
-			$remote_content_from_url = $this->getRemoteContentFromURL( $remote_content_url );
-			$remote_content_from_url = $this->convertEndOfLines( $remote_content_from_url );
-
-			if( substr( $remote_content_url, -3 ) == ".md" )
-			{
-				$remote_markdown_content = $this->convertMarkdownToHTML( $remote_content_from_url, $metadata, $friendly_urls );
-				$input_file_contents = str_replace( $remote_content_placeholder, $remote_markdown_content, $input_file_contents );
-			}
-		}
-
-		if( isset( $metadata[ 'redirect' ] ) )
-		{
-			// File Path, Old Path, New Destination
-			$this->processRedirection( $path_to_output_file, str_replace( $this->output_dir_path, '', $path_to_output_file ), $metadata[ 'redirect' ] );
-			return;
-		}
-		
-		if( $this->minify_html === true )
-			$input_file_contents = $this->minifyHTML( $input_file_contents );
-		
 		if( $this->test_mode )
 		{
 			$this->prepareForTest( $input_file_contents, $path_to_output_file );
@@ -2062,6 +1851,33 @@ HTML;
 		echo "TEST PASSED!" . PHP_EOL;
 
 		return;
+	}
+
+	public function getFileExtensionFromPath( string $path ): string
+	{
+		if( ! is_file( $path ) )
+			return '';
+		return substr( $path, strrpos( $path, '.' ) );
+	}
+
+	public function getFileTypeNameFromExtension( string $fileExtension ): string
+	{
+		if( $fileExtension == '' )
+			return '';
+
+		$fileTypes = array
+		(
+			'.php' => 'PHP',
+			'.html' => 'HTML',
+			'.htm' => 'HTML',
+			'.css' => 'CSS',
+			'.js' => 'JavaScript',
+			'.md' => 'Markdown',
+		);
+
+		if( ! array_key_exists( $fileExtension, $fileTypes ) )
+			return '';
+		return $fileTypes[ $fileExtension ];
 	}
 }
 
