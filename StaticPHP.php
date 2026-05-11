@@ -30,6 +30,8 @@ class StaticPHP
 	private $tests_unknown = array();
 	private $tests_failed = array();
 
+	private $tests_metadata = array();
+
 	public function __construct()
 	{
 		$args = func_get_args();
@@ -222,6 +224,9 @@ class StaticPHP
 				$metadata[ 'successful_tests_paths_list' ] = $successful_tests_paths_list;
 				$metadata[ 'successful_results_count' ] = $successful_results_count;
 
+				$metadata[ 'passed_tests_paths_list' ] = $successful_tests_paths_list;
+				$metadata[ 'passed_results_count' ] = $successful_results_count;
+
 				$metadata[ 'failed_tests_paths_list' ] = $failed_tests_paths_list;
 				$metadata[ 'failed_results_count' ] = $failed_results_count;
 
@@ -276,6 +281,7 @@ HTML;
 
 				$this->processMetaData( $this->metaDataDelimiter, $resultsHTML, $metadata, $resultsHTML );
 				$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $resultsHTML, $metadata, $resultsHTML );
+				$resultsHTML = $this->processFunctionalBlocks( $resultsHTML, $metadata );
 
 				$should_minify = $this->minify_html;
 
@@ -810,7 +816,7 @@ HTML;
 		{
 			if( $this->test_mode )
 			{
-				$this->prepareForTest( $input_file_contents_minified, $path_to_output_file );
+				$this->prepareForTest( $input_file_contents_minified, $path_to_output_file, $metadata );
 				return;
 			}
 
@@ -821,8 +827,8 @@ HTML;
 		{
 			if( $this->test_mode )
 			{
-				$this->prepareForTest( $input_file_contents_minified, str_replace( $file_extension, ".min" . $file_extension, $path_to_output_file ) );
-				$this->prepareForTest( $input_file_contents, $path_to_output_file );
+				$this->prepareForTest( $input_file_contents_minified, str_replace( $file_extension, ".min" . $file_extension, $path_to_output_file ), $metadata );
+				$this->prepareForTest( $input_file_contents, $path_to_output_file, $metadata );
 				return;
 			}
 
@@ -833,7 +839,7 @@ HTML;
 
 		if( $this->test_mode )
 		{
-			$this->prepareForTest( $input_file_contents, $path_to_output_file );
+			$this->prepareForTest( $input_file_contents, $path_to_output_file, $metadata );
 			return;
 		}
 
@@ -1141,48 +1147,95 @@ HTML;
 
 	private function processLoopFunctionalBlock( array $params, String $loopContent )
 	{
-		if( ! isset( $params[ 'dir' ] ) || ! is_dir( $params[ 'dir' ] ) )
-		{
-			return '';
-		}
-
 		echo "Processing Loop Functional Block..." . PHP_EOL;
-
-		$dir = __DIR__ . DIRECTORY_SEPARATOR . $params[ 'dir' ];
-
-		$dir = str_replace( [ "\\", "/" ], DIRECTORY_SEPARATOR, $dir );
 
 		$output = array();
 
-		$output = $this->processLoopDir( $dir, $params, $loopContent, $output );
-
-		if( isset( $params[ 'json' ] ) )
+		if( isset( $params[ 'dir' ] ) )
 		{
-			$jsonFilePath = str_replace( [ "\\", "/" ], DIRECTORY_SEPARATOR, $params[ 'json' ] );
-			
-			$jsonFilePathParts = explode( DIRECTORY_SEPARATOR, $jsonFilePath );
-			
-			$currentJsonFilePath = "";
-			
-			for( $cjfp = 0; $cjfp < count( $jsonFilePathParts ) -1; $cjfp++ )
+			$dir = __DIR__ . DIRECTORY_SEPARATOR . $params[ 'dir' ];
+
+			$dir = str_replace( [ "\\", "/" ], DIRECTORY_SEPARATOR, $dir );
+
+			$output = $this->processLoopDir( $dir, $params, $loopContent, $output );
+
+			if( isset( $params[ 'json' ] ) )
 			{
-				$currentJsonFilePath .= $jsonFilePathParts[ $cjfp ] . DIRECTORY_SEPARATOR;
+				$jsonFilePath = str_replace( [ "\\", "/" ], DIRECTORY_SEPARATOR, $params[ 'json' ] );
 				
-				if( ! is_dir( $currentJsonFilePath ) && $cjfp != count( $jsonFilePathParts ) -1 )
+				$jsonFilePathParts = explode( DIRECTORY_SEPARATOR, $jsonFilePath );
+				
+				$currentJsonFilePath = "";
+				
+				for( $cjfp = 0; $cjfp < count( $jsonFilePathParts ) -1; $cjfp++ )
 				{
-					mkdir( $currentJsonFilePath );
+					$currentJsonFilePath .= $jsonFilePathParts[ $cjfp ] . DIRECTORY_SEPARATOR;
+					
+					if( ! is_dir( $currentJsonFilePath ) && $cjfp != count( $jsonFilePathParts ) -1 )
+					{
+						mkdir( $currentJsonFilePath );
+					}
+				}
+				
+				if( $this->test_mode )
+				{
+					$this->prepareForTest( json_encode( $output ), $jsonFilePath );
+				}
+				else
+				{
+					echo "Outputting JSON File: " . $jsonFilePath . PHP_EOL;
+					file_put_contents( $jsonFilePath, json_encode( $output ) );
+					echo "JSON File Complete.\n";
 				}
 			}
-			
-			if( $this->test_mode )
+		}
+		else if( isset( $params[ 'test_results' ] ) && $this->test_mode == true )
+		{
+			$test_results = $params[ 'test_results' ];
+
+			if( $test_results == 'success' || $test_results == 'passed' )
 			{
-				$this->prepareForTest( json_encode( $output ), $jsonFilePath );
+				for( $trs = 0; $trs < count( $this->tests_successful ); $trs++ )
+				{
+					$content = $loopContent;
+					$path_to_successful_test_file = $this->tests_successful[ $trs ];
+					$successful_test_metadata = array();
+					$successful_test_metadata = isset( $this->tests_metadata[ $path_to_successful_test_file ] ) ? $this->tests_metadata[ $path_to_successful_test_file ] : array();
+					if( ! isset( $successful_test_metadata[ 'uri' ] ) )
+						$successful_test_metadata[ 'uri' ] = str_replace( $this->test_mode_output_dir_path . DIRECTORY_SEPARATOR, '', $path_to_successful_test_file );
+					$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $content, $successful_test_metadata, $content, 'test' );
+					$output[][ 'outputContent' ] = $content;
+				}
 			}
-			else
+
+			if( $test_results == 'unknown' )
 			{
-				echo "Outputting JSON File: " . $jsonFilePath . PHP_EOL;
-				file_put_contents( $jsonFilePath, json_encode( $output ) );
-				echo "JSON File Complete.\n";
+				for( $tru = 0; $tru < count( $this->tests_unknown ); $tru++ )
+				{
+					$content = $loopContent;
+					$path_to_unknown_test_file = $this->tests_unknown[ $tru ];
+					$unknown_test_metadata = array();
+					$unknown_test_metadata = isset( $this->tests_metadata[ $path_to_unknown_test_file ] ) ? $this->tests_metadata[ $path_to_unknown_test_file ] : array();
+					if( ! isset( $unknown_test_metadata[ 'uri' ] ) )
+						$unknown_test_metadata[ 'uri' ] = str_replace( $this->test_mode_output_dir_path . DIRECTORY_SEPARATOR, '', $path_to_unknown_test_file );
+					$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $content, $unknown_test_metadata, $content, 'test' );
+					$output[][ 'outputContent' ] = $content;
+				}
+			}
+
+			if( $test_results == 'failed' )
+			{
+				for( $trf = 0; $trf < count( $this->tests_failed ); $trf++ )
+				{
+					$content = $loopContent;
+					$path_to_failed_test_file = $this->tests_failed[ $trf ];
+					$failed_test_metadata = array();
+					$failed_test_metadata = isset( $this->tests_metadata[ $path_to_failed_test_file ] ) ? $this->tests_metadata[ $path_to_failed_test_file ] : array();
+					if( ! isset( $failed_test_metadata[ 'uri' ] ) )
+						$failed_test_metadata[ 'uri' ] = str_replace( $this->test_mode_output_dir_path . DIRECTORY_SEPARATOR, '', $path_to_failed_test_file );
+					$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $content, $failed_test_metadata, $content, 'test' );
+					$output[][ 'outputContent' ] = $content;
+				}
 			}
 		}
 
@@ -1858,7 +1911,7 @@ HTML;
 		return $html;
 	}
 
-	private function prepareForTest( $input_contents, $path_to_output_file )
+	private function prepareForTest( $input_contents, $path_to_output_file, $metadata = array() )
 	{
 		echo "Preparing for test..." . PHP_EOL;
 
@@ -1880,10 +1933,10 @@ HTML;
 		
 		$expected_file_contents = file_get_contents( $expected_file_path );
 
-		$this->runTest( $input_contents, $expected_file_contents, $path_to_output_file );
+		$this->runTest( $input_contents, $expected_file_contents, $path_to_output_file, $metadata );
 	}
 
-	private function runTest( $input_contents, $expected_contents, $path_to_output_file )
+	private function runTest( $input_contents, $expected_contents, $path_to_output_file, $metadata = array() )
 	{
 		echo "Running test..." . PHP_EOL;
 
@@ -1906,17 +1959,20 @@ HTML;
 			{
 				$path_to_output_file = $path_to_output_dir . "FAILED." . $output_file_name;
 				$this->tests_failed[] = $path_to_output_file;
+				echo "TEST FAILED: Check output file!" . PHP_EOL;
 			}
 
-			$this->outputFile( $path_to_output_file, $input_contents );
+			$this->tests_metadata[ $path_to_output_file ] = $metadata;
 
-			echo "TEST FAILED: Check output file!" . PHP_EOL;
+			$this->outputFile( $path_to_output_file, $input_contents );
 
 			return;
 		}
 
 		$path_to_output_file = $path_to_output_dir . "PASSED." . $output_file_name;
 		$this->tests_successful[] = $path_to_output_file;
+
+		$this->tests_metadata[ $path_to_output_file ] = $metadata;
 
 		$this->outputFile( $path_to_output_file, $input_contents );
 

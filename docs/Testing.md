@@ -83,6 +83,23 @@ The template can utilise special [MetaData](MetaData.md) keys exclusive to the t
 - **unknown_tests_paths_list**: An HTML unordered list of paths to test output files that were unknown in whether they succeeded or failed.
 - **failed_tests_paths_list**: An HTML unordered list of paths to test output files that failed.
 
+- **passed_results_count**: Alias of `successful_results_count`.
+- **passed_tests_paths_list**: Alias of `successful_tests_paths_list`.
+
+#### Loop Functional Blocks
+
+You can use StaticPHP's Loop [Functional Blocks](Functional-Blocks.md) feature to really extend how results are displayed in the HTML file. Set `test_results` to either `success`, `passed`, `unknown`, `failed`, depending on which test status you wish to display. Both `success` and `passed` are aliases of each other, so use whichever you prefer.
+
+Access and display [MetaData](MetaData.md) values within each test file using placeholders and the `test` prefix, instead of the default `metadata` prefix. The `uri` key will contain the file path relative to the `test_mode_output_dir_path` set in your build configuration.
+
+**Example**
+
+```html
+--- loop( test_results = "success" ) ---
+    <p>--- test.uri ---</p>
+--- endloop ---
+```
+
 ## Conclusion
 
 Hopefully you have fun testing StaticPHP's features to help keep them working as expected.
