@@ -63,6 +63,26 @@ $configurable_options[ 'test_mode_output_results_file' ] = true;
 $configurable_options[ 'test_mode_results_file_path' ] = 'tests/output/results.html';
 ```
 
+### Custom Results Template
+
+StaticPHP ships with a built-in HTML template for the results file, and it will be output at the end of all the tests if you have enabled the feature, but you may prefer to use your own template.
+
+In your launcher configuration, set `test_mode_results_template_file_path` to a valid path to an HTML file. If the template file is within your input directory, you may want to make it part of paths being ignored as defined in your launcher configuration. More on ignoring paths on the [Customisation](Customisation.md) page.
+
+```php
+$configurable_options[ 'test_mode_results_template_file_path' ] = 'tests/input/_includes/_results_template.html';
+```
+
+The template can utilise special [MetaData](MetaData.md) keys exclusive to the test results template to display information.
+
+- **successful_results_count**: The number of tests that were successful.
+- **unknown_results_count**: The number of tests that were unknown in whether they succeeded or failed.
+- **failed_results_count**: The number of tests that failed.
+
+- **successful_tests_paths_list**: An HTML unordered list of paths to test output files that were successful.
+- **unknown_tests_paths_list**: An HTML unordered list of paths to test output files that were unknown in whether they succeeded or failed.
+- **failed_tests_paths_list**: An HTML unordered list of paths to test output files that failed.
+
 ## Conclusion
 
 Hopefully you have fun testing StaticPHP's features to help keep them working as expected.

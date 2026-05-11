@@ -21,6 +21,7 @@ class StaticPHP
 	private $test_mode_expected_dir_path = "tests/expected";
 	private $test_mode_output_dir_path = "tests/output";
 	private $test_mode_output_results_file = true;
+	private $test_mode_results_template_file_path = "";
 	private $test_mode_results_file_path = "tests/output/results.html";
 	private $generate_standard_redirects_file = false;
 	private $generate_htaccess_redirections = false;
@@ -90,6 +91,8 @@ class StaticPHP
 				$this->test_mode_output_dir_path = $configurable_options[ 'test_mode_output_dir_path' ];
 			if( isset( $configurable_options[ 'test_mode_output_results_file' ] ) && is_bool( $configurable_options[ 'test_mode_output_results_file' ] ) )
 				$this->test_mode_output_results_file = $configurable_options[ 'test_mode_output_results_file' ];
+			if( isset( $configurable_options[ 'test_mode_results_template_file_path' ] ) && is_string( $configurable_options[ 'test_mode_results_template_file_path' ] ) && trim( $configurable_options[ 'test_mode_results_template_file_path' ] ) != "" )
+				$this->test_mode_results_template_file_path = $configurable_options[ 'test_mode_results_template_file_path' ];
 			if( isset( $configurable_options[ 'test_mode_results_file_path' ] ) && is_string( $configurable_options[ 'test_mode_results_file_path' ] ) && trim( $configurable_options[ 'test_mode_results_file_path' ] ) != "" )
 				$this->test_mode_results_file_path = $configurable_options[ 'test_mode_results_file_path' ];
 			if( isset( $configurable_options[ 'generate_standard_redirects_file' ] ) && is_bool( $configurable_options[ 'generate_standard_redirects_file' ] ) )
@@ -162,17 +165,68 @@ class StaticPHP
 			$this->emptyDirectory( $this->test_mode_output_dir_path );
 			$this->processDirectory( $this->test_mode_input_dir_path, $this->test_mode_output_dir_path );
 
-			echo "Test results: " . count( $this->tests_successful ) . " successful, " . count( $this->tests_failed ) . " failed, " . count( $this->tests_unknown ) . " unknown." . PHP_EOL . PHP_EOL;
-
 			if( isset( $this->test_mode_results_file_path ) && $this->test_mode_results_file_path && $this->test_mode_output_results_file )
 			{
-				$successful_results = implode( "<br>" . PHP_EOL, $this->tests_successful );
-				$failed_results = implode( "<br>" . PHP_EOL, $this->tests_failed );
-				$unknown_results = implode( "<br>" . PHP_EOL, $this->tests_unknown );
+				$successful_tests_paths_list = '';
+
+				for( $ts = 0; $ts < count( $this->tests_successful ); $ts++ )
+				{
+					$test_successful = $this->tests_successful[ $ts ];
+
+					if( $successful_tests_paths_list == '' )
+						$successful_tests_paths_list = '<ul>' . PHP_EOL;
+
+					$successful_tests_paths_list .= '<li>' . str_replace( $this->test_mode_output_dir_path . DIRECTORY_SEPARATOR, '', $test_successful ) . '</li>' . PHP_EOL;
+
+					if( $ts == count( $this->tests_successful ) - 1 )
+						$successful_tests_paths_list .= '</ul>' . PHP_EOL;
+				}
+
+				$failed_tests_paths_list = '';
+
+				for( $tf = 0; $tf < count( $this->tests_failed ); $tf++ )
+				{
+					$test_failed = $this->tests_failed[ $tf ];
+
+					if( $failed_tests_paths_list == '' )
+						$failed_tests_paths_list = '<ul>' . PHP_EOL;
+
+					$failed_tests_paths_list .= '<li>' . str_replace( $this->test_mode_output_dir_path . DIRECTORY_SEPARATOR, '', $test_failed ) . '</li>' . PHP_EOL;
+
+					if( $tf == count( $this->tests_failed ) - 1 )
+						$failed_tests_paths_list .= '</ul>' . PHP_EOL;
+				}
+
+				$unknown_tests_paths_list = '';
+
+				for( $tu = 0; $tu < count( $this->tests_unknown ); $tu++ )
+				{
+					$test_unknown = $this->tests_unknown[ $tu ];
+
+					if( $unknown_tests_paths_list == '' )
+						$unknown_tests_paths_list = '<ul>' . PHP_EOL;
+
+					$unknown_tests_paths_list .= '<li>' . str_replace( $this->test_mode_output_dir_path . DIRECTORY_SEPARATOR, '', $test_unknown ) . '</li>' . PHP_EOL;
+
+					if( $tu == count( $this->tests_unknown ) - 1 )
+						$unknown_tests_paths_list .= '</ul>' . PHP_EOL;
+				}
 
 				$successful_results_count = count( $this->tests_successful );
 				$failed_results_count = count( $this->tests_failed );
-				$unknow_results_count = count( $this->tests_unknown );
+				$unknown_results_count = count( $this->tests_unknown );
+
+				$metadata = array();
+				$metaDataDelimiter = $this->metaDataDelimiter;
+
+				$metadata[ 'successful_tests_paths_list' ] = $successful_tests_paths_list;
+				$metadata[ 'successful_results_count' ] = $successful_results_count;
+
+				$metadata[ 'failed_tests_paths_list' ] = $failed_tests_paths_list;
+				$metadata[ 'failed_results_count' ] = $failed_results_count;
+
+				$metadata[ 'unknown_tests_paths_list' ] = $unknown_tests_paths_list;
+				$metadata[ 'unknown_results_count' ] = $unknown_results_count;
 
 				$resultsHTML = <<<HTML
 <!DOCTYPE html>
@@ -200,25 +254,43 @@ class StaticPHP
 
 			<hr>
 
-			<h2 style="color: green;">$successful_results_count Successful</h2>
+			<h2 style="color: green;">$metaDataDelimiter metadata.successful_results_count $metaDataDelimiter Successful</h2>
 			
-			$successful_results
+			$metaDataDelimiter metadata.successful_tests_paths_list $metaDataDelimiter
 
-			<h2 style="color: red;">$failed_results_count Failed</h2>
+			<h2 style="color: red;">$metaDataDelimiter metadata.failed_results_count $metaDataDelimiter Failed</h2>
 			
-			$failed_results
+			$metaDataDelimiter metadata.failed_tests_paths_list $metaDataDelimiter
 
-			<h2 style="color: gray;">$unknow_results_count Unknown</h2>
+			<h2 style="color: gray;">$metaDataDelimiter metadata.unknown_results_count $metaDataDelimiter Unknown</h2>
 			
-			$unknown_results
+			$metaDataDelimiter metadata.unknown_tests_paths_list $metaDataDelimiter
 		</div>
 	</body>
 </html>
 
 HTML;
 
+				if( $this->test_mode_results_template_file_path && is_file( $this->test_mode_results_template_file_path ) )
+					$resultsHTML = file_get_contents( $this->test_mode_results_template_file_path );
+
+				$this->processMetaData( $this->metaDataDelimiter, $resultsHTML, $metadata, $resultsHTML );
+				$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $resultsHTML, $metadata, $resultsHTML );
+
+				$should_minify = $this->minify_html;
+
+				if( isset( $metadata[ 'minify' ] ) && $metadata[ 'minify' ] == 'true' )
+					$should_minify = true;
+				if( isset( $metadata[ 'minify' ] ) && $metadata[ 'minify' ] == 'false' )
+					$should_minify = false;
+		
+				if( $should_minify )
+					$resultsHTML = $this->minifyHTML( $resultsHTML );
+
 				$this->outputFile( $this->test_mode_results_file_path, $resultsHTML );
 			}
+
+			echo "Test results: " . count( $this->tests_successful ) . " successful, " . count( $this->tests_failed ) . " failed, " . count( $this->tests_unknown ) . " unknown." . PHP_EOL . PHP_EOL;
 
 			exit;
 		}

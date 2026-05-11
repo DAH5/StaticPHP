@@ -206,6 +206,17 @@ $configurable_options[ 'test_mode_output_results_file' ] = true;
 
 
 /*
+	Test Mode Results Template File Path
+
+	If set to a valid path, this file will be used as the HTML template for the results file.
+
+	Defaults to empty "".
+*/
+
+$configurable_options[ 'test_mode_results_template_file_path' ] = "";
+
+
+/*
 	Test Mode Results File Path
 
 	If test_mode_output_results_file is set to true, an HTML file will be generated containing the test results at the specified path.
