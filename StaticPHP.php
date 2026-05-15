@@ -579,7 +579,17 @@ HTML;
 
 		$this->processMetaData( $metaDataDelimiter, $layout_contents, $layout_metadata, $layout_contents );
 		
-		$metadata = array_merge( $layout_metadata, $metadata );
+		foreach( $layout_metadata as $layout_metadata_key => $layout_metadata_value )
+		{
+			if( isset( $metadata[ $layout_metadata_key ] ) && is_array( $metadata[ $layout_metadata_key ] ) && is_array( $layout_metadata_value ) )
+			{
+				$metadata[ $layout_metadata_key ] = array_merge( $layout_metadata_value, $metadata[ $layout_metadata_key ] );
+				continue;
+			}
+
+			if( ! isset( $metadata[ $layout_metadata_key ] ) )
+				$metadata[ $layout_metadata_key ] = $layout_metadata_value;
+		}
 	}
 	
 	private function processContentPlaceHolder( array $metadata, string &$file_contents, string $layout_contents )
