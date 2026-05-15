@@ -17,11 +17,25 @@ another_key: another value
 
 Keys and values are separated by a colon and a space for clarity. Replace `some_key` and `some value` with your actual metadata keys and values.
 
-### Using Placeholders
+### MetaData Lists
+
+Lists in MetaData utilise multiple lines to assign multiple values to the one MetaData key.
+
+```
+---
+shopping_list:
+- Bread
+- Butter
+- Milk
+- Coffee
+---
+```
+
+## Using Placeholders
 
 You can display MetaData values using placeholders. These are formed using the MetaData delimiter on either end, the word `metadata`, a dot, and then the key name. StaticPHP will replace this with the value associated with that key during the build process.
 
-#### HTML and PHP Files
+### HTML and PHP Files
 
 For example, given the MetaData above, you can retrieve these values like this:
 
@@ -37,7 +51,7 @@ This will output:
 <p>another value</p>
 ```
 
-#### CSS Files
+### CSS Files
 
 For example, this CSS source code:
 
@@ -75,7 +89,7 @@ Will output this generated code:
 }
 ```
 
-#### JavaScript Files
+### JavaScript Files
 
 For example, this JavaScript source code:
 
@@ -95,6 +109,30 @@ Will output this generated code:
 var metadata = document.getElementById( 'metadata' );
 
 metadata.innerHTML = 'Hello, world!';
+```
+
+### MetaData Lists
+
+Display the first item in a list with a MetaData Placeholder.
+
+**Example Input**
+
+```html
+---
+shopping_list:
+- Bread
+- Butter
+- Milk
+- Coffee
+---
+
+<p>First Shopping List Item: --- metadata.shopping_list ---</p>
+```
+
+**Example Output**
+
+```html
+<p>Bread</p>
 ```
 
 ## Special MetaData

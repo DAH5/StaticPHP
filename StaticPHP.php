@@ -483,6 +483,9 @@ HTML;
 				
 				if( $input_line == $delimiter )
 					break;
+
+				if( substr( $input_line, 0, 1 ) == '-' )
+					continue;
 				
 				if( ! strpos( $input_line, ":" ) )
 					continue;
@@ -492,6 +495,25 @@ HTML;
 				$metadata_key = trim( $data[ 0 ] );
 				$metadata_value = trim( $data[ 1 ] );
 				
+				if( ! $metadata_value && $input_line_count > $line_number - 1 )
+				{
+					$list_item_index = 1;
+
+					while( substr( $input_lines[ $line_number + $list_item_index ], 0, 1 ) == '-' && $input_lines[ $line_number + $list_item_index ] != $delimiter )
+					{
+						$item_value = trim( substr( $input_lines[ $line_number + $list_item_index ], 1 ) );
+
+						echo "Adding item value: " . $item_value . PHP_EOL;
+						echo "to MetaData List Key: " . $metadata_key . PHP_EOL;
+
+						$metadata[ $metadata_key ][] = $item_value;
+
+						$list_item_index++;
+					}
+
+					continue;
+				}
+
 				echo "Setting MetaData Key: " . $metadata_key . PHP_EOL;
 				echo "with matching value: " . $metadata_value . PHP_EOL . PHP_EOL;
 				$metadata[ $metadata_key ] = $metadata_value;
@@ -518,6 +540,10 @@ HTML;
 				if( array_key_exists( $key, $metadata ) )
 				{
 					$value = $metadata[ $key ];
+
+					if( is_array( $value ) )
+						$value = $value[ 0 ];
+
 					echo "Replacing " . $key . " with " . $value . PHP_EOL;
 					return $value;
 				}
@@ -1116,7 +1142,8 @@ HTML;
 							$blockOutput = $this->processLoopFunctionalBlock
 							(
 								$this->parseFunctionalBlockParameters( $paramStr ),
-								$blockContent
+								$blockContent,
+								$metadata
 							);
 
 							return $blockOutput ?? $matches[ 0 ];
@@ -1145,7 +1172,7 @@ HTML;
 		return $content;
 	}
 
-	private function processLoopFunctionalBlock( array $params, String $loopContent )
+	private function processLoopFunctionalBlock( array $params, String $loopContent, array $metadata = array() )
 	{
 		echo "Processing Loop Functional Block..." . PHP_EOL;
 
@@ -1188,6 +1215,12 @@ HTML;
 					echo "JSON File Complete.\n";
 				}
 			}
+		}
+		else if( isset( $params[ 'metadata' ] ) )
+		{
+			$metadata_key = $params[ 'metadata' ];
+
+			$output = $this->processLoopMetaData( $metadata_key, $metadata, $loopContent, $output );
 		}
 		else if( isset( $params[ 'test_results' ] ) && $this->test_mode == true )
 		{
@@ -1456,6 +1489,43 @@ HTML;
 			$output[] = $toOutput;
 
 			echo "...Loop Directory Processed." . PHP_EOL;
+		}
+
+		return $output;
+	}
+
+	private function processLoopMetaData( String $metadata_key, array $metadata, String $loopContent, array $output = array() )
+	{
+		$metadata_value = isset( $metadata[ $metadata_key ] ) ? $metadata[ $metadata_key ] : '';
+
+		if( is_array( $metadata_value ) )
+		{
+			foreach( $metadata_value as $metadata_value_item )
+			{
+				$metadata[ 'item' ] = $metadata_value_item;
+
+				$thisLoopContent = $loopContent;
+
+				$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $thisLoopContent, $metadata, $thisLoopContent, 'loop' );
+
+				$toOutput[ 'metadata' ] = $metadata;
+				$toOutput[ 'outputContent' ] = $thisLoopContent;
+
+				$output[] = $toOutput;
+			}
+		}
+		else if( is_string( $metadata_value ) )
+		{
+			$metadata[ 'item' ] = $metadata_value;
+
+			$thisLoopContent = $loopContent;
+
+			$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $thisLoopContent, $metadata, $thisLoopContent, 'loop' );
+
+			$toOutput[ 'metadata' ] = $metadata;
+			$toOutput[ 'outputContent' ] = $thisLoopContent;
+
+			$output[] = $toOutput;
 		}
 
 		return $output;

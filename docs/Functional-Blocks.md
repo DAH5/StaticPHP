@@ -40,7 +40,7 @@ For more information on setting MetaData in files and using placeholders, refer 
 
 A special placeholder `--- loop.uri ---` is available when using the `dir` parameter, displaying the path to the current directory item for use in links.
 
-### Sorting Order
+#### Sorting Order
 
 By default, items are sorted as the filesystem sorts them, typically in ascending order. You can change this by setting the `sort` parameter to either `ascending` or `descending`.
 
@@ -54,7 +54,7 @@ Item Name: --- loop.item-name ---
 --- endloop ---
 ```
 
-### Outputting JSON
+#### Outputting JSON
 
 You can make the loop results available as a JSON file by setting the `json` parameter to the desired file path. Similar to `dir`, this path can be relative to StaticPHP or absolute.
 
@@ -68,7 +68,7 @@ Item Name: --- loop.item-name ---
 --- endloop ---
 ```
 
-### Ignoring Items
+#### Ignoring Items
 
 You can specify additional items for the loop to ignore using the `ignores` parameter. This parameter takes a semicolon-separated list of items to ignore, optionally with spaces for readability.
 
@@ -82,7 +82,7 @@ Item Name: --- loop.item-name ---
 --- endloop ---
 ```
 
-### Filtering Items
+#### Filtering Items
 
 By default, any web page found in the specified directory will be listed, but you may want to filter this and only show certain ones. You can filter the items displayed in the rendered list using MetaData keys and values, and the `filter-key` and `filter-value` parameters.
 
@@ -109,6 +109,26 @@ Item Name: --- loop.item-name ---
 ```
 
 In the above example, only items containing the MetaData key `category` with a value of `random` fill be displayed. This is useful for blog post listings for a specific category.
+
+### MetaData List Items
+
+To iterate through each item in a MetaData List, define the list in the metadata block at the top of the page, then use the Loop Functional Block with the parameter `metadata` set to the value of the metadata key that holds the list, and use the `loop.item` placeholder to display the contents of that item.
+
+```html
+---
+shopping_list:
+- Bread
+- Butter
+- Milk
+- Coffee
+---
+
+<ul>
+    --- loop( metadata = "shopping_list" ) ---
+        <li>--- loop.item ---</li>
+    --- endloop ---
+</ul>
+```
 
 ## The If Functional Block
 
