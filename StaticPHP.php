@@ -800,10 +800,30 @@ HTML;
 			{
 				$remote_content_url = $metadata[ 'remote_content_url' ];
 				$remote_content_placeholder = $metadata[ 'remote_content_placeholder' ];
-				$remote_content_from_url = $this->getRemoteContentFromURL( $remote_content_url );
+
+				$remote_content_url_value = $remote_content_url;
+
+				$remote_content_from_url = "";
+
+				if( is_array( $remote_content_url ) )
+				{
+					foreach( $remote_content_url as $remote_url )
+					{
+						$remote_content_url_value = $remote_url[ 'value' ];
+						$remote_content_from_url = $this->getRemoteContentFromURL( $remote_content_url_value );
+
+						if( $remote_content_from_url != "" )
+							break;
+					}
+				}
+				else
+				{
+					$remote_content_from_url = $this->getRemoteContentFromURL( $remote_content_url_value );
+				}
+
 				$remote_content_from_url = $this->convertEndOfLines( $remote_content_from_url );
 
-				if( substr( $remote_content_url, -3 ) == ".md" )
+				if( substr( $remote_content_url_value, -3 ) == ".md" )
 				{
 					$remote_markdown_content = $this->convertMarkdownToHTML( $remote_content_from_url, $metadata, $friendly_urls );
 					$input_file_contents = str_replace( $remote_content_placeholder, $remote_markdown_content, $input_file_contents );
@@ -1767,7 +1787,7 @@ HTML;
 
 		$remote_file_headers = @get_headers( $URL );
 
-		if( ! $remote_file_headers && strpos( $remote_file_headers[ 0 ], '200' ) === false )
+		if( ! $remote_file_headers || ! isset( $remote_file_headers[ 0 ] ) || strpos( $remote_file_headers[ 0 ], '200' ) === false )
 		{
 			echo "Unable to fetch from remote URL. Remote content is either unavailable or returned non-200 HTTP code." . PHP_EOL;
 			return "";
@@ -1777,7 +1797,8 @@ HTML;
 
 		if( $remote_content === false )
 		{
-			echo "Unable to fetch from remote URL. Error: " . error_get_last() . PHP_EOL;
+			$error = error_get_last();
+			echo "Unable to fetch from remote URL. Error: " . $error[ 'message' ] . PHP_EOL;
 			return "";
 		}
 
