@@ -147,6 +147,45 @@ change_log:
 </ul>
 ```
 
+#### Splitting List Items
+
+Lists are more than simple values, they can be used to store multiple values in each list item. The number of values per list item is as far as your imagination takes it.
+
+Set the `split` parameter to what you want to use as the delimiter for splitting items into multiple values.
+
+Append an index number onto the end of the `loop.item` placeholder to determine which item you wish to output there, starting at `1` and counting upwards for each split value.
+
+Here is a simple example of a navigation menu:
+
+```html
+---
+nav_menu:
+- Home :: /home :: Takes you to the home page.
+- About :: /about :: All about the site.
+- Contact :: /contact :: Details on how to get in touch.
+---
+
+<div class="nav-menu">
+--- loop( metadata = "nav_menu", split = "::" ) ---
+    <a href="--- loop.item.2 ---" title="--- loop.item.3 ---">--- loop.item.1 ---</a>
+--- endloop ---
+</div>
+```
+
+The above code should output something similar to this:
+
+```html
+<div class="nav-menu">
+
+    <a href="/home" title="Takes you to the home page.">Home</a>
+
+    <a href="/about" title="All about the site.">About</a>
+
+    <a href="/contact" title="Details on how to get in touch.">Contact</a>
+
+</div>
+```
+
 ## The If Functional Block
 
 The `if` functional block allows you to perform conditional checks on MetaData.

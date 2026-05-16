@@ -1255,8 +1255,9 @@ HTML;
 		else if( isset( $params[ 'metadata' ] ) )
 		{
 			$metadata_key = $params[ 'metadata' ];
+			$split_delimiter = isset( $params[ 'split' ] ) ? $params[ 'split' ] : '';
 
-			$output = $this->processLoopMetaData( $metadata_key, $metadata, $loopContent, $output );
+			$output = $this->processLoopMetaData( $metadata_key, $metadata, $loopContent, $output, $split_delimiter );
 		}
 		else if( isset( $params[ 'test_results' ] ) && $this->test_mode == true )
 		{
@@ -1530,7 +1531,7 @@ HTML;
 		return $output;
 	}
 
-	private function processLoopMetaData( String $metadata_key, array $metadata, String $loopContent, array $output = array() )
+	private function processLoopMetaData( String $metadata_key, array $metadata, String $loopContent, array $output = array(), String $split_delimiter = '' )
 	{
 		$metadata_value = isset( $metadata[ $metadata_key ] ) ? $metadata[ $metadata_key ] : '';
 
@@ -1540,6 +1541,17 @@ HTML;
 			{
 				$metadata[ 'delimiter' ] = $metadata_value_item[ 'delimiter' ];
 				$metadata[ 'item' ] = $metadata_value_item[ 'value' ];
+
+				if( $split_delimiter && strpos( $metadata[ 'item' ], $split_delimiter ) )
+				{
+					$metadata_value_item_parts = explode( $split_delimiter, $metadata[ 'item' ] );
+
+					for( $i = 0; $i < count( $metadata_value_item_parts ); $i++ )
+					{
+						$metadata_value_item_part = $metadata_value_item_parts[ $i ];
+						$metadata[ 'item.' . ( $i + 1 ) ] = trim( $metadata_value_item_part );
+					}
+				}
 
 				$thisLoopContent = $loopContent;
 
@@ -1554,6 +1566,17 @@ HTML;
 		else if( is_string( $metadata_value ) )
 		{
 			$metadata[ 'item' ] = $metadata_value;
+
+			if( $split_delimiter && strpos( $metadata[ 'item' ], $split_delimiter ) )
+			{
+				$metadata_value_item_parts = explode( $split_delimiter, $metadata[ 'item' ] );
+
+				for( $i = 0; $i < count( $metadata_value_item_parts ); $i++ )
+				{
+					$metadata_value_item_part = $metadata_value_item_parts[ $i ];
+					$metadata[ 'item.' . ( $i + 1 ) ] = trim( $metadata_value_item_part );
+				}
+			}
 
 			$thisLoopContent = $loopContent;
 
