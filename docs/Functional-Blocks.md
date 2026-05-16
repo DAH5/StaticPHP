@@ -130,6 +130,23 @@ shopping_list:
 </ul>
 ```
 
+Optionally display the delimiter of that item (`-`, `+`, `*`) with `--- loop.delimiter ---`.
+
+```
+---
+change_log:
++ Added an awesome feature.
+- Removed an unwanted feature.
+* Fixed a buggy feature.
+---
+
+<ul>
+    --- loop( metadata = "change_log" ) ---
+        <li><b>--- loop.delimiter ---</b> --- loop.item ---</li>
+    --- endloop ---
+</ul>
+```
+
 ## The If Functional Block
 
 The `if` functional block allows you to perform conditional checks on MetaData.

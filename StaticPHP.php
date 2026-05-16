@@ -474,6 +474,8 @@ HTML;
 			echo "Processing MetaData..." . PHP_EOL . PHP_EOL;
 			
 			unset( $input_lines[ 0 ] );
+
+			$list_delimiters = array( '-', '+', '*' );
 			
 			for( $line_number = 1; $line_number <= $input_line_count; $line_number++ )
 			{
@@ -484,7 +486,7 @@ HTML;
 				if( $input_line == $delimiter )
 					break;
 
-				if( substr( $input_line, 0, 1 ) == '-' )
+				if( in_array( substr( $input_line, 0, 1 ), $list_delimiters ) )
 					continue;
 				
 				if( ! strpos( $input_line, ":" ) )
@@ -499,14 +501,15 @@ HTML;
 				{
 					$list_item_index = 1;
 
-					while( substr( $input_lines[ $line_number + $list_item_index ], 0, 1 ) == '-' && $input_lines[ $line_number + $list_item_index ] != $delimiter )
+					while( in_array( substr( $input_lines[ $line_number + $list_item_index ], 0, 1 ), $list_delimiters ) && $input_lines[ $line_number + $list_item_index ] != $delimiter )
 					{
+						$matched_list_delimiter = substr( $input_lines[ $line_number + $list_item_index ], 0, 1 );
 						$item_value = trim( substr( $input_lines[ $line_number + $list_item_index ], 1 ) );
 
 						echo "Adding item value: " . $item_value . PHP_EOL;
 						echo "to MetaData List Key: " . $metadata_key . PHP_EOL;
 
-						$metadata[ $metadata_key ][] = $item_value;
+						$metadata[ $metadata_key ][] = array( "delimiter" => $matched_list_delimiter, "value" => $item_value );
 
 						$list_item_index++;
 					}
@@ -543,6 +546,9 @@ HTML;
 
 					if( is_array( $value ) )
 						$value = $value[ 0 ];
+
+					if( isset( $value[ 'value' ] ) )
+						$value = $value[ 'value' ];
 
 					echo "Replacing " . $key . " with " . $value . PHP_EOL;
 					return $value;
@@ -1512,7 +1518,8 @@ HTML;
 		{
 			foreach( $metadata_value as $metadata_value_item )
 			{
-				$metadata[ 'item' ] = $metadata_value_item;
+				$metadata[ 'delimiter' ] = $metadata_value_item[ 'delimiter' ];
+				$metadata[ 'item' ] = $metadata_value_item[ 'value' ];
 
 				$thisLoopContent = $loopContent;
 

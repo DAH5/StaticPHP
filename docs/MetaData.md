@@ -31,6 +31,17 @@ shopping_list:
 ---
 ```
 
+You can use different delimiters like: `-`, `+`, `*`.
+
+```
+---
+change_log:
++ Added an awesome feature.
+- Removed an unwanted feature.
+* Fixed a buggy feature.
+---
+```
+
 ## Using Placeholders
 
 You can display MetaData values using placeholders. These are formed using the MetaData delimiter on either end, the word `metadata`, a dot, and then the key name. StaticPHP will replace this with the value associated with that key during the build process.
