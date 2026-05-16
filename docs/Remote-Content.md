@@ -22,6 +22,22 @@ remote_content_placeholder: {{ remote_content }}
 
 ```
 
+## List of URLs
+
+You can define URLs as a list for redundancy.
+
+```html
+---
+remote_content_url:
+- https://example.tld/path/to/remote-content.md
+- https://fallback.tld/path/to/remote-content.md
+
+remote_content_placeholder: {{ remote_content }}
+---
+
+{{ remote_content }}
+```
+
 ## What content formats are supported?
 
 Currently, StaticPHP can only fetch Markdown content with a URL ending in `.md`. The markdown content will automatically be converted to HTML for you. Please see the [Markdown Files](Markdown-Files.md) page for more details.
