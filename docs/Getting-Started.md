@@ -35,6 +35,12 @@ Refer to the [MetaData](MetaData.md) feature to explore additional capabilities 
 
 Run StaticPHP to generate the static version of your website in the output folder/directory.
 
+Make sure you have PHP installed where you want to run StaticPHP, whether it be your local machine, or a remote server. You can find out more about installing and using PHP on their website at [www.php.net](https://www.php.net).
+
+While there is no specific PHP version requirement for StaticPHP, it is recommended to use the latest PHP version for best results.
+
+### The StaticPHP Launcher (Recommended Method)
+
 If using the launcher, simply run the following command:
 
 ```bash
