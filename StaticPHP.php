@@ -1165,14 +1165,15 @@ HTML;
 		echo "Processing Functional Blocks...\n";
 
 		$delimiter = preg_quote( $this->metaDataDelimiter, '/' );
+		$closingDelimiter = preg_quote( $this->metaDataClosingDelimiter, '/' );
 
-		$tokenPattern = $delimiter . '\s*(?:\w+\([^)]*\)|end\w+)\s*' . $delimiter;
+		$tokenPattern = $delimiter . '\s*(?:\w+\([^)]*\)|end\w+)\s*' . $closingDelimiter;
 
 		$pattern =
 			'/' .
-			$delimiter . '\s*(\w+)\(([^)]*)\)\s*' . $delimiter .
+			$delimiter . '\s*(\w+)\(([^)]*)\)\s*' . $closingDelimiter .
 			'((?:(?!' . $tokenPattern . ').)*)' .
-			$delimiter . '\s*end\1\s*' . $delimiter .
+			$delimiter . '\s*end\1\s*' . $closingDelimiter .
 			'/s';
 
 		do

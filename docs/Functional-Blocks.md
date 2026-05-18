@@ -16,6 +16,18 @@ Put anything here.
 --- endfunc ---
 ```
 
+For those using differing opening and closing MetaData delimiters:
+
+```plaintext
+@metadata func( key = "value", another-key = "another-value" ) @endmetadata
+
+Put anything here.
+
+@metadata endfunc @endmetadata
+```
+
+The rest of this page will assume `---` for both the open and close delimiters to keep things simple, just remember to swap them out accordingly.
+
 ## The Loop Functional Block
 
 The `loop` block allows you to iterate through a list of items and display information for each item as you define.
