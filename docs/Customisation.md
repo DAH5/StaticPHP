@@ -32,7 +32,7 @@ Set `friendly_urls` in your build configuration to `true` to enable or `false` t
 
 ## MetaData Delimiter
 
-By default, StaticPHP uses a triple hyphen delimiter (`---`) for MetaData, but you can change this in your build configuration under `metadata_delimiter`.
+By default, StaticPHP uses a triple hyphen delimiter (`---`) for MetaData, but you can change this in your build configuration under `metadata_delimiter`. You can also define an optional alternative closing delimiter in your build configuration under `metadata_closing_delimiter`.
 
 For more details, refer to the [MetaData](MetaData.md) guide.
 

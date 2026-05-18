@@ -7,6 +7,7 @@ class StaticPHP
 	private $items_to_ignore = array( "_includes" );
 	private $friendly_urls = false;
 	private $metaDataDelimiter = "---";
+	private $metaDataClosingDelimiter = "---";
 	private $minify_html = false;
 	private $minify_css = false;
 	private $minify_js = false;
@@ -55,6 +56,10 @@ class StaticPHP
 				$this->friendly_urls = true;
 			if( isset( $configurable_options[ 'metadata_delimiter' ] ) && is_string( $configurable_options[ 'metadata_delimiter' ] ) && trim( $configurable_options[ 'metadata_delimiter' ] ) != "" )
 				$this->metaDataDelimiter = $configurable_options[ 'metadata_delimiter' ];
+			if( isset( $configurable_options[ 'metadata_closing_delimiter' ] ) && is_string( $configurable_options[ 'metadata_closing_delimiter' ] ) && trim( $configurable_options[ 'metadata_closing_delimiter' ] ) != "" )
+				$this->metaDataClosingDelimiter = $configurable_options[ 'metadata_closing_delimiter' ];
+			else
+				$this->metaDataClosingDelimiter = $this->metaDataDelimiter;
 			if( isset( $configurable_options[ 'minify_html' ] ) && is_bool( $configurable_options[ 'minify_html' ] ) )
 				$this->minify_html = $configurable_options[ 'minify_html' ];
 			if( isset( $configurable_options[ 'minify_html' ] ) && is_string( $configurable_options[ 'minify_html' ] ) && trim( $configurable_options[ 'minify_html' ] ) == "true" )
@@ -118,7 +123,10 @@ class StaticPHP
 		if( count( $args ) >= 4 && is_string( $args[ 3 ] ) && trim( $args[ 3 ] ) == "true" )
 			$this->friendly_urls = true;
 		if( count( $args ) >= 5 && is_string( $args[ 4 ] ) && trim( $args[ 4 ] ) != "" )
+		{
 			$this->metaDataDelimiter = trim( $args[ 4 ] );
+			$this->metaDataClosingDelimiter = $this->metaDataDelimiter;
+		}
 		if( count( $args ) >= 6 && is_bool( $args[ 5 ] ) )
 			$this->minify_html = $args[ 5 ];
 		if( count( $args ) >= 6 && is_string( $args[ 5 ] ) && trim( $args[ 5 ] ) == "true" )
@@ -279,8 +287,8 @@ HTML;
 				if( $this->test_mode_results_template_file_path && is_file( $this->test_mode_results_template_file_path ) )
 					$resultsHTML = file_get_contents( $this->test_mode_results_template_file_path );
 
-				$this->processMetaData( $this->metaDataDelimiter, $resultsHTML, $metadata, $resultsHTML );
-				$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $resultsHTML, $metadata, $resultsHTML );
+				$this->processMetaData( $this->metaDataDelimiter, $this->metaDataClosingDelimiter, $resultsHTML, $metadata, $resultsHTML );
+				$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $this->metaDataClosingDelimiter, $resultsHTML, $metadata, $resultsHTML );
 				$resultsHTML = $this->processFunctionalBlocks( $resultsHTML, $metadata );
 
 				$should_minify = $this->minify_html;
@@ -458,10 +466,13 @@ HTML;
 		}
 	}
 	
-	private function processMetaData( String $delimiter, String $input_contents, array &$metadata, String &$output_contents )
+	private function processMetaData( String $delimiter, String $closingDelimiter, String $input_contents, array &$metadata, String &$output_contents )
 	{
 		if( ! isset( $metadata['staticphp_path'] ) )
 			$metadata['staticphp_path'] = __DIR__;
+
+		$delimiter = addslashes( $delimiter );
+		$closingDelimiter = addslashes( $closingDelimiter );
 
 		$input_contents = $this->convertEndOfLines( $input_contents );
 		
@@ -483,7 +494,7 @@ HTML;
 				
 				unset( $input_lines[ $line_number ] );
 				
-				if( $input_line == $delimiter )
+				if( $input_line == $closingDelimiter )
 					break;
 
 				if( in_array( substr( $input_line, 0, 1 ), $list_delimiters ) )
@@ -528,10 +539,14 @@ HTML;
 		}
 	}
 	
-	private function processMetaDataPlaceHolders( String $delimiter, String $input_contents, array $metadata, String &$output_contents, String $prefix = 'metadata' )
+	private function processMetaDataPlaceHolders( String $delimiter, String $closingDelimiter, String $input_contents, array $metadata, String &$output_contents, String $prefix = 'metadata' )
 	{
 		echo "Processing MetaData PlaceHolders..." . PHP_EOL;
-		$pattern = '/' . $delimiter . '\s*' . $prefix . '\.(\S+)\s*' . $delimiter . '/';
+
+		$delimiter = addslashes( $delimiter );
+		$closingDelimiter = addslashes( $closingDelimiter );
+
+		$pattern = '/' . $delimiter . '\s*' . $prefix . '\.(\S+)\s*' . $closingDelimiter . '/';
 		
 		$output_contents = preg_replace_callback
 		(
@@ -563,7 +578,7 @@ HTML;
 		echo "Done.\n\n";
 	}
 	
-	private function processLayoutMetaData( array &$metadata, string $metaDataDelimiter, string &$layout_contents )
+	private function processLayoutMetaData( array &$metadata, string $metaDataDelimiter, string $metaDataClosingDelimiter, string &$layout_contents )
 	{
 		if( ! isset( $metadata[ 'layout' ] ) )
 			return;
@@ -571,6 +586,9 @@ HTML;
 			return;
 		if( strlen( $metadata[ 'layout' ] ) <= 0 )
 			return;
+
+		$metaDataDelimiter = addslashes( $metaDataDelimiter );
+		$metaDataClosingDelimiter = addslashes( $metaDataClosingDelimiter );
 
 		$base_layout_path = __DIR__ . DIRECTORY_SEPARATOR . $metadata[ 'layout' ];
 
@@ -583,7 +601,7 @@ HTML;
 
 		$layout_metadata = array();
 
-		$this->processMetaData( $metaDataDelimiter, $layout_contents, $layout_metadata, $layout_contents );
+		$this->processMetaData( $metaDataDelimiter, $metaDataClosingDelimiter, $layout_contents, $layout_metadata, $layout_contents );
 		
 		foreach( $layout_metadata as $layout_metadata_key => $layout_metadata_value )
 		{
@@ -766,12 +784,12 @@ HTML;
 		
 		$metadata = array();
 		
-		$this->processMetaData( $this->metaDataDelimiter, $input_file_contents, $metadata, $input_file_contents );
+		$this->processMetaData( $this->metaDataDelimiter, $this->metaDataClosingDelimiter, $input_file_contents, $metadata, $input_file_contents );
 
 		if( $file_extension == '.php' || $file_extension == '.html' || $file_extension == '.htm' || $file_extension == '.md' )
 		{
 			$layout_contents = "";
-			$this->processLayoutMetaData( $metadata, $this->metaDataDelimiter, $layout_contents );
+			$this->processLayoutMetaData( $metadata, $this->metaDataDelimiter, $this->metaDataClosingDelimiter, $layout_contents );
 
 			if( isset( $metadata['layout'] ) && $metadata['layout'] && substr( $metadata['layout'], -4 ) == ".php" )
 				$this->processTemporaryFile( $metadata['layout'], $layout_contents, $metadata );
@@ -790,7 +808,7 @@ HTML;
 				$this->processOutputPath( $path_to_output_file, $metadata, $friendly_urls );
 		}
 
-		$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $input_file_contents, $metadata, $input_file_contents );
+		$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $this->metaDataClosingDelimiter, $input_file_contents, $metadata, $input_file_contents );
 
 		if( $file_extension == '.php' || $file_extension == '.html' || $file_extension == '.htm' )
 		{
@@ -1273,7 +1291,7 @@ HTML;
 					$successful_test_metadata = isset( $this->tests_metadata[ $path_to_successful_test_file ] ) ? $this->tests_metadata[ $path_to_successful_test_file ] : array();
 					if( ! isset( $successful_test_metadata[ 'uri' ] ) )
 						$successful_test_metadata[ 'uri' ] = str_replace( $this->test_mode_output_dir_path . DIRECTORY_SEPARATOR, '', $path_to_successful_test_file );
-					$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $content, $successful_test_metadata, $content, 'test' );
+					$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $this->metaDataClosingDelimiter, $content, $successful_test_metadata, $content, 'test' );
 					$output[][ 'outputContent' ] = $content;
 				}
 			}
@@ -1288,7 +1306,7 @@ HTML;
 					$unknown_test_metadata = isset( $this->tests_metadata[ $path_to_unknown_test_file ] ) ? $this->tests_metadata[ $path_to_unknown_test_file ] : array();
 					if( ! isset( $unknown_test_metadata[ 'uri' ] ) )
 						$unknown_test_metadata[ 'uri' ] = str_replace( $this->test_mode_output_dir_path . DIRECTORY_SEPARATOR, '', $path_to_unknown_test_file );
-					$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $content, $unknown_test_metadata, $content, 'test' );
+					$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $this->metaDataClosingDelimiter, $content, $unknown_test_metadata, $content, 'test' );
 					$output[][ 'outputContent' ] = $content;
 				}
 			}
@@ -1303,7 +1321,7 @@ HTML;
 					$failed_test_metadata = isset( $this->tests_metadata[ $path_to_failed_test_file ] ) ? $this->tests_metadata[ $path_to_failed_test_file ] : array();
 					if( ! isset( $failed_test_metadata[ 'uri' ] ) )
 						$failed_test_metadata[ 'uri' ] = str_replace( $this->test_mode_output_dir_path . DIRECTORY_SEPARATOR, '', $path_to_failed_test_file );
-					$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $content, $failed_test_metadata, $content, 'test' );
+					$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $this->metaDataClosingDelimiter, $content, $failed_test_metadata, $content, 'test' );
 					$output[][ 'outputContent' ] = $content;
 				}
 			}
@@ -1479,7 +1497,7 @@ HTML;
 			
 			$metadata = array();
 			
-			$this->processMetaData( $this->metaDataDelimiter, $fileContents, $metadata, $fileContents );
+			$this->processMetaData( $this->metaDataDelimiter, $this->metaDataClosingDelimiter, $fileContents, $metadata, $fileContents );
 
 			unset( $metadata['staticphp_path'] );
 
@@ -1512,7 +1530,7 @@ HTML;
 			
 			$metadata[ 'uri' ] = $fileURI;
 			
-			$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $loopContent, $metadata, $thisLoopContent, 'loop' );
+			$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $this->metaDataClosingDelimiter, $loopContent, $metadata, $thisLoopContent, 'loop' );
 			
 			if( isset( $params[ 'content_placeholder' ] ) && $params[ 'content_placeholder' ] )
 			{
@@ -1555,7 +1573,7 @@ HTML;
 
 				$thisLoopContent = $loopContent;
 
-				$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $thisLoopContent, $metadata, $thisLoopContent, 'loop' );
+				$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $this->metaDataClosingDelimiter, $thisLoopContent, $metadata, $thisLoopContent, 'loop' );
 
 				$toOutput[ 'metadata' ] = $metadata;
 				$toOutput[ 'outputContent' ] = $thisLoopContent;
@@ -1580,7 +1598,7 @@ HTML;
 
 			$thisLoopContent = $loopContent;
 
-			$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $thisLoopContent, $metadata, $thisLoopContent, 'loop' );
+			$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $this->metaDataClosingDelimiter, $thisLoopContent, $metadata, $thisLoopContent, 'loop' );
 
 			$toOutput[ 'metadata' ] = $metadata;
 			$toOutput[ 'outputContent' ] = $thisLoopContent;

@@ -50,6 +50,15 @@ $configurable_options[ 'metadata_delimiter' ] = "---";
 
 
 /*
+	MetaData Closing Delimiter
+
+	This is what defines the end of the MetaData syntax. Defaults to the same as the main MetaData delimiter.
+*/
+
+$configurable_options[ 'metadata_closing_delimiter' ] = $configurable_options[ 'metadata_delimiter' ];
+
+
+/*
 	Minify HTML
 
 	Removes whitespace between HTML tags, comments, and extra spaces.
