@@ -16,14 +16,14 @@ Put anything here.
 --- endfunc ---
 ```
 
-For those using differing opening and closing MetaData delimiters:
+For those using differing opening and closing MetaData delimiters, assuming `{%` and `%}` as the opening and closing delimiter:
 
 ```plaintext
-@metadata func( key = "value", another-key = "another-value" ) @endmetadata
+{% func( key = "value", another-key = "another-value" ) %}
 
 Put anything here.
 
-@metadata endfunc @endmetadata
+{% endfunc %}
 ```
 
 The rest of this page will assume `---` for both the open and close delimiters to keep things simple, just remember to swap them out accordingly.

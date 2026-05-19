@@ -17,16 +17,18 @@ another_key: another value
 
 Keys and values are separated by a colon and a space for clarity. Replace `some_key` and `some value` with your actual metadata keys and values.
 
-Optionally, you can use a different closing delimiter if you defined it in your build configuration.
+Optionally, you can use a different closing delimiter if you defined it in your build configuration, assuming `{%` and `%}` as the opening and closing delimiter.
 
 ```
-@metadata
+{%
 
 some_key: some value
 another_key: another value
 
-@endmetadata
+%}
 ```
+
+The rest of this page will assume `---` for both the open and close delimiters to keep things simple, just remember to swap them out accordingly.
 
 ### MetaData Lists
 
@@ -159,20 +161,18 @@ shopping_list:
 
 ### Placeholders with Different Open and Close Delimiters
 
-If you defined a different opening and closing delimiter in your build config, for example `@metadata` and `@endmetadata`, you will need to ensure you use these in your placeholders.
+If you defined a different opening and closing delimiter in your build config, for example `{%` and `%}`, you will need to ensure you use these in your placeholders.
 
 ```html
-@metadata
+{%
 
 some_key: some key
 some_value: some value
 
-@endmetadata
+%}
 
-<p>@metadata metadata.some_key @endmetadata</p>
+<p>{% metadata.some_key %}</p>
 ```
-
-*(If you squint your eyes slightly, the above example may look less...cursed)*
 
 ## Special MetaData
 
