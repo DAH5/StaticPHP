@@ -1552,7 +1552,7 @@ HTML;
 
 	private function processLoopMetaData( String $metadata_key, array $metadata, String $loopContent, array $output = array(), String $split_delimiter = '' )
 	{
-		$metadata_value = isset( $metadata[ $metadata_key ] ) ? $metadata[ $metadata_key ] : '';
+		$metadata_value = isset( $metadata[ $metadata_key ] ) ? $metadata[ $metadata_key ] : null;
 
 		if( is_array( $metadata_value ) )
 		{
