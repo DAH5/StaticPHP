@@ -75,16 +75,16 @@ $configurable_options[ 'test_mode_results_template_file_path' ] = 'tests/input/_
 
 The template can utilise special [MetaData](MetaData.md) keys exclusive to the test results template to display information.
 
-- **successful_results_count**: The number of tests that were successful.
-- **unknown_results_count**: The number of tests that were unknown in whether they succeeded or failed.
-- **failed_results_count**: The number of tests that failed.
+- **`successful_results_count`**: The number of tests that were successful.
+- **`unknown_results_count`**: The number of tests that were unknown in whether they succeeded or failed.
+- **`failed_results_count`**: The number of tests that failed.
 
-- **successful_tests_paths_list**: An HTML unordered list of paths to test output files that were successful.
-- **unknown_tests_paths_list**: An HTML unordered list of paths to test output files that were unknown in whether they succeeded or failed.
-- **failed_tests_paths_list**: An HTML unordered list of paths to test output files that failed.
+- **`successful_tests_paths_list`**: An HTML unordered list of paths to test output files that were successful.
+- **`unknown_tests_paths_list`**: An HTML unordered list of paths to test output files that were unknown in whether they succeeded or failed.
+- **`failed_tests_paths_list`**: An HTML unordered list of paths to test output files that failed.
 
-- **passed_results_count**: Alias of `successful_results_count`.
-- **passed_tests_paths_list**: Alias of `successful_tests_paths_list`.
+- **`passed_results_count`**: Alias of `successful_results_count`.
+- **`passed_tests_paths_list`**: Alias of `successful_tests_paths_list`.
 
 #### Loop Functional Blocks
 
