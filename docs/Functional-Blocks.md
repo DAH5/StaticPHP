@@ -272,6 +272,35 @@ Another examaple, check if the current page is NOT `home`.
 
 The if functional block is currently limited to this basic functionality. The functionality may get extended in the future.
 
+
+## The Snippet Functional Block
+
+Snippet functional blocks are code snippets that can be defined in once place and reused anywhere on the page. If you want them to be usable on all pages, try putting them in a base layout. More on base layouts on the [MetaData](MetaData.md) page.
+
+### Defining a Snippet
+
+Each snippet has an identifier. This is so you can recall it later when you want to reuse it.
+
+An example is as follows:
+
+```html
+--- snippet( id = "example" ) ---
+<p>This is an example.</p>
+--- endsnippet ---
+```
+
+### Using a Snippet
+
+To use a snippet somewhere, the syntax is similar to MetaData Placeholders, except using the `snippet` prefix and the identifier for that snippet.
+
+As an example, you can recall and reuse the above code snippet as follows:
+
+```html
+--- snippet.example ---
+```
+
+Find out more about MetaData Placeholders on the [MetaData](MetaData.md) page.
+
 ## More Features Coming Soon
 
 Stay tuned for updates and additional features in the documentation.

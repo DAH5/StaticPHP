@@ -33,6 +33,8 @@ class StaticPHP
 
 	private $tests_metadata = array();
 
+	private $snippetBlocks = array();
+
 	public function __construct()
 	{
 		$args = func_get_args();
@@ -541,7 +543,7 @@ HTML;
 	
 	private function processMetaDataPlaceHolders( String $delimiter, String $closingDelimiter, String $input_contents, array $metadata, String &$output_contents, String $prefix = 'metadata' )
 	{
-		echo "Processing MetaData PlaceHolders..." . PHP_EOL;
+		echo "Processing" . ( $prefix != 'metadata' ? ' ' . ucfirst( $prefix ) : '' ) . " MetaData PlaceHolders..." . PHP_EOL;
 
 		$delimiter = addslashes( $delimiter );
 		$closingDelimiter = addslashes( $closingDelimiter );
@@ -575,7 +577,7 @@ HTML;
 			},
 			$input_contents
 		);
-		echo "Done.\n\n";
+		echo "...Done Processing" . ( $prefix != 'metadata' ? ' ' . ucfirst( $prefix ) : '' ) . " MetaData Placeholders.\n\n";
 	}
 	
 	private function processLayoutMetaData( array &$metadata, string $metaDataDelimiter, string $metaDataClosingDelimiter, string &$layout_contents )
@@ -813,6 +815,7 @@ HTML;
 		if( $file_extension == '.php' || $file_extension == '.html' || $file_extension == '.htm' )
 		{
 			$input_file_contents = $this->processFunctionalBlocks( $input_file_contents, $metadata );
+			$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $this->metaDataClosingDelimiter, $input_file_contents, $this->snippetBlocks, $input_file_contents, 'snippet' );
 
 			if( isset( $metadata[ 'remote_content_url' ] ) && isset( $metadata[ 'remote_content_placeholder' ] ) )
 			{
@@ -1212,6 +1215,16 @@ HTML;
 							);
 
 							return $blockOutput ?? $matches[ 0 ];
+						
+						case 'snippet':
+							$blockOutput = $this->processSnippetFunctionalBlock
+							(
+								$this->parseFunctionalBlockParameters( $paramStr ),
+								$blockContent,
+								$metadata
+							);
+
+							return $blockOutput ?? $matches[ 0 ];
 					}
 
 					return $matches[ 0 ];
@@ -1417,6 +1430,16 @@ HTML;
 
 		if( $condition_state )
 			return $content;
+		return "";
+	}
+
+	private function processSnippetFunctionalBlock( array $params, String $content, array $metadata )
+	{
+		if( ! isset( $params[ 'id' ] ) || ! is_string( $params[ 'id' ] ) || strlen( $params[ 'id' ] ) <= 0 )
+			return "";
+
+		$this->snippetBlocks[ $params[ 'id' ] ] = $content;
+
 		return "";
 	}
 
