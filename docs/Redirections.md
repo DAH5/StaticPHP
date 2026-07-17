@@ -139,6 +139,35 @@ In this example:
 - The `$oldPath` placeholder is replaced with the path the user is coming from.
 - The redirection is delayed for **5 seconds**, as specified by the `content="5; url='$newDestination'"` attribute in the `<meta>` tag. You can adjust the number `5` to any number of seconds you want for the delay, or set it to `0` for no delay.
 
+#### MetaData Support
+
+You can use MetaData in your custom redirection templates.
+
+```html
+---
+title: Redirecting...
+duration_in_seconds: 5
+---
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="refresh" content="--- metadata.duration_in_seconds ---; url='$newDestination'" />
+        
+        <title>--- metadata.title ---</title>
+    </head>
+
+    <body>
+        <h1>--- metadata.title ---</h1>
+        <p>You are about to be redirected from <b>$oldPath</b> to <b>$newDestination</b>.</p>
+        <p>If you are not redirected within --- metadata.duration_in_seconds --- seconds, <a href="$newDestination">click here</a>.</p>
+    </body>
+</html>
+```
+
+Find out more about MetaData on the [MetaData](MetaData.md) documentation page.
+
 ## Why Meta Refresh?
 
 The `<meta http-equiv="refresh">` tag has been used for automatic redirection for many years and is supported by nearly all browsers. While this method is generally reliable, StaticPHP ensures that if the redirect fails, a clickable link is provided as a backup.
