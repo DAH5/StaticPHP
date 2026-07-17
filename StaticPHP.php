@@ -1020,8 +1020,20 @@ HTML;
 			$htmlContent = file_get_contents( $source_dir_path . DIRECTORY_SEPARATOR . $this->redirection_template_filename );
 			$htmlContent = str_replace( [ '$newDestination', '$oldPath' ], [ $newDestination, $oldPath ], $htmlContent );
 		}
-		
-		if( $this->minify_html === true )
+
+		$metadata = array();
+
+		$this->processMetaData( $this->metaDataDelimiter, $this->metaDataClosingDelimiter, $htmlContent, $metadata, $htmlContent );
+		$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $this->metaDataClosingDelimiter, $htmlContent, $metadata, $htmlContent, 'metadata' );
+
+		$should_minify = $this->minify_html;
+
+		if( isset( $metadata[ 'minify_html' ] ) && $metadata[ 'minify_html' ] == 'true' )
+			$should_minify = true;
+		if( isset( $metadata[ 'minify_html' ] ) && $metadata[ 'minify_html' ] == 'false' )
+			$should_minify = false;
+
+		if( $should_minify === true )
 			$htmlContent = $this->minifyHTML( $htmlContent );
 
 		if( $this->test_mode )
