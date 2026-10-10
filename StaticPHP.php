@@ -514,10 +514,10 @@ HTML;
 				{
 					$list_item_index = 1;
 
-					while( in_array( substr( $input_lines[ $line_number + $list_item_index ], 0, 1 ), $list_delimiters ) && $input_lines[ $line_number + $list_item_index ] != $delimiter )
+					while( in_array( substr( trim( $input_lines[ $line_number + $list_item_index ] ), 0, 1 ), $list_delimiters ) && trim( $input_lines[ $line_number + $list_item_index ] ) != $delimiter )
 					{
-						$matched_list_delimiter = substr( $input_lines[ $line_number + $list_item_index ], 0, 1 );
-						$item_value = trim( substr( $input_lines[ $line_number + $list_item_index ], 1 ) );
+						$matched_list_delimiter = substr( trim( $input_lines[ $line_number + $list_item_index ] ), 0, 1 );
+						$item_value = trim( substr( trim( $input_lines[ $line_number + $list_item_index ] ), 1 ) );
 
 						echo "Adding item value: " . $item_value . PHP_EOL;
 						echo "to MetaData List Key: " . $metadata_key . PHP_EOL;
