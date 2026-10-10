@@ -270,6 +270,41 @@ Another examaple, check if the current page is NOT `home`.
 --- endif ---
 ```
 
+### Multiple Conditions
+
+Check if both conditions are true using the && operator.
+
+```html
+--- if( current-page == "home" && page-title == "Welcome" ) ---
+<p>Welcome to the home page.</p>
+--- endif ---
+```
+
+Check if either condition is true using the || operator.
+
+```html
+--- if( current-page == "home" || current-page == "about" ) ---
+<p>Welcome to the website.</p>
+--- endif ---
+```
+
+Combining both operators into one check.
+
+```html
+--- if( current-page == "home" && show-greeting == "true" || current-page == "about" && show-greeting == "true" ) ---
+<p>Welcome to the website.</p>
+--- endif ---
+```
+
+StaticPHP evaluates AND conditions before OR conditions, following PHP's operator precedence, so the above check is similar to writting this in PHP...
+
+```php
+if( ( $current_page == "home" && $show_greeting == "true" ) || ( $current_page == "about" && $show_greeting == "true" ) )
+{
+    echo "<p>Welcome to the website.</p>";
+}
+```
+
 The if functional block is currently limited to this basic functionality. The functionality may get extended in the future.
 
 

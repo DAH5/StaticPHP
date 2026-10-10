@@ -1369,72 +1369,96 @@ HTML;
 	{
 		echo "Processing If Functional Block..." . PHP_EOL;
 
-		$condition_state = true;
+		$condition_state = false;
 
-		$params = preg_split( "/(\s*)(&&)(\s*)/", $paramStr );
+		// Split into OR groups.
+		$or_groups = preg_split( '/\s*\|\|\s*/', $paramStr );
 
-		foreach( $params as $param )
+		foreach( $or_groups as $or_group )
 		{
-			$param = trim( $param );
+			// All AND conditions within a group must pass.
+			$group_state = true;
 
-			if( strpos( $param, '==' ) !== false )
+			$params = preg_split( '/\s*&&\s*/', $or_group );
+
+			foreach( $params as $param )
 			{
-				$param = preg_split( "/(\s*)(==)(\s*)/", $param );
-				$param_key = $param[ 0 ];
-				$param_value = $param[ 1 ];
+				$param = trim( $param );
 
-				if( ! array_key_exists( $param_key, $metadata ) )
+				if( strpos( $param, '==' ) !== false )
 				{
-					$condition_state = false;
+					$parts = preg_split( '/\s*==\s*/', $param, 2 );
+					$param_key = trim( $parts[ 0 ] );
+					$param_value = trim( $parts[ 1 ] );
+
+					if( ! array_key_exists( $param_key, $metadata ) )
+					{
+						$group_state = false;
+					}
+					else if(
+						strlen( $param_value ) < 2 ||
+						$param_value[ 0 ] !== '"' ||
+						substr( $param_value, -1 ) !== '"'
+					)
+					{
+						$group_state = false;
+					}
+					else if( $metadata[ $param_key ] != substr( $param_value, 1, -1 ) )
+					{
+						$group_state = false;
+					}
 				}
-
-				if( substr( trim( $param_value ), 0, 1 ) != "\"" && substr( trim( $param_value ), -1, 1 ) != "\"" )
+				else if( strpos( $param, '!=' ) !== false )
 				{
-					$condition_state = false;
-				}
+					$parts = preg_split( '/\s*!=\s*/', $param, 2 );
+					$param_key = trim( $parts[ 0 ] );
+					$param_value = trim( $parts[ 1 ] );
 
-				if( array_key_exists( $param_key, $metadata ) && $metadata[ $param_key ] != substr( $param_value, 1, -1 ) )
-				{
-					$condition_state = false;
-				}
-			}
-			else if( strpos( $param, '!=' ) !== false )
-			{
-				$param = preg_split( "/(\s*)(!=)(\s*)/", $param );
-				$param_key = $param[ 0 ];
-				$param_value = $param[ 1 ];
-
-				if( ! array_key_exists( $param_key, $metadata ) )
-				{
-					$condition_state = false;
-				}
-
-				if( substr( trim( $param_value ), 0, 1 ) != "\"" || substr( trim( $param_value ), -1, 1 ) != "\"" )
-				{
-					$condition_state = false;
-				}
-
-				if( array_key_exists( $param_key, $metadata ) && $metadata[ $param_key ] == substr( $param_value, 1, -1 ) )
-				{
-					$condition_state = false;
-				}
-			}
-			else
-			{
-				$param_key = trim( $param );
-
-				if( substr( $param_key, 0, 1 ) == "!" )
-				{
-					$param_key = trim( substr( $param_key, 1 ) );
-
-					if( array_key_exists( $param_key, $metadata ) )
-						$condition_state = false;
+					if( ! array_key_exists( $param_key, $metadata ) )
+					{
+						$group_state = false;
+					}
+					else if(
+						strlen( $param_value ) < 2 ||
+						$param_value[ 0 ] !== '"' ||
+						substr( $param_value, -1 ) !== '"'
+					)
+					{
+						$group_state = false;
+					}
+					else if( $metadata[ $param_key ] == substr( $param_value, 1, -1 ) )
+					{
+						$group_state = false;
+					}
 				}
 				else
 				{
-					if( ! array_key_exists( $param_key, $metadata ) )
-						$condition_state = false;
+					$param_key = trim( $param );
+
+					if( substr( $param_key, 0, 1 ) == "!" )
+					{
+						$param_key = trim( substr( $param_key, 1 ) );
+
+						if( array_key_exists( $param_key, $metadata ) )
+							$group_state = false;
+					}
+					else
+					{
+						if( ! array_key_exists( $param_key, $metadata ) )
+							$group_state = false;
+					}
 				}
+
+				// No need to evaluate the rest of this AND group.
+				if( ! $group_state )
+					break;
+			}
+
+			// At least one OR group must pass.
+			if( $group_state )
+			{
+				$condition_state = true;
+				break;
 			}
 		}
 
@@ -1442,6 +1466,7 @@ HTML;
 
 		if( $condition_state )
 			return $content;
+
 		return "";
 	}
 
