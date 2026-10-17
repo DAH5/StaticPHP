@@ -792,17 +792,17 @@ HTML;
 		{
 			$layout_contents = "";
 			$this->processLayoutMetaData( $metadata, $this->metaDataDelimiter, $this->metaDataClosingDelimiter, $layout_contents );
-
-			if( isset( $metadata['layout'] ) && $metadata['layout'] && substr( $metadata['layout'], -4 ) == ".php" )
-				$this->processTemporaryFile( $metadata['layout'], $layout_contents, $metadata );
 			
-			$this->processContentPlaceHolder( $metadata, $input_file_contents, $layout_contents );
-
 			if( ! isset( $friendly_urls ) )
 				$friendly_urls = $this->friendly_urls;
 
 			if( $file_extension == '.md' )
 				$input_file_contents = $this->convertMarkdownToHTML( $input_file_contents, $metadata, $friendly_urls );
+			
+			if( isset( $metadata['layout'] ) && $metadata['layout'] && substr( $metadata['layout'], -4 ) == ".php" )
+				$this->processTemporaryFile( $metadata['layout'], $layout_contents, $metadata );
+			
+			$this->processContentPlaceHolder( $metadata, $input_file_contents, $layout_contents );
 
 			if( isset( $custom_output_path ) )
 				$this->processOutputPath( $path_to_output_file, $metadata, $friendly_urls, $custom_output_path );
