@@ -319,6 +319,12 @@ In some editors, the MetaData code in these files may flag errors or warnings, t
 
 [Jump to Section](#jump-to-section)
 
+### Markdown Link Fragment Prefix
+
+Exclusive to Markdown files, the `link_fragment_prefix` special metadata key can be used to specify a prefix to be prepended to the start of fragment link hrefs to assist in situations where normal anchor links may not work as expected, such as when using the HTML `<base>` tag, for example.
+
+[Jump to Section](#jump-to-section)
+
 ## Conclusion
 
 By following these steps, you can easily manage MetaData in your StaticPHP projects, enabling greater flexibility and control over your static website generation process. For more detailed information, refer to the accompanying documentation and guides.

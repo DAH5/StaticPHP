@@ -2073,15 +2073,21 @@ HTML;
 			$lines[ $l ] = preg_replace_callback
 			(
 				'/\[([^\]]+)\]\(([^)\s]+)(?:\s+"([^"]+)")?\)/',
-				function( $matches )
+				function( $matches ) use ($metadata)
 				{
 					$text  = $matches[ 1 ];
 					$href  = $matches[ 2 ];
 					$title = isset( $matches[ 3 ] ) ? ' title="' . htmlspecialchars( $matches[ 3 ] ) . '"' : '';
 					$external = false;
+					$fragment = false;
 
 					if( strpos( $href, '://' ) )
 						$external = true;
+					if( ! $external && substr( $href, 0, 1 ) == "#" )
+						$fragment = true;
+
+					if( isset( $metadata[ 'link_fragment_prefix' ] ) && strlen( $metadata[ 'link_fragment_prefix' ] ) > 0 && $fragment )
+						$href = $metadata[ 'link_fragment_prefix' ] . $href;
 
 					return '<a href="' . htmlspecialchars( $href ) . '"' . $title . ( $external ? ' target="_blank" rel="noopener noreferrer"' : '' ) . '>' . htmlspecialchars( $text ) . '</a>';
 				},

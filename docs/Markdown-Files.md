@@ -80,6 +80,8 @@ Create a link to a heading anchor.
 ### Hyperlinks
 ```
 
+You can also use the Special MetaData key of `link_fragment_prefix` to define a prefix for fragment/anchor links. More about this on the [MetaData](MetaData.md) page.
+
 [Back to Supported Markdown](#examples-of-supported-markdown)
 
 ### Images
