@@ -2,6 +2,12 @@
 
 MetaData is an area at the top of your source files where you can store information for later reference or for StaticPHP to use during the build process.
 
+## Jump to Section
+
+- [Defining MetaData](#defining-metadata)
+- [Using Placeholders](#using-placeholders)
+- [Special MetaData](#special-metadata)
+
 ## Defining MetaData
 
 To define MetaData, place it at the top of your file with the first line being the MetaData delimiter set in your build configuration. If you haven't defined a delimiter yet, follow the instructions on the [Getting Started](Getting-Started.md) page, or use the default delimiter of triple hyphens (---).
@@ -54,6 +60,8 @@ change_log:
 * Fixed a buggy feature.
 ---
 ```
+
+[Jump to Section](#jump-to-section)
 
 ## Using Placeholders
 
@@ -173,6 +181,8 @@ some_value: some value
 
 <p>{% metadata.some_key %}</p>
 ```
+
+[Jump to Section](#jump-to-section)
 
 ## Special MetaData
 
@@ -306,6 +316,8 @@ function minification()
 ```
 
 In some editors, the MetaData code in these files may flag errors or warnings, these can be safely ignored, as the MetaData settings at the top of the files are always removed from output.
+
+[Jump to Section](#jump-to-section)
 
 ## Conclusion
 

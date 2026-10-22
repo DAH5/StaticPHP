@@ -8,6 +8,14 @@ You may want to use Markdown when you are writing an article of some sort where 
 
 The most used Markdown features should be supported, but if you have any specific needs, you may need to wait for this to be added in the future.
 
+- [Paragraphs and Text](#paragraphs-and-text)
+- [Headings](#headings)
+- [Inline Text Formatting](#inline-text-formatting)
+- [Hyperlinks](#hyperlinks)
+- [Images](#images)
+- [Code and Code Blocks](#code-and-code-blocks)
+- [Unordered Lists](#unordered-lists)
+
 ### Paragraphs and Text
 
 Simple lines of text forming sentenses or paragraphs can be written on their own. Linebreaks are supported too.
@@ -18,6 +26,8 @@ The quick brown fox jumped over the lazy dog.
 The quick brown fox
 jumped over the lazy dog.
 ```
+
+[Back to Supported Markdown](#examples-of-supported-markdown)
 
 ### Headings
 
@@ -32,6 +42,10 @@ StaticPHP supports all six headings in Markdown.
 ###### Heading 6
 ```
 
+Every heading is an anchor and can be used to create [hyperlinks](#hyperlinks) to those headings.
+
+[Back to Supported Markdown](#examples-of-supported-markdown)
+
 ### Inline Text Formatting
 
 You can format your text as **bold**, *italic*, and ~~strikethrough~~.
@@ -41,6 +55,8 @@ You can format your text as **bold**, *italic*, and ~~strikethrough~~.
 *italic* or _italic_
 ~~strikethrough~~
 ```
+
+[Back to Supported Markdown](#examples-of-supported-markdown)
 
 ### Hyperlinks
 
@@ -56,6 +72,16 @@ You can also add a title to the hyperlink.
 [Link Text](http://hostname.tld/resource "Title Text")
 ```
 
+Create a link to a heading anchor.
+
+```
+[Hyperlinks](#hyperlinks)
+
+### Hyperlinks
+```
+
+[Back to Supported Markdown](#examples-of-supported-markdown)
+
 ### Images
 
 Adding images is very similar to hyperlinks.
@@ -70,11 +96,15 @@ With a title.
 ![Alt Text](http://hostname.tld/image.png "Title Text")
 ```
 
+[Back to Supported Markdown](#examples-of-supported-markdown)
+
 ### Code and Code Blocks
 
 You can write lines of code inline by surrounding the content with single backticks. `` ` ``
 
 And you can write multiline codeblocks using three backticks on the start and end lines. You can optionally supply a name after the opening backticks.
+
+[Back to Supported Markdown](#examples-of-supported-markdown)
 
 ### Unordered Lists
 
@@ -86,6 +116,8 @@ You can write unordered lists by putting each list item on its own line, with ea
 - Another List Item
 - Yet Another List Item
 ```
+
+[Back to Supported Markdown](#examples-of-supported-markdown)
 
 ## MetaData Support
 

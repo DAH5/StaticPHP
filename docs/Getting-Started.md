@@ -2,9 +2,19 @@
 
 *Your next project begins here.*
 
+## All Steps
+
+- [Step One: Download and Install](#step-one-download-and-install)
+- [Step Two: Setup Your Project Structure](#step-two-setup-your-project-structure)
+- [Step Three: Develop Your Website](#step-three-develop-your-website)
+- [Step Four: Build and Deploy](#step-four-build-and-deploy)
+- [Step Five: Commit to Git](#step-five-commit-to-git)
+
 ## Step One: Download and Install
 
 Create a new folder/directory for your project (e.g. `mysite`). Download the latest version of StaticPHP to your project folder/directory. It is recommended to download the launcher instead of StaticPHP itself, as this will keep you up-to-date with the latest StaticPHP features and provide easy customization options.
+
+[All Steps](#all-steps)
 
 ## Step Two: Setup Your Project Structure
 
@@ -25,11 +35,15 @@ StaticPHP.php
 
 The above example will ensure that only the source files are commited to Git because the generated output files can be regenerated anytime, so make sure to replace `public` with your chosen folder/directory name. It also includes an entry to ignore `StaticPHP.php` which is recommended when using the launcher to ensure the main StaticPHP file does not get commited too. If you are not using the launcher, you may want this file included, so simply remove that line. Lines that start with a hash symbol `#` are comments.
 
+[All Steps](#all-steps)
+
 ## Step Three: Develop Your Website
 
 Start creating HTML and PHP files, and let StaticPHP handle the rest. Ensure that any file paths, such as those for including other files, are relative to the location of the StaticPHP file.
 
 Refer to the [MetaData](MetaData.md) feature to explore additional capabilities for your website files.
+
+[All Steps](#all-steps)
 
 ## Step Four: Build and Deploy
 
@@ -161,6 +175,8 @@ new StaticPHP
 );
 ```
 
+[All Steps](#all-steps)
+
 ## Step Five: Commit to Git
 
 This step is optional, but if you are using Git source control, you may want to commit it now to make sure your progress is saved.
@@ -176,6 +192,8 @@ This step is optional, but if you are using Git source control, you may want to 
 **Push to Remote**
 
 `git push origin master`
+
+[All Steps](#all-steps)
 
 ## Conclusion
 

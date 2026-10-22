@@ -2,6 +2,12 @@
 
 Functional Blocks in StaticPHP allow you to create dynamic content without writing PHP. They are similar to using PHP functions but with a simplified syntax.
 
+## Available Functional Blocks
+
+- [The Loop Functional Block](#the-loop-functional-block)
+- [The If Functional Block](#the-if-functional-block)
+- [The Snippet Functional Block](#the-snippet-functional-block)
+
 ## Syntax
 
 A Functional Block starts with an opening tag using the same delimiter as MetaData, followed by the block name, and then a set of key-value parameters within parentheses. The block is closed with an end tag, which is the word "end" followed by the block name, surrounded by the MetaData delimiter.
@@ -27,6 +33,8 @@ Put anything here.
 ```
 
 The rest of this page will assume `---` for both the open and close delimiters to keep things simple, just remember to swap them out accordingly.
+
+Back to [Available Functional Blocks](#available-functional-blocks)
 
 ## The Loop Functional Block
 
@@ -198,6 +206,8 @@ The above code should output something similar to this:
 </div>
 ```
 
+Back to [Available Functional Blocks](#available-functional-blocks)
+
 ## The If Functional Block
 
 The `if` functional block allows you to perform conditional checks on MetaData.
@@ -307,6 +317,7 @@ if( ( $current_page == "home" && $show_greeting == "true" ) || ( $current_page =
 
 The if functional block is currently limited to this basic functionality. The functionality may get extended in the future.
 
+Back to [Available Functional Blocks](#available-functional-blocks)
 
 ## The Snippet Functional Block
 
@@ -335,6 +346,8 @@ As an example, you can recall and reuse the above code snippet as follows:
 ```
 
 Find out more about MetaData Placeholders on the [MetaData](MetaData.md) page.
+
+Back to [Available Functional Blocks](#available-functional-blocks)
 
 ## More Features Coming Soon
 

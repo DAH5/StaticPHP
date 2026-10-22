@@ -4,17 +4,33 @@ StaticPHP is designed to be powerful and versatile right out of the box, caterin
 
 StaticPHP offers many customisable options that can be defined in the build configuration, and some can be overridden on a per-file basis. Let's explore these options.
 
+## Jump to Section
+
+- [Input Directory](#input-directory)
+- [Output Directory](#output-directory)
+- [Ignoring Files](#ignoring-files)
+- [Friendly URLs](#friendly-urls)
+- [MetaData Delimiter](#metadata-delimiter)
+- [Code Minification](#code-minification)
+- [Bulk Redirects Filename](#bulk-redirects-filename)
+- [Redirection Template Filename](#redirection-template-filename)
+- [Passing Through Items](#passing-through-items)
+
 ## Input Directory
 
 The input directory is where you put all your source files. By default, this is a folder named `src` located relative to StaticPHP. You can change this to any directory you prefer.
 
 To specify your input directory, set `source_dir_path` in your build configuration to the path where your source files are located.
 
+[Jump to Section](#jump-to-section)
+
 ## Output Directory
 
 The output directory is where StaticPHP places the generated output files after processing. By default, this is a folder named `public` located relative to StaticPHP. You can change this to any directory you prefer.
 
 To specify your output directory, set `output_dir_path` in your build configuration to the path where you want StaticPHP to put your generated output files.
+
+[Jump to Section](#jump-to-section)
 
 ## Ignoring Files
 
@@ -24,17 +40,23 @@ If using the command line option, you can specify one path part to ignore. If us
 
 A general recommendation is to use a folder called `_includes` and add it as the path to ignore. This way, any files inside `_includes` will be ignored as individual files but still processed as intended, such as through PHP includes.
 
+[Jump to Section](#jump-to-section)
+
 ## Friendly URLs
 
 Enhance user experience and improve SEO by enabling StaticPHP's Friendly URLs feature. This feature creates URLs like `domain.tld/page` instead of `domain.tld/page.html`.
 
 Set `friendly_urls` in your build configuration to `true` to enable or `false` to disable Friendly URLs.
 
+[Jump to Section](#jump-to-section)
+
 ## MetaData Delimiter
 
 By default, StaticPHP uses a triple hyphen delimiter (`---`) for MetaData, but you can change this in your build configuration under `metadata_delimiter`. You can also define an optional alternative closing delimiter in your build configuration under `metadata_closing_delimiter`.
 
 For more details, refer to the [MetaData](MetaData.md) guide.
+
+[Jump to Section](#jump-to-section)
 
 ## Code Minification
 
@@ -46,6 +68,8 @@ You can choose which types of files to minify (`HTML`, `CSS`, `JS`) in your buil
 
 **HTML Tag Preservation:** For HTML files, sometimes you may want certain tags, like `<pre>`, to remain unminified so that things like code snippets remain intact. Simply set `minify_html_tags_to_preserve` to an array of tag names in your StaticPHP configuration.
 
+[Jump to Section](#jump-to-section)
+
 ### Minify CSS and JS In-Place or Separate
 
 StaticPHP can output just the minified versions of your CSS and JS files, which is the default behaviour, and can output both minified and unminified versions.
@@ -56,16 +80,24 @@ When outputing both versions, StaticPHP will put `.min.css` and/or `.min.js` on 
 
 Note that for your CSS and JS minification in-place preferences to take effect, the build config settings `minify_css` and/or `minify_js` must be set to `true` for the feature you wish to use, or individually via the special MetaData key `minify` on a per-file basis.
 
+[Jump to Section](#jump-to-section)
+
 ## Bulk Redirects Filename
 
 StaticPHP supports defining all your redirection rules in a single file. By default, this filename is `_bulk_redirects`, but you can change it by setting the configuration option `bulk_redirects_filename` to your preferred filename as a string.
 
+[Jump to Section](#jump-to-section)
+
 ## Redirection Template Filename
 StaticPHP outputs a simple HTML file whenever a redirection takes place. You can change the contents of the redirection file by specifying a filename for a template to use instead. Set the configuration option `redirection_template_filename` to your chosen filename relative to your source directory.
+
+[Jump to Section](#jump-to-section)
 
 ## Passing Through Items
 
 Sometimes you may wish a PHP script or file that StaticPHP would normally process, remain in the output as-is. To make this happen, you can define the configurable option `items_to_passthrough` to an array of strings that will be matched against file paths. These can be partial matches, such as `_passthrough` as a value will match any path that has `_passthrough` as part of it.
+
+[Jump to Section](#jump-to-section)
 
 ---
 

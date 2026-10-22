@@ -4,6 +4,14 @@ StaticPHP supports URL redirection, allowing you to automatically redirect users
 
 **Note:** Redirections apply only to web pages. For redirects involving assets or non-HTML files, you'll need to use alternative methods.
 
+## Sections
+
+- [Bulk Redirects](#bulk-redirects)
+- [Single Redirections](#single-redirections)
+- [How Does the Redirection Work?](#how-does-the-redirection-work)
+- [Why Meta Refresh?](#why-meta-refresh)
+- [Faster Redirections Where Supported](#faster-redirections-where-supported)
+
 ## Bulk Redirects
 
 The **Bulk Redirects** feature in StaticPHP enables you to manage multiple redirects easily using a single file: `_bulk_redirects`. This file allows you to list all your redirection rules in one place, making it simple to update or add new redirects without modifying your codebase.
@@ -46,6 +54,8 @@ You can also optionally specify a redirection code as a third parameter, but thi
 
 This system makes it easy to handle large-scale redirects in bulk, simplifying site maintenance and ensuring a smooth user experience even after restructuring or updating content.
 
+[All Sections](#sections)
+
 ## Single Redirections
 
 The **Single Redirections** feature in StaticPHP allows you to easily redirect from one page to another, either within your site or to an external URL. This is useful in cases where you want to redirect users from an outdated or temporary URL while still preserving the content of the original page in your project source files.
@@ -75,6 +85,8 @@ The user’s browser will automatically follow the redirect, and they will be ta
 ### Notes:
 - The `redirect` URL can be either an absolute URL (e.g., `https://example.tld/new`) or a relative URL (e.g., `/new`).
 - This feature is ideal for temporary redirects or handling legacy URLs.
+
+[All Sections](#sections)
 
 ## How Does the Redirection Work?
 
@@ -168,9 +180,13 @@ duration_in_seconds: 5
 
 Find out more about MetaData on the [MetaData](MetaData.md) documentation page.
 
+[All Sections](#sections)
+
 ## Why Meta Refresh?
 
 The `<meta http-equiv="refresh">` tag has been used for automatic redirection for many years and is supported by nearly all browsers. While this method is generally reliable, StaticPHP ensures that if the redirect fails, a clickable link is provided as a backup.
+
+[All Sections](#sections)
 
 ## Faster Redirections Where Supported
 
@@ -189,3 +205,5 @@ You can optionally define a redirect code in your `_bulk_redirects` file.
 ```
 
 Supported codes are `301 (Moved Permanently)`, `302 (Found)`, `307 (Temporary Redirect)`, and `308 (Permanent Redirect)`. If no code is specified, or if you specify a code other than these, StaticPHP will default to `307 (Temporary Redirect)`.
+
+[All Sections](#sections)
