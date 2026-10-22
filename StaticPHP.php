@@ -2022,39 +2022,36 @@ HTML;
 				$endOfList = true;
 			}
 
-			if( preg_match( "/(#{6}\s)(.*)/", $lines[ $l ] ) )
+			if( preg_match( '/^(#{1,6})\s+(.+)$/', $lines[ $l ], $matches ) )
 			{
-				$lines[ $l ] = preg_replace( "/(#{6}\s)(.*)/", "<h6>$2</h6>", $lines[ $l ] );
-				continue;
-			}
-			
-			if( preg_match( "/(#{5}\s)(.*)/", $lines[ $l ] ) )
-			{
-				$lines[ $l ] = preg_replace( "/(#{5}\s)(.*)/", "<h5>$2</h5>", $lines[ $l ] );
-				continue;
-			}
+				$level = strlen( $matches[ 1 ] );
+				$heading = $matches[ 2 ];
 
-			if( preg_match( "/(#{4}\s)(.*)/", $lines[ $l ] ) )
-			{
-				$lines[ $l ] = preg_replace( "/(#{4}\s)(.*)/", "<h4>$2</h4>", $lines[ $l ] );
-				continue;
-			}
+				// Convert to lowercase
+				$baseSlug = strtolower( $heading );
 
-			if( preg_match( "/(#{3}\s)(.*)/", $lines[ $l ] ) )
-			{
-				$lines[ $l ] = preg_replace( "/(#{3}\s)(.*)/", "<h3>$2</h3>", $lines[ $l ] );
-				continue;
-			}
+				// Remove punctuation (but keep letters, numbers,
+				// spaces, hyphens and underscores)
+				$baseSlug = preg_replace( '/[^\p{L}\p{N}\s_-]/u', '', $baseSlug );
 
-			if( preg_match( "/(#{2}\s)(.*)/", $lines[ $l ] ) )
-			{
-				$lines[ $l ] = preg_replace( "/(#{2}\s)(.*)/", "<h2>$2</h2>", $lines[ $l ] );
-				continue;
-			}
+				// Replace spaces with hyphens
+				$baseSlug = preg_replace( '/\s/u', '-', $baseSlug );
 
-			if( preg_match( "/(#{1}\s)(.*)/", $lines[ $l ] ) )
-			{
-				$lines[ $l ] = preg_replace( "/(#{1}\s)(.*)/", "<h1>$2</h1>", $lines[ $l ] );
+				$slug = $baseSlug;
+				$suffix = 0;
+
+				while( isset( $usedSlugs[ $slug ] ) )
+				{
+					$suffix++;
+					$slug = $baseSlug . '-' . $suffix;
+				}
+
+				$usedSlugs[ $slug ] = true;
+
+				$lines[ $l ] = '<h' . $level . ' id="' . htmlspecialchars( $slug, ENT_QUOTES, 'UTF-8' ) . '">'
+							. htmlspecialchars( $heading, ENT_QUOTES, 'UTF-8' )
+							. '</h' . $level . '>';
+
 				continue;
 			}
 
