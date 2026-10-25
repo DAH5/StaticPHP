@@ -812,11 +812,15 @@ HTML;
 
 		$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $this->metaDataClosingDelimiter, $input_file_contents, $metadata, $input_file_contents );
 
-		if( $file_extension == '.php' || $file_extension == '.html' || $file_extension == '.htm' )
+		if( $file_extension == '.php' || $file_extension == '.html' || $file_extension == '.htm' || $file_extension == '.css' )
 		{
 			$input_file_contents = $this->processFunctionalBlocks( $input_file_contents, $metadata );
+		}
+		
+		if( $file_extension == '.php' || $file_extension == '.html' || $file_extension == '.htm' )
+		{
 			$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $this->metaDataClosingDelimiter, $input_file_contents, $this->snippetBlocks, $input_file_contents, 'snippet' );
-
+			
 			if( isset( $metadata[ 'remote_content_url' ] ) && isset( $metadata[ 'remote_content_placeholder' ] ) )
 			{
 				$remote_content_url = $metadata[ 'remote_content_url' ];

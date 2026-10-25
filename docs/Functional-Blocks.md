@@ -2,6 +2,8 @@
 
 Functional Blocks in StaticPHP allow you to create dynamic content without writing PHP. They are similar to using PHP functions but with a simplified syntax.
 
+The Functional Blocks system can currently only be used in `PHP`, `HTML`, and `CSS` files.
+
 ## Available Functional Blocks
 
 - [The Loop Functional Block](#the-loop-functional-block)
