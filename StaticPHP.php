@@ -1956,11 +1956,15 @@ HTML;
 			{
 				if( ! $isCodeblock )
 				{
-					$codeblockName = $matches[ 1 ];
+					$codeblockLanguage = $matches[ 1 ];
+					$codeBlockLanguagePlaceholder = isset( $metadata[ 'codeblock_language_placeholder' ] ) && $metadata[ 'codeblock_language_placeholder' ] ? $metadata[ 'codeblock_language_placeholder' ] : '{{ language }}';
+					$codeblockLanguageClass = isset( $metadata[ 'codeblock_language_class' ] ) && $metadata[ 'codeblock_language_class' ] ? $metadata[ 'codeblock_language_class' ] : 'codeblock-' . $codeBlockLanguagePlaceholder;
+					$codeblockLanguageClass = str_replace( $codeBlockLanguagePlaceholder, $codeblockLanguage, $codeblockLanguageClass );
+
 					$isCodeblock = true;
 
-					if( $codeblockName )
-						$lines[ $l ] = preg_replace( "/\`\`\`(.*)/", "<pre><code class=\"codeblock codeblock-" . $codeblockName . "\">", $lines[ $l ] );
+					if( $codeblockLanguage )
+						$lines[ $l ] = preg_replace( "/\`\`\`(.*)/", "<pre><code class=\"codeblock " . $codeblockLanguageClass . "\">", $lines[ $l ] );
 					else
 						$lines[ $l ] = preg_replace( "/\`\`\`(.*)/", "<pre><code class=\"codeblock\">", $lines[ $l ] );
 

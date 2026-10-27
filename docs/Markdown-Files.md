@@ -104,7 +104,40 @@ With a title.
 
 You can write lines of code inline by surrounding the content with single backticks. `` ` ``
 
-And you can write multiline codeblocks using three backticks on the start and end lines. You can optionally supply a name after the opening backticks.
+And you can write multiline codeblocks using three backticks on the start and end lines. You can optionally supply a language after the opening backticks.
+
+Generated code blocks will be structured as an HTML `<pre>` tag with a `<code>` tag inside it. The `<code>` tag will have the class name of `codeblock` so you can style it as you wish. If a language was supplied, an additional class name similar to `codeblock-language` will be included, where `language` is the language specified.
+
+If the default `codeblock-language` style of language class name doesn't work for you, it can be customised using two MetaData keys, `codeblock_language_placeholder`, which is used to style the format of the language placeholder, and by default will be set to `{{ language }}`, and `codeblock_language_class`, which is used to style the actual class name itself, and by default will be set to `codeblock-{{ language }}`, generating `codeblock-html` for an HTML code block.
+
+#### Example Default HTML Code Block
+
+With no customisations in MetaData, something similar to the following will be generated:
+
+```html
+<pre><code class="codeblock codeblock-html">
+<!-- Some HTML code goes here. -->
+</code></pre>
+```
+
+#### Example Customised HTML Code Block
+
+With the following MetaData defined:
+
+```html
+---
+codeblock_language_placeholder: {{ lang }}
+codeblock_language_class: language-{{ lang }}
+---
+```
+
+Something similar to the following will be generated:
+
+```html
+<pre><code class="codeblock language-html">
+<!-- Some HTML code goes here. -->
+</code></pre>
+```
 
 [Back to Supported Markdown](#examples-of-supported-markdown)
 
