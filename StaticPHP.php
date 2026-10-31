@@ -407,7 +407,7 @@ HTML;
 				}
 			}
 
-			if( is_dir( $path_to_input_directory_item ) && ! is_dir( $path_to_output_directory_item ) )
+			if( is_dir( $path_to_input_directory_item ) )
 			{
 				$this->processDirectory( $path_to_input_directory_item, $path_to_output_directory_item );
 			}
