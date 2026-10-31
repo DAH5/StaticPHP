@@ -1072,9 +1072,65 @@ HTML;
 		else if( ! is_file( $outputFilePath ) && is_file( $inputFilePath ) )
 			$file_contents = file_get_contents( $inputFilePath ) . PHP_EOL;
 
-		$file_contents .= $oldPath . ' ' . $newDestination . ' ' . $redirect_code;
+		$begin = '# BEGIN StaticPHP Bulk Redirects';
+		$end = '# END StaticPHP Bulk Redirects';
+		$blockPattern = '/' . preg_quote( $begin, '/' ) . '.*?' . preg_quote( $end, '/' ) . '/s';
 
-		$this->outputFile( $outputFilePath, $file_contents );
+		$existingRules = [];
+		$pre = $file_contents;
+		$hasBlock = preg_match( $blockPattern, $file_contents, $m ) === 1;
+
+		if( $hasBlock )
+		{
+			$block = $m[ 0 ];
+
+			if( preg_match_all( '/^[ \t]*([^\s#]+)\s+(\S+)(?:[ \t]+(\S+))?[ \t]*$/m', $block, $mm, PREG_SET_ORDER | PREG_UNMATCHED_AS_NULL ) )
+			{
+				foreach( $mm as $match )
+				{
+					$from = $match[ 1 ];
+					$dest = $match[ 2 ];
+					$rcode = isset( $match[ 3 ] ) ? ( int ) $match[ 3 ] : 307;
+
+					$existingRules[ $from ] = [
+						'to' => $dest,
+						'code' => $rcode
+					];
+				}
+			}
+
+			$pre = preg_replace( $blockPattern, '', $file_contents, 1 );
+		}
+
+		$existingRules[ $oldPath ] = [ 'to' => $newDestination, 'code' => $redirect_code ];
+
+		ksort( $existingRules, SORT_STRING );
+
+		$lines = [];
+		$lines[] = $begin;
+		$lines[] = '# Managed by StaticPHP. There is no need to manually edit between these markers.';
+		$lines[] = '';
+
+		foreach( $existingRules as $f => $info )
+		{
+			$dest = $info[ 'to' ];
+			$rc = $info[ 'code' ];
+
+			$lines[] = $f . ' ' . $dest . ' ' . $rc;
+		}
+
+		$lines[] = '';
+		$lines[] = $end;
+		$newBlock = implode( PHP_EOL, $lines ) . PHP_EOL;
+
+		$pre = rtrim( $pre );
+
+		if( $pre )
+			$pre .= PHP_EOL . PHP_EOL;
+
+		$newContents = $pre . $newBlock;
+
+		$this->outputFile( $outputFilePath, $newContents );
 	}
 
 	private function generateHtaccessRedirections( String $oldPath, String $newDestination, int $redirect_code )
