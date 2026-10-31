@@ -398,7 +398,7 @@ HTML;
 			{
 				foreach( $this->items_to_passthrough as $item_to_passthrough )
 				{
-					if( $item_to_passthrough != "" && strpos( $path_to_input_directory_item, $item_to_passthrough ) !== false && is_file( $path_to_input_directory_item ) )
+					if( $item_to_passthrough != "" && strpos( $path_to_input_directory_item, $item_to_passthrough ) !== false && is_file( $path_to_input_directory_item ) && ! is_file( $path_to_output_directory_item ) )
 					{
 						echo "Passing Through File: " . $path_to_input_directory_item . PHP_EOL;
 						copy( $path_to_input_directory_item, $path_to_output_directory_item );
@@ -407,12 +407,12 @@ HTML;
 				}
 			}
 
-			if( is_dir( $path_to_input_directory_item ) )
+			if( is_dir( $path_to_input_directory_item ) && ! is_dir( $path_to_output_directory_item ) )
 			{
 				$this->processDirectory( $path_to_input_directory_item, $path_to_output_directory_item );
 			}
 			
-			if( is_file( $path_to_input_directory_item ) && substr( $directory_item, -4 ) == ".php" )
+			if( is_file( $path_to_input_directory_item ) && ! is_file( $path_to_output_directory_item ) && substr( $directory_item, -4 ) == ".php" )
 			{
 				$path_to_output_directory_item = substr( $path_to_output_directory_item, 0, -4 ) . ".html";
 				
@@ -420,25 +420,25 @@ HTML;
 				continue;
 			}
 
-			if( is_file( $path_to_input_directory_item ) && substr( $directory_item, -5 ) == ".html" )
+			if( is_file( $path_to_input_directory_item ) && ! is_file( $path_to_output_directory_item ) && substr( $directory_item, -5 ) == ".html" )
 			{
 				$this->processFile( $path_to_input_directory_item, $path_to_output_directory_item );
 				continue;
 			}
 
-			if( is_file( $path_to_input_directory_item ) && substr( $directory_item, -4 ) == ".css" )
+			if( is_file( $path_to_input_directory_item ) && ! is_file( $path_to_output_directory_item ) && substr( $directory_item, -4 ) == ".css" )
 			{
 				$this->processFile( $path_to_input_directory_item, $path_to_output_directory_item );
 				continue;
 			}
 
-			if( is_file( $path_to_input_directory_item ) && substr( $directory_item, -3 ) == ".js" )
+			if( is_file( $path_to_input_directory_item ) && ! is_file( $path_to_output_directory_item ) && substr( $directory_item, -3 ) == ".js" )
 			{
 				$this->processFile( $path_to_input_directory_item, $path_to_output_directory_item );
 				continue;
 			}
 
-			if( is_file( $path_to_input_directory_item ) && substr( $directory_item, -3 ) == ".md" )
+			if( is_file( $path_to_input_directory_item ) && ! is_file( $path_to_output_directory_item ) && substr( $directory_item, -3 ) == ".md" )
 			{
 				$path_to_output_directory_item = substr( $path_to_output_directory_item, 0, -3 ) . ".html";
 
@@ -446,7 +446,7 @@ HTML;
 				continue;
 			}
 
-			if( is_file( $path_to_input_directory_item ) && $directory_item == $this->bulk_redirects_filename )
+			if( is_file( $path_to_input_directory_item ) && ! is_file( $path_to_output_directory_item ) && $directory_item == $this->bulk_redirects_filename )
 			{
 				$redirect_list_file_contents = file_get_contents( $path_to_input_directory_item );
 				$redirect_list_file_contents = $this->convertEndOfLines( $redirect_list_file_contents );
@@ -455,7 +455,7 @@ HTML;
 				continue;
 			}
 			
-			if( is_file( $path_to_input_directory_item ) )
+			if( is_file( $path_to_input_directory_item ) && ! is_file( $path_to_output_directory_item ) )
 			{
 				echo "Copying File: " . $path_to_input_directory_item . " to " . $path_to_output_directory_item . PHP_EOL;
 				copy( $path_to_input_directory_item, $path_to_output_directory_item );
