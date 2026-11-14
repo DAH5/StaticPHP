@@ -15,4 +15,5 @@ jobs:
         run: |
           gh api repos/DAH5/StaticPHP-Website/dispatches \
             --method POST \
+            --include \
             -f event_type=staticphp-updated
