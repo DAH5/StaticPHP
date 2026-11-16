@@ -977,7 +977,7 @@ HTML;
 
 			$filePath = $path_to_output_directory . DIRECTORY_SEPARATOR . $oldPath;
 
-			if( strpos( $filePath, '.' ) === false )
+			if( substr( $filePath, -5 ) != '.html' && substr( $filePath, -4 ) != '.htm' )
 				$filePath = $filePath . DIRECTORY_SEPARATOR . 'index.html';
 			
 			$this->processRedirection( $filePath, $oldPath, $newDestination );
