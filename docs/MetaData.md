@@ -184,7 +184,7 @@ welcome_message: Welcome to --- metadata.site_name ---!
 **Example Output**
 
 ```html
-
+<p>Welcome to Awesome Website!</p>
 ```
 
 ### Placeholders with Different Open and Close Delimiters
@@ -349,17 +349,15 @@ Exclusive to Markdown files, the `link_fragment_prefix` special metadata key can
 
 Access Global MetaData values using placeholders and the `StaticPHP` namespace.
 
-#### Example
+#### Example Syntax
 
 ```html
 --- StaticPHP.key ---
 ```
 
-Currently, only one key is available, and that is `BuildID`.
+Currently, the `StaticPHP` namespace provides one key: `BuildID`.
 
-```html
---- StaticPHP.BuildID ---
-```
+Replace `key` with `BuildID` to access the unique identifier generated at the beginning of each StaticPHP build.
 
 ## Conclusion
 
