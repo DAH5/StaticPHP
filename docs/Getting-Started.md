@@ -85,6 +85,7 @@ Firstly, you need to know what each configurable option does when defined via co
 - `items_to_passthrough`: Any string of text in file paths that StaticPHP should passthrough instead of process. Useful if you want a PHP script to remain intact and exist in the output.
 - `generate_standard_redirects_file`: A boolean indicating whether StaticPHP should generate a `_redirects` file based on your `_bulk_redirects` file.
 - `generate_htaccess_redirections`: A boolean indicating whether StaticPHP should generate redirections inside a `.htaccess` file based on your `_bulk_redirects` file.
+- `apply_build_id_to_file_extensions`: An array containing file extensions to apply the current Build ID to when processing files of those extensions. Defaults to an empty array.
 
 To define these options via command line arguments, make sure you have a terminal open with the path set to your project directory/folder.
 

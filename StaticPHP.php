@@ -2,6 +2,8 @@
 
 class StaticPHP
 {
+	private $buildID = "";
+
 	private $source_dir_path = "src";
 	private $output_dir_path = "public";
 	private $items_to_ignore = array( "_includes" );
@@ -26,6 +28,7 @@ class StaticPHP
 	private $test_mode_results_file_path = "tests/output/results.html";
 	private $generate_standard_redirects_file = false;
 	private $generate_htaccess_redirections = false;
+	private $apply_build_id_to_file_extensions = array();
 
 	private $tests_successful = array();
 	private $tests_unknown = array();
@@ -35,8 +38,15 @@ class StaticPHP
 
 	private $snippetBlocks = array();
 
+	private $globalMetaData = array();
+
 	public function __construct()
 	{
+		$dateTime = new DateTime;
+		$this->buildID = $dateTime->format( "YmdHisv" );
+		$this->globalMetaData[ "BuildID" ] = $this->buildID;
+		echo "StaticPHP Build ID " . $this->buildID . PHP_EOL . PHP_EOL;
+
 		$args = func_get_args();
 
 		// Array Method
@@ -108,6 +118,8 @@ class StaticPHP
 				$this->generate_standard_redirects_file = $configurable_options[ 'generate_standard_redirects_file' ];
 			if( isset( $configurable_options[ 'generate_htaccess_redirections' ] ) && is_bool( $configurable_options[ 'generate_htaccess_redirections' ] ) )
 				$this->generate_htaccess_redirections = $configurable_options[ 'generate_htaccess_redirections' ];
+			if( isset( $configurable_options[ 'apply_build_id_to_file_extensions' ] ) && is_array( $configurable_options[ 'apply_build_id_to_file_extensions' ] ) )
+				$this->apply_build_id_to_file_extensions = $configurable_options[ 'apply_build_id_to_file_extensions' ];
 		}
 		// End Array Method
 
@@ -381,7 +393,7 @@ HTML;
 			
 			$path_to_input_directory_item = $path_to_input_directory . DIRECTORY_SEPARATOR . $directory_item;
 			$path_to_output_directory_item = $path_to_output_directory . DIRECTORY_SEPARATOR . $directory_item;
-			
+
 			if( is_array( $this->items_to_ignore ) )
 			{
 				foreach( $this->items_to_ignore as $item_to_ignore )
@@ -410,6 +422,20 @@ HTML;
 			if( is_dir( $path_to_input_directory_item ) )
 			{
 				$this->processDirectory( $path_to_input_directory_item, $path_to_output_directory_item );
+			}
+
+			$input_directory_item_file_extension = $this->getFileExtensionFromPath( $path_to_input_directory_item );
+			$input_directory_item_file_extension_lower = strtolower( $input_directory_item_file_extension );
+			
+			foreach( $this->apply_build_id_to_file_extensions as $apply_build_id_to_file_extension )
+			{
+				$apply_build_id_to_file_extension_lower = strtolower( $apply_build_id_to_file_extension );
+
+				if( $input_directory_item_file_extension_lower == $apply_build_id_to_file_extension_lower )
+				{
+					$path_to_output_directory_item = substr( $path_to_output_directory_item, 0, -strlen( $input_directory_item_file_extension ) ) . "." . $this->buildID . $input_directory_item_file_extension;
+					break;
+				}
 			}
 			
 			if( is_file( $path_to_input_directory_item ) && ! is_file( $path_to_output_directory_item ) && substr( $directory_item, -4 ) == ".php" )
@@ -811,6 +837,7 @@ HTML;
 		}
 
 		$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $this->metaDataClosingDelimiter, $input_file_contents, $metadata, $input_file_contents );
+		$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $this->metaDataClosingDelimiter, $input_file_contents, $this->globalMetaData, $input_file_contents, 'StaticPHP' );
 
 		if( $file_extension == '.php' || $file_extension == '.html' || $file_extension == '.htm' || $file_extension == '.css' )
 		{
@@ -2200,6 +2227,7 @@ HTML;
 		echo "Path to Output file: " . $path_to_output_file . PHP_EOL;
 
 		$expected_file_path = str_replace( $this->test_mode_output_dir_path, $this->test_mode_expected_dir_path, $path_to_output_file );
+		$expected_file_path = str_replace( "." . $this->buildID . ".", ".", $expected_file_path );
 
 		if( ! is_file( $expected_file_path ) )
 		{
@@ -2223,10 +2251,43 @@ HTML;
 
 		$input_contents = $this->convertEndOfLines( $input_contents );
 
+		$inputBuildID = "";
+		$expectedBuildID = "";
+
+		$find_input_build_id = preg_match( '/^StaticPHP Build ID (\d{17})$/m', $input_contents, $input_matches );
+		$find_expected_build_id = preg_match( '/^StaticPHP Build ID (\d{17})$/m', $expected_contents, $expected_matches );
+
+		if( $find_input_build_id )
+			$inputBuildID = $input_matches[ 1 ];
+		if( $find_expected_build_id )
+			$expectedBuildID = $expected_matches[ 1 ];
+
 		$expected_contents = $this->convertEndOfLines( $expected_contents );
+		
+		if( $inputBuildID !== '' && $expectedBuildID !== '' && $inputBuildID !== $expectedBuildID )
+			$expected_contents = str_replace( $expectedBuildID, $inputBuildID, $expected_contents );
 
 		if( $input_contents != $expected_contents )
 		{
+			preg_match_all( '/(?<!\d)\d{' . strlen( $this->buildID ) . '}(?!\d)/', $expected_contents, $potential_build_id_matches );
+
+			$possibleBuildIDs = array_unique( $potential_build_id_matches[ 0 ] );
+
+			if( count( $possibleBuildIDs ) === 1 )
+			{
+				$oldBuildID = reset( $possibleBuildIDs );
+
+				$expected_contents = str_replace(
+					$oldBuildID,
+					$this->buildID,
+					$expected_contents
+				);
+			}
+		}
+
+		if( $input_contents != $expected_contents )
+		{
+
 			if( $expected_contents == "" )
 			{
 				$path_to_output_file = $path_to_output_dir . "UNKNOWN." . $output_file_name;
@@ -2262,7 +2323,14 @@ HTML;
 	{
 		if( ! is_file( $path ) )
 			return '';
-		return substr( $path, strrpos( $path, '.' ) );
+
+		$filename = basename( $path );
+		$position = strrpos( $filename, '.' );
+
+		if( $position === false || $position === 0 || $position === strlen( $filename ) - 1 )
+			return '';
+
+		return substr( $filename, $position );
 	}
 
 	public function getFileTypeNameFromExtension( string $fileExtension ): string

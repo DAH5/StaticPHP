@@ -259,6 +259,18 @@ $configurable_options[ 'generate_htaccess_redirections' ] = false;
 
 
 /*
+	Apply Build ID to File Extensions
+
+	Set to an array of file extensions representing the file types you wish renamed to include the unique Build ID.
+
+	Useful for situations where a caching system causes stale content to exist after deployment.
+
+	Defaults to an empty array.
+*/
+$configurable_options[ 'apply_build_id_to_file_extensions' ] = array();
+
+
+/*
 	Auto Update
 
 	Downloads the latest version of StaticPHP upon every run to ensure you always run the latest version.

@@ -325,6 +325,22 @@ Exclusive to Markdown files, the `link_fragment_prefix` special metadata key can
 
 [Jump to Section](#jump-to-section)
 
+### Global MetaData
+
+Access Global MetaData values using placeholders and the `StaticPHP` namespace.
+
+#### Example
+
+```html
+--- StaticPHP.key ---
+```
+
+Currently, only one key is available, and that is `BuildID`.
+
+```html
+--- StaticPHP.BuildID ---
+```
+
 ## Conclusion
 
 By following these steps, you can easily manage MetaData in your StaticPHP projects, enabling greater flexibility and control over your static website generation process. For more detailed information, refer to the accompanying documentation and guides.

@@ -99,7 +99,26 @@ Sometimes you may wish a PHP script or file that StaticPHP would normally proces
 
 [Jump to Section](#jump-to-section)
 
+## Apply Build ID to File Extensions
+
+A list of file extensions defined as an array of strings with leading dots for the file types you wish the unique Build ID to be applied to.
+
+For example, say you have a file called `stylesheet.css`, and you define `.css` in the list of file extensions, the resulting file will be named `stylesheet.SOME_BUILD_ID.css` where `SOME_BUILD_ID` represents the current Build ID.
+
+Build IDs should be 17 characters in length and comprise of numerical digits representing the current date and time down to the millisecond according to how PHP in the build environment sees it.
+
+This feature is useful for situations where a caching system causes stale content to exist after deployment.
+
+Referencing these files can be done normally, except where the Build ID should be, put the special Global MetaData placeholder `--- StaticPHP.BuildID ---`.
+
+```html
+<link rel="stylesheet" type="text/css" href="stylesheet.--- StaticPHP.BuildID ---.css">
+```
+
+For more about MetaData, check out the [MetaData](MetaData.md) documentation.
+
+[Jump to Section](#jump-to-section)
+
 ---
 
 For more information on customising StaticPHP, be sure to check out the [Getting Started](Getting-Started.md) guide. For options available to be overridden on a per-file basis, refer to the [MetaData](MetaData.md) guide.
-
