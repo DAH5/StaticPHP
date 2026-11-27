@@ -167,6 +167,26 @@ shopping_list:
 <p>Bread</p>
 ```
 
+### Inside MetaData Values
+
+You can use MetaData Placeholders inside MetaData Values, useful for when you need a value defined previously. This will probably only work one-level up, so only nest placeholders similar to this.
+
+**Example Input**
+
+```html
+---
+site_name: Awesome Webste
+welcome_message: Welcome to --- metadata.site_name ---!
+---
+<p>--- metadata.welcome_message ---</p>
+```
+
+**Example Output**
+
+```html
+
+```
+
 ### Placeholders with Different Open and Close Delimiters
 
 If you defined a different opening and closing delimiter in your build config, for example `{%` and `%}`, you will need to ensure you use these in your placeholders.

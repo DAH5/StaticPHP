@@ -535,7 +535,7 @@ HTML;
 				
 				$metadata_key = trim( $data[ 0 ] );
 				$metadata_value = trim( $data[ 1 ] );
-				
+
 				if( ! $metadata_value && $input_line_count > $line_number - 1 )
 				{
 					$list_item_index = 1;
@@ -837,7 +837,6 @@ HTML;
 		}
 
 		$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $this->metaDataClosingDelimiter, $input_file_contents, $metadata, $input_file_contents );
-		$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $this->metaDataClosingDelimiter, $input_file_contents, $this->globalMetaData, $input_file_contents, 'StaticPHP' );
 
 		if( $file_extension == '.php' || $file_extension == '.html' || $file_extension == '.htm' || $file_extension == '.css' )
 		{
@@ -882,6 +881,9 @@ HTML;
 				}
 			}
 		}
+
+		$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $this->metaDataClosingDelimiter, $input_file_contents, $metadata, $input_file_contents );
+		$this->processMetaDataPlaceHolders( $this->metaDataDelimiter, $this->metaDataClosingDelimiter, $input_file_contents, $this->globalMetaData, $input_file_contents, 'StaticPHP' );
 
 		if( isset( $metadata[ 'redirect' ] ) )
 		{
